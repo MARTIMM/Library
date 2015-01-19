@@ -1,0 +1,17 @@
+=begin pod
+
+=head1 Introduction
+
+=head1 Ideas to implement
+
+=head1 Priorities
+
+
+
+
+=head1 See also
+
+ * Freemind drawing in Library.mm
+
+=end pod
+ 

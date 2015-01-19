@@ -1,16 +1,13 @@
 use v6;
 use Test;
 
-#use v5;
-#use Log::Log4perl;
-#use v6;
-
 use File::HomeDir;
+
 use Library::Configuration;
+#use_ok Library::Configuration;
 
 #-------------------------------------------------------------------------------
 #
-#use_ok Library::Configuration;
 my Library::Configuration $cfg .= new;
 my Str $filename = 'my-config.json';
 
