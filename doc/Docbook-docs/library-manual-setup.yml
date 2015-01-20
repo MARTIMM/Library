@@ -1,0 +1,100 @@
+#!/usr/bin/env yaml2any
+#
+---
+################################################################################
+# - Docbook v5.* do not use a dtd defined with DOCTYPE anymore
+# - Program to translate is xsltproc
+# - Stylesheets are found at /usr/share/sgml/docbook
+#
+# Book to describe the Data2any perl module
+#
+################################################################################
+# 
+- DocumentControl:
+   Translator: Xml
+
+   SendTo:
+    xml: '| xmllint --format - > Data2any.xml'
+    fo: '| xsltproc --encoding utf-8 --xinclude book-stylesheet.xsl - > Data2any.fo'
+    fop: '| xsltproc --encoding utf-8 --xinclude book-stylesheet.xsl - | fop - Data2any.pdf'
+    xxep: |
+#     | cat
+     | xep -xml - -xsl book-stylesheet.xsl -param abc=def -pdf Data2any.pdf
+    xep: |
+     | xsltproc --encoding utf-8 --xinclude book-stylesheet.xsl -
+     | xep -fo - -pdf Data2any.pdf
+    chk: |
+     | tee Data2any.xml | xmllint --format -
+     | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc
+
+- XML version=1.0 encoding=utf-8:
+- DOCTYPE root=book:
+   entities:
+    - company "Acme Mc Carpenter, Inc"
+    - product "Library"
+    - github ""
+
+- book:
+  xmlns=http://docbook.org/ns/docbook:
+  xmlns:xi=http://www.w3.org/2001/XInclude:
+  xmlns:xl=http://www.w3.org/1999/xlink:
+  version=5.0 xml:lang=en:
+   - title: Library Requirements Document
+   - info:
+      - author:
+         - personname:
+            - firstname: Marcel
+            - surname: Timmerman
+	 - email: mt1957@gmail.com
+      - address:
+         - city: Haarlem
+	 - country: Netherlands
+      - copyright:
+         - year: 2015
+	 - holder: Marcel Timmerman
+      - date: $date
+      - abstract:
+         - para: >
+	    &product; is capable of transforming an internally build data
+	    structure into xml after which it is possible to store it in a file
+	    or send it to any program for conversion or some other type of
+	    processor. 
+	 - para: Version of yaml2any when book is written: $version_yaml2any
+	 - para: Version of Data2any when book is written: $version_Data2any
+	 - para: Generated on date $date.
+
+   - dedication:
+      - para: >
+	 To my wife Juhi, who finds me too often behind the computer.
+
+
+
+   - index:
+
+---
+- X:
+   - !perl/Data2any::Any::IncludeDocument
+      type: include
+      reference: book-preface.yml
+      document: 0	 
+
+   - !perl/Data2any::Any::IncludeDocument
+      type: include
+      reference: book-chapter-intro-data.yml
+      document: 0
+
+   - !perl/Data2any::Any::IncludeDocument
+      type: include
+      reference: book-chapter-yaml-code.yml
+      document: 0
+
+   - !perl/Data2any::Any::IncludeDocument
+      type: include
+      reference: book-chapter-data-structure.yml
+      document: 0
+
+   - !perl/Data2any::Any::IncludeDocument
+      type: include
+      reference: book-appendix-install.yml
+      document: 0
+
