@@ -2,11 +2,15 @@
 #
 use v6;
 
+#------------------------------------------------------------------------------
+# 
 =begin pod
 
 =comment First few levels gets numbered
 =config head1 :numbered
 =config head2 :numbered
+
+=head1 Library program
 
 =head1 Introduction
 
@@ -26,6 +30,7 @@ program and what to build myself. This must be viewed in light of a set of
 prioritized requirements.
 
 =head1 Ideas to implement
+=head2 Files can be located anywhere
 
 =head1 Priorities
 
