@@ -9,6 +9,8 @@ use Library::Configuration;
 #-------------------------------------------------------------------------------
 #
 my Library::Configuration $cfg .= new;
+ok $cfg.WHICH ~~ /Configuration\|\d+/, 'Check type';
+
 my Str $filename = 'my-config.json';
 
 # Test filename
