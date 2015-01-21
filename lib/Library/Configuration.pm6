@@ -28,12 +28,12 @@ package Library
     my Bool $t-is-file = False;
 
     #--------------------------------------------------------------------------
+    # We only have to load it once, after that saving is the only step needed
     #
     method load ( Bool :$use-home-dir = True )
     {
-      $t = slurp( self.get-config-path(:use-home-dir($use-home-dir))
-                , :!bin
-                ) if !$t-is-file;
+      return if $t-is-file;
+      $t = slurp( self.get-config-path(:use-home-dir($use-home-dir)), :!bin);
       $t-is-file = True;
       $!config = from-json($t);
     }
@@ -43,9 +43,7 @@ package Library
     method save ( Bool :$use-home-dir = True )
     {
       $t = to-json($!config);
-      spurt( self.get-config-path(:use-home-dir($use-home-dir))
-           , $t
-           );
+      spurt( self.get-config-path(:use-home-dir($use-home-dir)), $t);
       $t-is-file = True;
     }
 

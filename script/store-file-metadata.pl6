@@ -32,8 +32,22 @@ sub MAIN ( **@files, :$rec = False )
       {
         say "Skip directory $directory";
       }
-      
+
       next;
+    }
+    
+    # Process plain files
+    #
+    elsif $file.IO ~~ :f
+    {
+      $meta.process-file($file);
+    }
+    
+    # Ignore other type of files
+    #
+    else
+    {
+      say "File $file is ignored, it is a special type of file";
     }
   }
 }
