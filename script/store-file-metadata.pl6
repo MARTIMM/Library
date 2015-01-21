@@ -12,13 +12,12 @@ my Library::File-metadata-manager $meta .= new();
 sub MAIN ( **@files, :$rec = False )
 {
   my $recursive := $rec;                        # Alias to longer name
-  my @*files-to-process = @files;               # Copy to rw-able array.
-say "Elems: {@*files-to-process.elems}";
+  my @files-to-process = @files;                # Copy to rw-able array.
 
   say "R: {$recursive ?? 'Y' !! 'N'}";
 
-  for @*files-to-process -> $file
-  {
+  while @files-to-process.shift() -> $file      # for will not go past the
+  {                                             # initial number of elements
     say "Processing {$file.IO.absolute()}";
     if $file.IO ~~ :d
     {
@@ -26,8 +25,7 @@ say "Elems: {@*files-to-process.elems}";
       if $recursive
       {
         my @new-files = dir( $directory, :Str);
-        push @*files-to-process, @new-files;
-say "Elems: {@*files-to-process.elems}";
+        @files-to-process.push(@new-files);
       }
 
       else
