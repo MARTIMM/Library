@@ -66,12 +66,12 @@
       - title: Introduction
       - para: >
          Long ago I've started to think about how to maintain the large amount
-         of documents on my system which consists of anything textual or
-         imaginary like photos. Storing on disk you can give it a name and
-         store in some place in the hope that you can find it later. You can
-         than also make links to the same data to provide extra information in
-         the form of a filename. This will soon be a problem when the file is
-         placed in another location.
+         of documents on my system which consists of anything textual or other
+         kinds of imagery like photos, films, music and books. Storing on disk you
+         can give it a name and store in some place in the hope that you can
+         find it later. You can than also make links to the same data to
+         provide extra information in the form of a filename. This will soon be
+         a problem when the file is placed in another location.
 
       - para: >
          I now wanted a solution which does not duplicate any information
@@ -157,8 +157,35 @@
    - sect1:
       - title: Implementation
       - para: >
+         This software package should come with several modules and programs to
+         suit several ways of accessing the data. There is also an issue of
+         making the software platform independent so everyone can be happy with
+         it.
+      - itemizedlist:
+          - listitem:
+             - emphasis: The programming language
+             - para: >
+                The first item to think about is the choice of programming
+                language. A scripting language would be a proper choice because
+                these languages have a higher level of coding and will access
+                the underlaying system in a platform independent way. The
+                language I want to choose is perl6. Yes, the still unfinished
+                perl version. I am very confident that the language gets its
+                first release this year(2015) and wanted to learn about the
+                language by doing this project.
+             - para: >
+                The second approach is to use a browser to do the work. There we can
+                use emphasis[html5], emphasis[css3] and emphasis[javascript] and
+                libraries. There is also a server side scripting which can be any of
+                emphasis[perl6], emphasis[perl 5] or javascript emphasis[(nodejs)]
+          - listitem:
+             - emphasis: The storage method
+          - listitem:
+             - emphasis: Storage
+             - para: >
+                The name of the database and the names of the collections
 
-
+ 
    - sect1:
       - title: Dependencies
       - para: >
