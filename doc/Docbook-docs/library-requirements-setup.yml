@@ -100,14 +100,20 @@
             somewhere. It is however nice when it can detect duplicates
             when another document is entered by the user.
             This duplication can be caused by backups or archives.
+         - para: >
+            A file can only be found on the local disk or externally connected
+            disk. There are however other places where documents can be found
+            such as network attached storage (abbrev[NAS]), media stores or on
+            webservers. In the same process as adding the metadata to the
+            database these remote documents might be copied to local store to
+            prevent dissapearing from the net when you find it still important.
 
       - sect2:
          - title: Not only files
          - para: >
-
-      - sect2:
-         - title: Metadata
-         - para: >
+            A file on a disk is pointed to by a name and path. There are other
+            ways to get to a document like using a unified resource locator
+            (abbrev[URL]). 
 
          - sect3:
             - title: Use of mimetypes and document suffixes
@@ -153,6 +159,34 @@
                - listitem:
                   - para: >
                      emphasis[ftp:] File transfer protocol.
+
+      - sect2:
+         - title: Metadata
+         - para: >
+            What information do we want to store. Well, it must be something
+            about the document. Furthermore, keys under which a document might
+            be catagorized. A description will sometimes help. There are on the
+            internet numerous descriptions available of known items like books
+            and movies. Besides the list below, users must be capable to add
+            new metadat attributes.
+         - itemizedlist:
+            - listitem:
+               - emphasis[name], Unique name
+            - listitem:
+               -  emphasis[path], complete and absolute path to the document
+            - listitem:
+               -  emphasis[uri], url or uri
+            - listitem:
+               -  emphasis[description], a description
+            - listitem:
+               -  emphasis[author], a set of data like name and surname, address and email etc
+            - listitem:
+               -  emphasis[datetime], Date and time of retrieval, date and time of modification or current date and time
+#            - listitem:
+#               -  emphasis[], 
+#            - listitem:
+#               -  emphasis[], 
+# emphasis[], 
 
    - sect1:
       - title: Implementation
