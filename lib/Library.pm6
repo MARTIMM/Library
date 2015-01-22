@@ -10,7 +10,7 @@ say 'Library package ping...';
             , port => '2222'
             , database => 'Library'
             , collections =>
-              { meta => metadata
+              { meta => 'metadata'
               }
             }
           );

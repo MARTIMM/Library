@@ -39,11 +39,10 @@ package Library
       
       # set
       #
-      self.meta-insert\
-      ( %( name => $document-path
-         , type => $type
-         )
-      );
+#      self.meta-insert( %( name => $document-path
+#                         , type => $type
+#                         )
+#                      );
     }
   }
 }
