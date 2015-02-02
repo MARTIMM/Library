@@ -6,15 +6,13 @@ use Library::File-metadata-manager;
 
 #------------------------------------------------------------------------------
 #
-my Library::File-metadata-manager $meta .= new();
+my Library::File-metadata-manager $file-meta .= new();
 
 #| Program to store metadata about a file.
-sub MAIN ( **@files, :$rec = False )
+sub MAIN ( **@files, :$r = False )
 {
-  my $recursive := $rec;                        # Alias to longer name
+  my $recursive := $r;                          # Alias to longer name
   my @files-to-process = @files;                # Copy to rw-able array.
-
-  say "R: {$recursive ?? 'Y' !! 'N'}";
 
   while @files-to-process.shift() -> $file      # for will not go past the
   {                                             # initial number of elements
@@ -40,7 +38,7 @@ sub MAIN ( **@files, :$rec = False )
     #
     elsif $file.IO ~~ :f
     {
-      $meta.process-file($file);
+      $file-meta.process-file($file);
     }
     
     # Ignore other type of files

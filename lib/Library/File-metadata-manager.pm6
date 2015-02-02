@@ -10,13 +10,17 @@ package Library
 {
   role MetaDB
   {
-    our $connection = MongoDB::Connection.new( :host('localhost')
-                                             , :port(27017)
-                                             );
+    my $cfg = $Library::cfg;
+    our $connection = MongoDB::Connection.new\
+        ( :host($cfg.get('MongoDB_Server'))
+        , :port(Int($cfg.get('port')))
+        );
+    our $database = $connection.database($cfg.get('database'));
+    our $collection = $database.collection($cfg.get('collections')<documents>);
 
-    method meta-insert(%document)
+    method meta-insert ( %document )
     {
-      $connection.insert(%document);
+      $collection.insert(%document);
     }
   }
 
@@ -32,17 +36,17 @@ package Library
       my $path = $document-path.IO.dir;
       my $name = $document-path.IO.basename;
       $name ~~ /\.(<-[^.]>+)$/;
-      my $type = $/[0];
+      my $type = ~$/[0];
       say "Type of $name is $type";
       
       # search it first
       
       # set
       #
-#      self.meta-insert( %( name => $document-path
-#                         , type => $type
-#                         )
-#                      );
+      self.meta-insert( %( name => $document-path
+                         , type => $type
+                         )
+                      );
     }
   }
 }

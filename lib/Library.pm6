@@ -7,10 +7,10 @@ package Library
 say 'Library package ping...';
   our $cfg = Library::Configuration.new();
   $cfg.set( { MongoDB_Server => 'localhost'
-            , port => '2222'
+            , port => '27017'
             , database => 'Library'
             , collections =>
-              { meta => 'metadata'
+              { documents => 'docs-metadata'
               }
             }
           );
