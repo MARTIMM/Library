@@ -4,7 +4,7 @@ use v6;
 
 use Library::File-metadata-manager;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #
 my Library::File-metadata-manager $file-meta .= new();
 
@@ -13,15 +13,18 @@ sub MAIN ( **@files, Bool :$r = False ) {
   my Bool $recursive := $r;                     # Alias to longer name
   my @files-to-process = @files;                # Copy to rw-able array.
 
+  my Array $sts_symbols = [<! s n u a>];        # See File-metadata-manager
+
   while @files-to-process.shift() -> $file {    # for will not go past the
                                                 # initial number of elements
-    say "Processing {$file.IO.absolute()}";
 
     # Process directories
     #
     if $file.IO ~~ :d {
       my $directory := $file;                   # Alias to proper name
       $file-meta.process-directory($directory);
+      say '[', $sts_symbols[$file-meta.status], ']', " {$file.IO.absolute()}";
+
       if $recursive {
         my @new-files = dir( $directory, :Str);
         @files-to-process.push(@new-files);
@@ -38,6 +41,7 @@ sub MAIN ( **@files, Bool :$r = False ) {
     #
     elsif $file.IO ~~ :f {
       $file-meta.process-file($file);
+      say '[', $sts_symbols[$file-meta.status], ']', " {$file.IO.absolute()}";
     }
 
     # Ignore other type of files
