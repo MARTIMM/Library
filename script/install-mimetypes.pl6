@@ -1,12 +1,23 @@
 #!/usr/bin/env perl6
-#
+#-------------------------------------------------------------------------------
+# Get a mimtype info from http://www.freeformatter.com/mime-types-list.html
+# and store them in MongoDB database Library and collection mimetypes.
+#-------------------------------------------------------------------------------
 use v6;
 use HTTP::Client;
+use MongoDB;
+use Library;
 #use Grammar::Tracer;
 
+#-------------------------------------------------------------------------------
+# Define a grammer to read a html table
+#
 grammar Table-Grammar {
   token TOP { (<-[\<]>* ( <table> || \< <-[\<]>* ) )+ }
 
+  # Table can have a header and body or plain records. Col specs are ignored
+  # for the moment
+  #
   token table { <table-start> \s* ( <table-head> \s* <table-body> || <trd-entry>+ ) \s* <table-end> }
   token table-start { \<table <attribute>* \> }
   token table-end { \<\/table\> }
@@ -35,16 +46,18 @@ grammar Table-Grammar {
   token td-start { \<td <attribute>* \> }
   token td-end { \<\/td\> }
 
-#  token data { <-[\<]>* }
-#  token data { ( <-[\<]>* )* <?th-end> || <?td-end> }
+  # In the data field there can be other tags, so be not-greedy and look for
+  # the proper end tags
+  #
   token data { .*? ( <?th-end> || <?td-end> ) }
-#  token data { .? }
 
   token attribute { \s* <attr-name> '=' <attr-value> \s* }
   token attr-name { <[A..Za..z0..9\:\_\-]>+ }
   token attr-value { <[']> <-[']>* <[']> || <["]> <-["]>* <["]> }
 }
 
+# The actions to perform when tokens are found
+#
 class Table-Actions {
   has Array $.tables = [];
   has Int $.table-count = 0;
@@ -52,28 +65,22 @@ class Table-Actions {
   has Hash $.table-content;
   has Int $.row-count;
   has Int $.field-count;
-  has Hash $.headers;
   has Bool $.in-body;
 
   method table-start ( $match ) {
     $!table-content = {};
     $!row-count = 0;
     $!field-count = 0;
-    $!headers = {};
     $!in-body = True;
   }
 
   method table-end ( $match ) {
     $!tables.push($!table-content);
     $!table-count++;
-    $!table-content = {};
-    $!row-count = 0;
-    $!field-count = 0;
   }
 
   method table-hstart ( $match ) {
     $!in-body = False;
-say "Start header, $!in-body";
   }
 
   method table-bstart ( $match ) {
@@ -82,14 +89,8 @@ say "Start header, $!in-body";
 
   method data ( $match ) {
     if $!in-body {
-say "In body";
       $!table-content{'R' ~ $!row-count}{'F' ~ $!field-count} = $match.Str;
       $!field-count++;
-    }
-
-    else {
-say "In header";
-      $.headers{'F' ~ $!field-count} = $match.Str;
     }
   }
 
@@ -99,14 +100,16 @@ say "In header";
   }
 }
 
-# Test if file exists
+#------------------------------------------------------------------------------
+# Get the html content. The content is saved on disk so test first
+# if file exists.
 #
 my $content;
 if 'mime-types-list.html'.IO ~~ :e {
   $content = slurp( 'mime-types-list.html', :!bin);
 }
 
-# Else get data from server
+# If not found, get data from server
 #
 else {
   if 0 {
@@ -120,8 +123,8 @@ else {
 #    spurt( 'mime-types-list.html', $content);
   }
   }
-  
-  unlink 'mime-types-list.html';
+
+#  unlink 'mime-types-list.html';
   my $r = shell('wget http://www.freeformatter.com/mime-types-list.html');
 }
 
@@ -132,110 +135,57 @@ if !?$content {
   exit(1);
 }
 
+#------------------------------------------------------------------------------
 # Get data from table
 #
-# Name, MIME Type / Internet Media Type, File Extension, More Details
-#
-#my Str @table_entries;
-
-
-#my regex data { <-[\<]>* };
-#my regex tr-data { \s* \<td\><data>\<\/td\> \s* };
-#my regex tr-entry { \s* \<tr\> <tr-data>+ \<\/tr\> \s* };
-#my regex tr-entries { .* <tr-entry>+ .* };
-#say 'D: ', '<td>Test data</td>' ~~ &tr-data;
-#say 'E: ', '<tr> <td>Test data1</td> <td>Test data2</td> </tr>' ~~ &tr-entry;
-#say 'C: ', $content ~~ &tr-entries;
-#say 'P: ', Table.parse('<tr> <td>Test data1</td> <td>Test data2</td> </tr>');
-
-my $h-text = q:to/EOT/;
-jkdhfgkj kjd
-<p> kjsdf
-</p>
-
-<table class='abc' id='1' title="t1">
-  <thead>
-    <tr>
-      <th>jhg</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Test data1</td>
-      <td>Test data2</td>
-    </tr>
-    <tr>
-      <td>Test data3</td>
-      <td>Test data4</td>
-      <td>Test data5</td>
-    </tr>
-  </tbody>
-</table>
-
-jsdhfk sjhddkj dsjhfkjh
-
-<table>
-  <tr>
-    <td>Test data1a</td>
-    <td>Test data2a</td>
-  </tr>
-  <tr>
-    <td>Test data1b</td>
-    <td>Test data2b</td>
-  </tr>
-</table>
-
-kjhkhjherk
-
-<table class="bordered-table zebra-striped table-sort" style="font-size:11px;">
-  <thead>
-    <tr>
-      <th nowrap="nowrap" style="width:250px;">Name</th>
-      <th nowrap="nowrap">MIME Type / Internet Media Type</th>
-      <th nowrap="nowrap">File Extension</th>
-      <th nowrap="nowrap">More Details</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Andrew Toolkit</td>
-      <td>application/andrew-inset</td>
-      <td>N/A</td>
-      <td><a title="What is a 'N/A' file?" href="http://www.iana.org/assignments/media-types/application/andrew-inset">IANA - Andrew Inset</a></td>
-    </tr>
-    <tr>
-      <td>Applixware</td>
-      <td>application/applixware</td>
-      <td>.aw</td>
-      <td><a title="What is a '.aw' file?" href="http://www.vistasource.com/en/apl.php">Vistasource</a></td>
-    </tr>
-    <tr>
-      <td>Atom Syndication Format</td>
-      <td>application/atom+xml</td>
-      <td>.atom, .xml</td>
-      <td><a title="What is a '.atom, .xml' file?" href="http://tools.ietf.org/html/rfc4287">RFC 4287</a></td>
-    </tr>
-
-  </tbody>
-</table>
-
-EOT
-say "H: $h-text";
 my Table-Actions $actions-object .= new();
-Table-Grammar.subparse( $h-text, :actions($actions-object));
-#Table-Grammar.subparse( $content, :actions($actions-object));
+Table-Grammar.subparse( $content, :actions($actions-object));
 
+#------------------------------------------------------------------------------
+# Store the data in MongoDB Library
+#
+my $cfg = $Library::cfg;
+my MongoDB::Database $lib-db = $Library::connection.database($cfg.get('database'));
+my MongoDB::Collection $mime-cl = $lib-db.collection($cfg.get('collections')<mimetypes>);
+
+# headers. F1 must be translated into F1a and F1b
+#
+my Hash $headers = {
+  F0 => 'name',
+  F1a => 'type',
+  F1b => 'subtype',
+  F2 => 'fileext',
+  F3 => 'details1'
+};
+
+# Go through all tables
+#
 for $actions-object.tables.list -> $table {
-  say "\nTable:";
 
+  # Go through all rows
+  #
   for $table.keys -> $row {
-    say "  Row $row:";
-    print "    ";
+
+    # Go through all fields
+    #
+    my Hash $mime-data = {};
     for $table{$row}.keys -> $field {
-      print "$field='", $table{$row}{$field}, "' ";
+      if $field eq 'F1' {
+        my @type = $table{$row}{$field}.split('/');
+        $mime-data{ $headers<F1a> } = @type[0];
+        $mime-data{ $headers<F1b> } = @type[1];
+      }
+      
+      else {
+        $mime-data{ $headers{$field} } = $table{$row}{$field};
+      }
     }
 
-    say '';
+    # Look it up first
+    #
+    my Hash $doc = $mime-cl.find_one({name => $mime-data<name>});
+    $mime-cl.insert($mime-data) unless ?$doc;
+    say '[', (?$doc ?? '-' !! 'x' ), "] $mime-data<fileext type subtype>";
   }
 }
 
