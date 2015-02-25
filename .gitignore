@@ -1,5 +1,4 @@
 .directory
-mime-types-list.html
-R.html
-*/*.pdf
-
+*.html
+*.pdf
+*.csv
