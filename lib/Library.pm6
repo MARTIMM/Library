@@ -2,11 +2,11 @@ use v6;
 use Library::Configuration;
 use MongoDB;
 
-say 'Library file ping...';
+#say 'Library file ping...';
 
-package Library {
+package Library:ver<0.2.0> {
 
-say 'Library package ping...';
+#say 'Library package ping...';
   our $cfg = Library::Configuration.new();
   $cfg.set( { MongoDB_Server => 'localhost',
               port => '27017',

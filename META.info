@@ -13,5 +13,5 @@
         "Library::File-metadata-manager": "lib/Library/File-metadata-manager.pm6",
     },
     "source-url": "git://github.com/MARTIMM/Library.git",
-    "version": "0.1.0"
+    "version": "0.2.0"
 }
