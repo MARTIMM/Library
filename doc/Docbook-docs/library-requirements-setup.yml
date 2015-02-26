@@ -102,18 +102,18 @@
             This duplication can be caused by backups or archives.
          - para: >
             A file can only be found on the local disk or externally connected
-            disk. There are however other places where documents can be found
+            disk (directly or network). There are however other places where documents can be found
             such as network attached storage (abbrev[NAS]), media stores or on
             webservers. In the same process as adding the metadata to the
             database these remote documents might be copied to local store to
-            prevent dissapearing from the net when you find it still important.
+            prevent disappearing from the net when you find it still important.
 
       - sect2:
          - title: Not only files
          - para: >
-            A file on a disk is pointed to by a name and path. There are other
-            ways to get to a document like using a unified resource locator
-            (abbrev[URL]). 
+            A file on a disk is pointed to by a name and path and a drive on
+            windows. There are other ways to get to a document like using a
+            unified resource locator (abbrev[URL]). 
 
          - sect3:
             - title: Use of mimetypes and document suffixes
