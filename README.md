@@ -37,3 +37,7 @@ Still in a 'omega' state. So bugs come and go.
 ## Author
   M.Timmerman
   Github account MARTIMM
+
+## License
+
+Released under [Artistic License 2.0](http://www.perlfoundation.org/artistic_license_2_0).
