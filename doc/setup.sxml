@@ -14,7 +14,7 @@ options/doctype/definition: [
 
 output/filepath:                .;
 
-output/program/xml:     | xmllint --format $> library-requirements.xml;
+output/program/xml:     | xmllint --format - > library-requirements.xml;
 output/program/chk:
         | tee library-requirements.xml | xmllint --format -
         | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc
@@ -306,7 +306,7 @@ $article xmlns=http://docbook.org/ns/docbook
       $title [A list of all mimetypes]
       $abstract [A list of mimetypes can be found on the]
       $ulink url=http://www.sitepoint.com/web-foundations/mime-types-complete-list/ [
-        $internet []
+#        $internet []
       ]
     ]
   ]
