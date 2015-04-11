@@ -132,21 +132,21 @@ $article xmlns=http://docbook.org/ns/docbook
           what can be done with the document. The list can also be used
           to start native applications to process a particular document.
           According to their mimetype of the document it mostly has also
-          a proper suffix such as $emphasis[.txt] or $emphasis[.html]. See
-          also $citation[MIMETYPES].
+          a proper suffix such as $*emphasis[.txt] or $*emphasis[.html]. See
+          also $*citation[MIMETYPES].
         ]
         $para [ A few examples are ]
         $itemizedlist [
           $listitem [
             $para [
-              $emphasis[text/plain:] This is simple text format mostly
+              $*emphasis[text/plain:] This is simple text format mostly
               created with simple text editors.
             ]
           ]
           $listitem [
             $para [
-              $emphasis[audio/mpeg3:] A type of audio file with document
-              suffix of $emphasis[mp3].
+              $*emphasis[audio/mpeg3:] A type of audio file with document
+              suffix of $*emphasis[mp3].
             ]
           ]
         ]
@@ -156,10 +156,10 @@ $article xmlns=http://docbook.org/ns/docbook
         $title [Use of protocols]
         $para [
           Protocols are used to get to the document before processing it.
-          E.g. the\ $emphasis[http] protocol is used to get a webpage from a
-          site on the network and $emphasis[file] is used often to get a
+          E.g. the $*emphasis[http] protocol is used to get a webpage from a
+          site on the network and $*emphasis[file] is used often to get a
           document from the local filesystem. See also
-          $citation[MIMETYPES].
+          $*citation[MIMETYPES].
         ]
         $para [
           The following list is a series of protocols which might be
@@ -168,19 +168,19 @@ $article xmlns=http://docbook.org/ns/docbook
         $itemizedlist [
           $listitem [
             $para [
-              $emphasis[file:] Protocol to get documents from a
+              $*emphasis[file:] Protocol to get documents from a
               filesystem.
             ]
           ]
           $listitem [
             $para [
-              $emphasis[http] and\ $emphasis[https:] Protocols to get
+              $*emphasis[http] and\ $*emphasis[https:] Protocols to get
               webpage documents from a web server.
             ]
           ]
           $listitem [
             $para [
-              $emphasis[ftp:] File transfer protocol.
+              $*emphasis[ftp:] File transfer protocol.
             ]
           ]
         ]
@@ -198,22 +198,22 @@ $article xmlns=http://docbook.org/ns/docbook
         new metadat attributes.
       ]
       $itemizedlist [
-        $listitem [ $emphasis[name:] Unique name ]
+        $listitem [ $*emphasis[name:] Unique name ]
         $listitem [
-          $emphasis[path:] complete and absolute path to the document
+          $*emphasis[path:] complete and absolute path to the document
         ]
         $listitem [
-          $emphasis[uri:] url or uri
+          $*emphasis[uri:] url or uri
         ]
         $listitem [
-          $emphasis[description:] a description
+          $*emphasis[description:] a description
         ]
         $listitem [
-          $emphasis[author:] a set of data like name and surname,
+          $*emphasis[author:] a set of data like name and surname,
           address and email etc.
         ]
         $listitem [
-          $emphasis[datetime:] Date and time of retrieval, date and time of
+          $*emphasis[datetime:] Date and time of retrieval, date and time of
           modification or current date and time.
         ]
       ]
@@ -235,7 +235,7 @@ $article xmlns=http://docbook.org/ns/docbook
     ]
     $itemizedlist [
       $listitem [
-        $emphasis [The programming language]
+        $*emphasis [The programming language]
         $para [
           The first item to think about is the choice of programming
           language. A scripting language would be a proper choice because
@@ -248,16 +248,16 @@ $article xmlns=http://docbook.org/ns/docbook
         ]
         $para [
           The second approach is to use a browser to do the work. There we can
-          use $emphasis[html5], $emphasis[css3] and $emphasis[javascript] and
+          use $*emphasis[html5], $*emphasis[css3] and $*emphasis[javascript] and
           libraries. There is also a server side scripting which can be any of
-          $emphasis[perl6], $emphasis[perl 5] or javascript $emphasis[(nodejs)]
+          $*emphasis[perl6], $*emphasis[perl 5] or javascript $*emphasis[(nodejs)]
         ]
       ]
       $listitem [
-        $emphasis [The storage method]
+        $*emphasis [The storage method]
       ]
       $listitem [
-        $emphasis [Storage]
+        $*emphasis [Storage]
         $para [
           The name of the database and the names of the collections
         ]
@@ -276,7 +276,7 @@ $article xmlns=http://docbook.org/ns/docbook
     $itemizedlist [
       $listitem [
         $para [
-          $emphasis[perl6:] The followup version of perl 5.*. The program
+          $*emphasis[perl6:] The followup version of perl 5.*. The program
           is not yet completely finished but will be soon (2015-01). This
           program is a interpreter/compiler which can compile the script into some
           intermediary
@@ -284,7 +284,7 @@ $article xmlns=http://docbook.org/ns/docbook
       ]
       $listitem [
         $para [
-          $emphasis[perl6:] The followup version of perl 5.*. The program
+          $*emphasis[perl6:] The followup version of perl 5.*. The program
           is not yet completely finished but will be soon (2015-01).
         ]
       ]
