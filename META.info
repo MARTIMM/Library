@@ -1,17 +1,19 @@
 {
-    "author": "Marcel Timmerman",
-    "depends": [
-        "MongoDB",
-        "BSON",
-        "HTTP::Client"
-    ],
-    "description": "Metadata library",
-    "name": "Library",
-    "provides": {
-        "Library": "lib/Library.pm6",
-        "Library::Configuration": "lib/Library/Configuration.pm6",
-        "Library::File-metadata-manager": "lib/Library/File-metadata-manager.pm6",
-    },
-    "source-url": "git://github.com/MARTIMM/Library.git",
-    "version": "0.2.0"
+  "author": "Marcel Timmerman",
+  "depends": [
+    "MongoDB",
+    "BSON"
+  ],
+  "description": "Metadata library",
+  "name": "Library",
+  "provides": {
+    "Library": "lib/Library.pm6",
+    "Library::Configuration": "lib/Library/Configuration.pm6",
+    "Library::File-metadata-manager": "lib/Library/File-metadata-manager.pm6",
+
+    "install-mimetypes": "bin/install-mimetypes.pl",
+    "store-file-metadata":  "store-file-metadata.pl6"
+  },
+  "source-url": "git://github.com/MARTIMM/Library.git",
+  "version": "0.2.0"
 }
