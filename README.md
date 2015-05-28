@@ -28,13 +28,11 @@ bin/store-file-metadata.pl6
 
 Still in a 'omega' state. So bugs come and go.
 
-* Updating entries is wrong.
-
-
 ## Changes
 
 0.2.1
   * Bugfixes in File-metadata-manager
+  * Bugfixes updating entries.
 0.2.0
   * Added install-mimetypes.pl6
 0.1.1

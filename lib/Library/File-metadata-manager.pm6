@@ -28,15 +28,16 @@ package Library {
       $!status = $FAIL;
 
       my $f-io = $document-path.IO;
-      my $name = $f-io.basename;
-#say "PF: $document-path, $name";
 
       # search for it first
       #
       my $found_doc = self!name_in_db($document-path);
       if ?$found_doc {
         self.meta-update( $found_doc,
-                          %( searchable => $f-io.x
+                          %( size               => $f-io.s,
+                             searchable         => $f-io.x,
+                             accessed           => ~$f-io.accessed,
+                             changed            => ~$f-io.changed
                            )
                         );
          $!status = $IS_UPDATED;
@@ -45,9 +46,13 @@ package Library {
       else {
         # set if not found
         #
-        self.meta-insert( %( name => $document-path,
-                             searchable => $f-io.x,
-                             type => 'directory',
+        self.meta-insert( %( full-name          => $document-path,
+                             doc-type           => 'directory',
+                             searchable         => $f-io.x,
+                             file-name          => $f-io.basename,
+                             size               => $f-io.s,
+                             accessed           => ~$f-io.accessed,
+                             changed            => ~$f-io.changed
                            )
                         );
         $!status = $IS_STORED;
@@ -59,21 +64,17 @@ package Library {
       $!status = $FAIL;
 
       my $f-io = $document-path.IO;
-      my $name = $f-io.basename;
-      my $extension = $f-io.extension;
-      my $dirname = $f-io.dirname;
-
-#say "PF: $document-path, $name, $type";
 
       # search for it first
       #
       my $found_doc = self!name_in_db($document-path);
       if ?$found_doc {
         self.meta-update( $found_doc,
-                          %( size => $f-io.s,
-                             executable => $f-io.x,
-                             dirname => $dirname
-                          )
+                          %( size               => $f-io.s,
+                             executable         => $f-io.x,
+                             accessed           => ~$f-io.accessed,
+                             changed            => ~$f-io.changed
+                           )
                         );
         $!status = $IS_UPDATED;
       }
@@ -81,10 +82,15 @@ package Library {
       else {
         # set if not found
         #
-        self.meta-insert( %( name => $document-path,
-                             extension => $extension,
-                             type => 'file',
-                             dirname => $dirname
+        self.meta-insert( %( full-name          => $document-path,
+                             extension          => $f-io.extension,
+                             doc-type           => 'file',
+                             dirname            => $f-io.dirname,
+                             file-name          => $f-io.basename,
+                             size               => $f-io.s,
+                             executable         => $f-io.x,
+                             accessed           => ~$f-io.accessed,
+                             changed            => ~$f-io.changed
                            )
                         );
         $!status = $IS_STORED;
@@ -93,7 +99,7 @@ package Library {
 
 
     method !name_in_db ( Str $document-path --> Hash ) {
-      my Hash $doc = self.meta-find-one({name => $document-path});
+      my Hash $doc = self.meta-find-one({ full-name => $document-path });
       return $doc;
     }
   }

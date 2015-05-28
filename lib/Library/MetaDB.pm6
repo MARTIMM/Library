@@ -22,7 +22,7 @@ package Library {
 
     method meta-update ( $found_document, $modifications ) {
 #say "C: $collection";
-      $collection.update( $found_document, $modifications);
+      $collection.update( $found_document, {'$set' => $modifications});
     }
   }
 }
