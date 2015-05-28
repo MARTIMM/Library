@@ -1,10 +1,12 @@
 use v6;
+
+
 use Library::Configuration;
-use MongoDB;
+use MongoDB::Connection;
 
 #say 'Library file ping...';
 
-package Library:ver<0.2.0> {
+package Library:ver<0.2.1> {
 
 #say 'Library package ping...';
   our $cfg = Library::Configuration.new();

@@ -1,7 +1,9 @@
 use v6;
 
-use MongoDB;
+
+#use MongoDB;
 use Library;
+use Library::MetaDB;
 #use Library::Configuration;
 
 #-------------------------------------------------------------------------------
@@ -13,20 +15,6 @@ package Library {
   constant $IS_UPDATED          = 0x0003;       # Metadata is updated
   constant $ALR_STORED          = 0x0004;       # Metadata is already in db
 
-  role MetaDB {
-
-    my $cfg = $Library::cfg;
-    our $database = $Library::connection.database($cfg.get('database'));
-    our $collection = $database.collection($cfg.get('collections')<documents>);
-
-    method meta-insert ( Hash $document ) {
-      $collection.insert($document);
-    }
-
-    method meta-find-one ( Hash $document --> Hash ) {
-      return $collection.find_one($document);
-    }
-  }
 
   #-----------------------------------------------------------------------------
   #
@@ -35,59 +23,78 @@ package Library {
 #    my Str @source-locations;
     has Int $.status;
 
+
     method process-directory ( Str $document-path ) {
       $!status = $FAIL;
-#say "Server: ", $Library::cfg.get('MongoDB_Server');
-      my $path = $document-path.IO.dir;
-      my $name = $document-path.IO.basename;
-      $name ~~ /\.(<-[^.]>+)$/;
-      my $type = 'directory';
-      
+
+      my $f-io = $document-path.IO;
+      my $name = $f-io.basename;
+#say "PF: $document-path, $name";
+
       # search for it first
       #
-      if self._name_in_db($document-path) {
-        $!status = $ALR_STORED;
+      my $found_doc = self!name_in_db($document-path);
+      if ?$found_doc {
+        self.meta-update( $found_doc,
+                          %( searchable => $f-io.x
+                           )
+                        );
+         $!status = $IS_UPDATED;
       }
-      
+
       else {
         # set if not found
         #
         self.meta-insert( %( name => $document-path,
-                             type => $type
+                             searchable => $f-io.x,
+                             type => 'directory',
                            )
                         );
         $!status = $IS_STORED;
       }
     }
+
 
     method process-file ( Str $document-path ) {
       $!status = $FAIL;
-#say "Server: ", $Library::cfg.get('MongoDB_Server');
-      my $path = $document-path.IO.dir;
-      my $name = $document-path.IO.basename;
-      $name ~~ /\.(<-[^.]>+)$/;
-      my $type = ~$/[0];
+
+      my $f-io = $document-path.IO;
+      my $name = $f-io.basename;
+      my $extension = $f-io.extension;
+      my $dirname = $f-io.dirname;
+
+#say "PF: $document-path, $name, $type";
 
       # search for it first
       #
-      if self._name_in_db($document-path) {
-        $!status = $ALR_STORED;
+      my $found_doc = self!name_in_db($document-path);
+      if ?$found_doc {
+        self.meta-update( $found_doc,
+                          %( size => $f-io.s,
+                             executable => $f-io.x,
+                             dirname => $dirname
+                          )
+                        );
+        $!status = $IS_UPDATED;
       }
 
       else {
         # set if not found
         #
         self.meta-insert( %( name => $document-path,
-                             type => $type
+                             extension => $extension,
+                             type => 'file',
+                             dirname => $dirname
                            )
                         );
         $!status = $IS_STORED;
       }
     }
 
-    method _name_in_db ( Str $document-path --> Bool ) {
+
+    method !name_in_db ( Str $document-path --> Hash ) {
       my Hash $doc = self.meta-find-one({name => $document-path});
-      return ?$doc;
+      return $doc;
     }
   }
 }

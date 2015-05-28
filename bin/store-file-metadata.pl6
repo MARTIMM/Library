@@ -2,14 +2,20 @@
 #
 use v6;
 
+
 use Library::File-metadata-manager;
 
 #-------------------------------------------------------------------------------
 #
 my Library::File-metadata-manager $file-meta .= new();
 
+# Allow switches after positionals. Pinched from the panda program. Now it is
+# possible to make the sxml file executable with the path of this program.
+#
+@*ARGS = @*ARGS.grep(/^ '-'/), @*ARGS.grep(/^ <-[-]>/);
+
 #| Program to store metadata about files.
-sub MAIN ( **@files, Bool :$r = False ) {
+sub MAIN ( *@files, Bool :$r = False ) {
   my Bool $recursive := $r;                     # Alias to longer name
   my @files-to-process = @files;                # Copy to rw-able array.
 

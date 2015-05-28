@@ -19,20 +19,28 @@ bin/install-mimetypes.pl6
 bin/store-file-metadata.pl6
 ```
 
-## Bugs
-
-Still in a 'omega' state. So bugs come and go.
-
 ## Documentation
 
 * ./doc/Library.mm, Freemind mindmapping.
 * ./doc/Docbook-docs/library-requirements-setup.pdf, Setup
 
+## Bugs
+
+Still in a 'omega' state. So bugs come and go.
+
+* Updating entries is wrong.
+
+
 ## Changes
 
-0.2.0   - Added install-mimetypes.pl6
-0.1.1   - Modified modules and finished store-file-metadata.pl6
-0.1.0   - Creation date. Lots of thinking.
+0.2.1
+  * Bugfixes in File-metadata-manager
+0.2.0
+  * Added install-mimetypes.pl6
+0.1.1
+  * Modified modules and finished store-file-metadata.pl6
+0.1.0
+  * Creation date. Lots of thinking.
 
 ## Author
   M.Timmerman

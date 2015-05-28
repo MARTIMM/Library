@@ -1,30 +1,29 @@
 #!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
 #
 ---
-options/xml-prelude/show:       1;
-options/doctype/show:           1;
-options/doctype/definition: [
+option/xml-prelude/show:        1;
+option/doctype/show:            1;
+option/doctype/show:            1;
+option/doctype/definition: [
         <!ENTITY library "Library">
         <!ENTITY nbsp " ">
-#        <!ENTITY % isoamsa SYSTEM "/home/marcel/Languages/Perl/Lib/Modules/Data2any-Xml/Entities/isoamsa.ent">
-#        %isoamsa\;
-#        <!ENTITY % isopub SYSTEM "/home/marcel/Languages/Perl/Lib/Modules/Data2any-Xml/Entities/isopub.ent">
-#        #%isopub\;
 ];
 
 output/filepath:                .;
 
-output/program/xml:     | xmllint --format - > library-requirements.xml;
+output/program/xml:
+        | xmllint --format - > library-requirements.xml;
 output/program/chk:
         | tee library-requirements.xml | xmllint --format -
         | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc
         ;
-output/program/xep:
+output/program/pdf:
         | xsltproc --encoding utf-8 --xinclude library-requirements.xsl -
         | xep -fo - -pdf library-requirements.pdf
         ;
 
-#module/file:                            SxmlLib::File;
+module/file:                    SxmlLib::File;
+module/d5b:                     SxmlLib::Docbook5::Basic;
 ---
 $article xmlns=http://docbook.org/ns/docbook
       xmlns:xi=http://www.w3.org/2001/XInclude
@@ -40,7 +39,7 @@ $article xmlns=http://docbook.org/ns/docbook
       ]
       $email [ mt1957@gmail.com ]
     ]
-    
+
     $address [
       $city [ Haarlem ]
       $country [ Netherlands ]
