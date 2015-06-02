@@ -1,0 +1,105 @@
+#!/home/marcel/Languages/Perl6/Projects/Semi-xml/bin/sxml2xml.pl6
+#
+---
+option/xml-prelude/show:        1;
+option/doctype/show:            1;
+option/doctype/show:            1;
+option/doctype/definition: [
+        <!ENTITY library "Library">
+        <!ENTITY nbsp " ">
+];
+
+output/filepath:                .;
+
+output/program/xml:
+        | xmllint --format - > library.xml;
+output/program/chk:
+        | xmllint --format - | tee library.xml
+        | rnv /usr/share/xml/docbook5/schema/rng/5.0/docbook.rnc
+        ;
+# Use the stylesheet from library requirements document
+output/program/pdf:
+        | xsltproc --encoding utf-8 --xinclude library-requirements.xsl -
+        | xep -fo - -pdf library.pdf
+        ;
+
+module/file:                    SxmlLib::File;
+module/d5b:                     SxmlLib::Docbook5::Basic;
+---
+$article xmlns=http://docbook.org/ns/docbook
+         xmlns:xi=http://www.w3.org/2001/XInclude
+         xmlns:xl=http://www.w3.org/1999/xlink
+         version=5.0
+         xml:lang=en [
+  $title [ Using The Meta Library ]
+  $info [
+    $author [
+      $personname [
+        $firstname [ Marcel ]
+        $surname [ Timmerman ]
+      ]
+      $email [ mt1957@gmail.com ]
+    ]
+
+    $address [
+      $city [ Haarlem ]
+      $country [ Netherlands ]
+    ]
+
+    $copyright [
+      $year [ 2015, 2016 ... Inf ]
+      $holder [ Marcel Timmerman ]
+    ]
+
+    $date [ $!SxmlCore.date [] ]
+    $abstract [
+      $para [
+        This document will describe the meta library modules and programs.
+      ]
+
+      $para [ The latest version of this document is generated on date
+        $!SxmlCore.date []
+      ]
+    ]
+  ]
+  
+  $sect1 [
+    $title [Introduction]
+    $para [
+      Long ago I've started to think about how to maintain the large amount of
+      documents on my system which consists of anything textual or other kinds
+      of imagery like photos, films, music and books. Storing on disk you can
+      give it a name and store in some place in the hope that you can find it
+      later. You can then also make links to the same data to provide extra
+      information in the form of a filename. This will soon be a problem when
+      the file is placed in another location.
+    ]
+  ]
+
+  $sect1 [
+    $title [ x ]
+    $para [
+    ]
+  ]
+
+  $sect1 [
+    $title [ x ]
+    $para [
+    ]
+  ]
+
+
+#   $bibliolist:
+#      $title: Bibliography
+  $bibliography [
+    $biblioentry [
+      $abbrev [MIMETYPES]
+      $title [A list of all mimetypes]
+      $abstract [A list of mimetypes can be found on the]
+      $ulink url=http://www.sitepoint.com/web-foundations/mime-types-complete-list/ [
+#        $internet []
+      ]
+    ]
+  ]
+#   $index:
+]

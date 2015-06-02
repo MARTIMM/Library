@@ -53,8 +53,9 @@ $article xmlns=http://docbook.org/ns/docbook
     $date [ $!SxmlCore.date [] ]
     $abstract [
       $para [
-        This is a small document of requirements which I think is needed to
-        have a nice library and example programs.
+        This is a small document of requirements which I think is needed for
+        this project. It describes the needed functionality, programs and
+        structures.
       ]
 
       $para [ The latest version of this document is generated on date
@@ -66,53 +67,137 @@ $article xmlns=http://docbook.org/ns/docbook
   $sect1 [
     $title [Introduction]
     $para [
-      Long ago I've started to think about how to maintain the large amount of
-      documents on my system which consists of anything textual or other kinds
-      of imagery like photos, films, music and books. Storing on disk you can
-      give it a name and store in some place in the hope that you can find it
-      later. You can than also make links to the same data to provide extra
-      information in the form of a filename. This will soon be a problem when
-      the file is placed in another location.
+      Purpose of this project is to store meta information of objects which can
+      be documents, computernames, websites etcetera. This information is stored
+      centrally in a database and used by programs to search for the documents,
+      display info in tables or show relations between other objects.
     ]
 
     $para [
-      I now wanted a solution which does not duplicate any information
-      except for a backup and also not clobbering the filesystem with links
-      to some other location. And there this program comes in.
-    ]
-
-    $para [
-      In this document I try to make clear what is needed to build the
-      modules and program and what to build myself. This must be viewed in
-      light of a set of prioritized requirements.
-    ]
-  ]
-
-  $sect1 [
-    $title [Ideas to implement]
-    $para [
-      Here a list of thoughts will show what I like to include in this
+      This list of requirements will show what I like to include in this
       system. It does not mention if this will be feasable or not. That will
       come in a later part where things like dependencies will be
       investigated.
     ]
 
+    $para [
+      From this document I try to make clear what is needed to build the
+      modules and program and what to build.
+    ]
+  ]
+
+  $sect1 [
+    $title [Requirements]
+    $para [
+    
+    ]
+
     $sect2 [
-      $title [Files can be located anywhere]
-      $para [
-        This system will not manage documents. It will manage metadata
-        about the documents. So it is not nessesary to store them
-        somewhere. It is however nice when it can detect duplicates
-        when another document is entered by the user.
-        This duplication can be caused by backups or archives.
+      $title [ General specifications of any object ]
+      $orderedlist spacing=compact [
+        $listitem [
+          $para [
+            There are two types of information to be stored, A) automatically
+            found data such as ownership, path to document and volumename in
+            case of documents, and B) explicitly provided information like
+            keywords, name and address of owner, project name etcetera.
+          ]
+        ]
+        $listitem [
+          $para [
+            Store, update or delete meta information in the database. This is
+            for automatically retrieved or explicitly provided information.
+          ]
+        ]
+        $listitem [
+          $para [
+            Search meta information using exact match or regular expressions on
+            any part of the meta information.
+          ]
+        ]
+        $listitem [
+          $para [
+            Displaying output from searches by commandline program or by webpage
+            in a browser.
+          ]
+        ]
+        $listitem [
+          $para [
+            Actions can be started using mimetypes also stored as metadata.
+          ]
+        ]
+        $listitem [
+          $para [
+            Relations between objects are stored in the database using
+            directions of Web Ontology Language ($abbrev[OWL]).
+          ]
+        ]
+        $listitem [
+          $para [
+            Relations stored in the database can be exported as OWL/XML
+            documents or as RDF.
+          ]
+        ]
+        $listitem [
+          $para [
+          ]
+        ]
       ]
-      $para [
-        A file can only be found on the local disk or externally connected disk
-        (directly or network). There are however other places where documents
-        can be found such as network attached storage ($abbrev[NAS]), media
-        stores or on webservers. In the same process as adding the metadata to
-        the database these remote documents might be copied to local store to
-        prevent disappearing from the net when you find it still important.
+    ]
+
+    $sect2 [
+      $title [ Document objects ]
+      $orderedlist spacing=compact [
+        $listitem [
+          $para [
+            This system will not manage documents. It will manage metadata
+            about the documents. Location of the document is stored as part
+            of this information.It is however nice when it can detect
+            duplicates when another document is entered by the user. This
+            duplication can be caused by backups or archives.
+          ]
+        ]
+        $listitem [
+          $para [
+            A document can be found on the local disk, externally connected
+            disk, other computers and network devices such as network attached
+            storage ($abbrev[NAS]), media stores or on webservers.
+          ]
+        ]
+        $listitem [
+          $para [
+            As a side effect of locating documents on exernal servers, these
+            documents can be stored on disk for offline use.
+          ]
+        ]
+        $listitem [
+          $para [
+          ]
+        ]
+      ]
+    ]
+
+    $sect2 [
+      $title [ Website information ]
+      $orderedlist spacing=compact [
+        $listitem [
+          $para [
+          ]
+        ]
+        $listitem [
+          $para [
+          ]
+        ]
+      ]
+    ]
+
+    $sect2 [
+      $title [ Programs, modules and web ]
+      $orderedlist spacing=compact [
+        $listitem [
+          $para [
+          ]
+        ]
       ]
     ]
 
