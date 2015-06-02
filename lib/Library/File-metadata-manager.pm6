@@ -36,7 +36,6 @@ package Library {
       my $found_doc = self!name_in_db($document-path);
       if ?$found_doc {
         my Hash $meta-data = {
-          full-name     => $*SPEC.rel2abs($document-path),
           size          => $f-io.s,
           searchable    => $f-io.x,
           changed       => ~$f-io.changed,
@@ -86,7 +85,6 @@ package Library {
       my $found_doc = self!name_in_db($document-path);
       if ?$found_doc {
         my Hash $meta-data = {
-          full-name     => $*SPEC.rel2abs($document-path),
           size          => $f-io.s,
           executable    => $f-io.x,
           changed       => ~$f-io.changed,
@@ -127,7 +125,9 @@ package Library {
 
 
     method !name_in_db ( Str $document-path --> Hash ) {
-      my Hash $doc = self.meta-find-one({ full-name => $document-path });
+      my Hash $doc = self.meta-find-one(
+         { full-name => $*SPEC.rel2abs($document-path) }
+      );
       return $doc;
     }
   }
