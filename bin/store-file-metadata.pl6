@@ -13,12 +13,21 @@ my Library::File-metadata-manager $file-meta .= new();
 # possible to make the sxml file executable with the path of this program.
 #
 @*ARGS = @*ARGS.grep(/^ '-'/), @*ARGS.grep(/^ <-[-]>/);
+#say @*ARGS;
 
-#| Program to store metadata about files.
-sub MAIN ( *@files, Bool :$r = False ) {
-  my Bool $recursive := $r;                     # Alias to longer name
+# Program to store metadata about files.
+#
+# --h   Help info
+# --k   supply keywords. Separated by commas or repetition of option
+# --r   Recursive search through directories
+#
+sub MAIN ( *@files, Bool :$r = False, Str :$k ) {
+  my Bool $recursive := $r;                     # Aliases to longer names
+
+#  my Array[Str] $keys = [$k.split(/ \s* ',' \s* /)];
+  my Array $keys = [$k.join(',').split(/ \s* ',' \s* /)];
+
   my @files-to-process = @files;                # Copy to rw-able array.
-
   my Array $sts_symbols = [<! s n u a>];        # See File-metadata-manager
 
   while @files-to-process.shift() -> $file {    # for will not go past the
@@ -28,7 +37,7 @@ sub MAIN ( *@files, Bool :$r = False ) {
     #
     if $file.IO ~~ :d {
       my $directory := $file;                   # Alias to proper name
-      $file-meta.process-directory($directory);
+      $file-meta.process-directory( $directory, $keys);
       say '[', $sts_symbols[$file-meta.status], ']', " {$file.IO.absolute()}";
 
       if $recursive {
@@ -46,7 +55,7 @@ sub MAIN ( *@files, Bool :$r = False ) {
     # Process plain files
     #
     elsif $file.IO ~~ :f {
-      $file-meta.process-file($file);
+      $file-meta.process-file( $file, $keys);
       say '[', $sts_symbols[$file-meta.status], ']', " {$file.IO.absolute()}";
     }
 

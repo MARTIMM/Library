@@ -6,7 +6,7 @@ use MongoDB::Connection;
 
 #say 'Library file ping...';
 
-package Library:ver<0.2.1> {
+package Library:ver<0.3.0> {
 
 #say 'Library package ping...';
   our $cfg = Library::Configuration.new();

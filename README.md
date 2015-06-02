@@ -30,6 +30,9 @@ Still in a 'omega' state. So bugs come and go.
 
 ## Changes
 
+0.3.0
+  * Added keyword processing to store-file-metadata.pl6 and
+    File-metadata-manager.pm6
 0.2.1
   * Bugfixes in File-metadata-manager
   * Bugfixes updating entries.

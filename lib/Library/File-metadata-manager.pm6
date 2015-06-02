@@ -24,75 +24,103 @@ package Library {
     has Int $.status;
 
 
-    method process-directory ( Str $document-path ) {
+    method process-directory ( Str $document-path, Array $keys ) {
       $!status = $FAIL;
 
       my $f-io = $document-path.IO;
+      my $accessed = ~$f-io.accessed;
+      my $volume = $f-io.volume;
 
       # search for it first
       #
       my $found_doc = self!name_in_db($document-path);
       if ?$found_doc {
-        self.meta-update( $found_doc,
-                          %( size               => $f-io.s,
-                             searchable         => $f-io.x,
-                             accessed           => ~$f-io.accessed,
-                             changed            => ~$f-io.changed
-                           )
-                        );
-         $!status = $IS_UPDATED;
-      }
+        my Hash $meta-data = {
+          full-name     => $*SPEC.rel2abs($document-path),
+          size          => $f-io.s,
+          searchable    => $f-io.x,
+          changed       => ~$f-io.changed,
+          modified      => ~$f-io.modified,
+        };
 
-      else {
-        # set if not found
-        #
-        self.meta-insert( %( full-name          => $document-path,
-                             doc-type           => 'directory',
-                             searchable         => $f-io.x,
-                             file-name          => $f-io.basename,
-                             size               => $f-io.s,
-                             accessed           => ~$f-io.accessed,
-                             changed            => ~$f-io.changed
-                           )
-                        );
-        $!status = $IS_STORED;
-      }
-    }
+        $meta-data<keywords> = $keys if ?$keys;
+        $meta-data<accessed> = $accessed if ?$accessed;
+        $meta-data<volume> = $volume if ?$volume;
 
-
-    method process-file ( Str $document-path ) {
-      $!status = $FAIL;
-
-      my $f-io = $document-path.IO;
-
-      # search for it first
-      #
-      my $found_doc = self!name_in_db($document-path);
-      if ?$found_doc {
-        self.meta-update( $found_doc,
-                          %( size               => $f-io.s,
-                             executable         => $f-io.x,
-                             accessed           => ~$f-io.accessed,
-                             changed            => ~$f-io.changed
-                           )
-                        );
+        self.meta-update( $found_doc, $meta-data);
         $!status = $IS_UPDATED;
       }
 
       else {
         # set if not found
         #
-        self.meta-insert( %( full-name          => $document-path,
-                             extension          => $f-io.extension,
-                             doc-type           => 'file',
-                             dirname            => $f-io.dirname,
-                             file-name          => $f-io.basename,
-                             size               => $f-io.s,
-                             executable         => $f-io.x,
-                             accessed           => ~$f-io.accessed,
-                             changed            => ~$f-io.changed
-                           )
-                        );
+        my Hash $meta-data = {
+          full-name     => $*SPEC.rel2abs($document-path),
+          doc-type      => 'directory',
+          file-name     => $f-io.basename,
+          searchable    => $f-io.x,
+          size          => $f-io.s,
+          changed       => ~$f-io.changed,
+          modified      => ~$f-io.modified,
+        };
+
+        $meta-data<keywords> = $keys if ?$keys;
+        $meta-data<accessed> = $accessed if ?$accessed;
+        $meta-data<volume> = $volume if ?$volume;
+
+        self.meta-insert($meta-data);
+        $!status = $IS_STORED;
+      }
+    }
+
+
+    method process-file ( Str $document-path, Array $keys ) {
+      $!status = $FAIL;
+
+      my $f-io = $document-path.IO;
+      my $accessed = ~$f-io.accessed;
+      my $volume = $f-io.volume;
+
+      # search for it first
+      #
+      my $found_doc = self!name_in_db($document-path);
+      if ?$found_doc {
+        my Hash $meta-data = {
+          full-name     => $*SPEC.rel2abs($document-path),
+          size          => $f-io.s,
+          executable    => $f-io.x,
+          changed       => ~$f-io.changed,
+          modified      => ~$f-io.modified,
+        };
+
+        $meta-data<keywords> = $keys if ?$keys;
+        $meta-data<accessed> = $accessed if ?$accessed;
+        $meta-data<volume> = $volume if ?$volume;
+
+        self.meta-update( $found_doc, $meta-data);
+        $!status = $IS_UPDATED;
+      }
+
+      else {
+        # set if not found
+        #
+        my Hash $meta-data = {
+          full-name     => $*SPEC.rel2abs($document-path),
+          extension     => $f-io.extension,
+          doc-type      => 'file',
+          dirname       => $f-io.dirname,
+          file-name     => $f-io.basename,
+          executable    => $f-io.x,
+          size          => $f-io.s,
+          changed       => ~$f-io.changed,
+          modified      => ~$f-io.modified,
+        };
+
+        $meta-data<keywords> = $keys if ?$keys;
+        $meta-data<accessed> = $accessed if ?$accessed;
+        $meta-data<volume> = $volume if ?$volume;
+
+        self.meta-insert($meta-data);
         $!status = $IS_STORED;
       }
     }
