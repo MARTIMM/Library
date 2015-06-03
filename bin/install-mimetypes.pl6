@@ -4,7 +4,7 @@
 # and store them in MongoDB database Library and collection mimetypes.
 #-------------------------------------------------------------------------------
 use v6;
-use HTTP::Client;
+#use HTTP::Client;
 use MongoDB;
 use Library;
 #use Grammar::Tracer;
@@ -112,17 +112,17 @@ if 'mime-types-list.html'.IO ~~ :e {
 # If not found, get data from server
 #
 else {
-  if 0 {
-  my HTTP::Client $client .= new;
-  my $response = $client.get('http://www.freeformatter.com/mime-types-list.html');
-  if $response.success {
-    $content = $response.content;
-    my $mt = open( 'mime-types-list.html', :rw, :!bin);
-    $mt.print($content);
-    $mt.close;
+#  if 0 {
+#  my HTTP::Client $client .= new;
+#  my $response = $client.get('http://www.freeformatter.com/mime-types-list.html');
+#  if $response.success {
+#    $content = $response.content;
+#    my $mt = open( 'mime-types-list.html', :rw, :!bin);
+#    $mt.print($content);
+#    $mt.close;
 #    spurt( 'mime-types-list.html', $content);
-  }
-  }
+#  }
+#  }
 
 #  unlink 'mime-types-list.html';
   my $r = shell('wget http://www.freeformatter.com/mime-types-list.html');
@@ -142,20 +142,27 @@ my Table-Actions $actions-object .= new();
 Table-Grammar.subparse( $content, :actions($actions-object));
 
 #------------------------------------------------------------------------------
-# Store the data in MongoDB Library
+# Store the data in MongoDB Library. First get connection, database and
+# collection. Drop the old collection before filling.
 #
 my $cfg = $Library::cfg;
 my MongoDB::Database $lib-db = $Library::connection.database($cfg.get('database'));
 my MongoDB::Collection $mime-cl = $lib-db.collection($cfg.get('collections')<mimetypes>);
 
+if any($lib-db.collection_names) ~~ $mime-cl.name {
+  say 'Drop collection {$mime-cl.name}';
+  $mime-cl.drop();
+}
+
+
 # headers. F1 must be translated into F1a and F1b
 #
 my Hash $headers = {
-  F0 => 'name',
-  F1a => 'type',
-  F1b => 'subtype',
-  F2 => 'fileext',
-  F3 => 'details1'
+  F0    => 'name',
+  F1a   => 'type',
+  F1b   => 'subtype',
+  F2    => 'fileext',
+  F3    => 'details1'
 };
 
 # Go through all tables
@@ -170,21 +177,28 @@ for $actions-object.tables.list -> $table {
     #
     my Hash $mime-data = {};
     for $table{$row}.keys -> $field {
-      if $field eq 'F1' {
-        my @type = $table{$row}{$field}.split('/');
-        $mime-data{ $headers<F1a> } = @type[0];
-        $mime-data{ $headers<F1b> } = @type[1];
-      }
-      
-      else {
-        $mime-data{ $headers{$field} } = $table{$row}{$field};
+      given $field {
+        when 'F1' {
+          my @type = $table{$row}{$field}.split('/');
+          $mime-data{ $headers<F1a> } = @type[0];
+          $mime-data{ $headers<F1b> } = @type[1];
+        }
+        
+        when 'F2' {
+          my Array $extensions = [$table{$row}{$field}.split( / \s* ',' \s* / )];
+          $mime-data{ $headers{$field} } = $extensions;
+        }
+
+        default {
+          $mime-data{ $headers{$field} } = $table{$row}{$field};
+        }
       }
     }
 
     # Look it up first
     #
     my Hash $doc = $mime-cl.find_one({name => $mime-data<name>});
-    $mime-cl.insert($mime-data) unless ?$doc;
+    $mime-cl.insert($mime-data);# unless ?$doc;
     say '[', (?$doc ?? '-' !! 'x' ), "] $mime-data<fileext type subtype>";
   }
 }

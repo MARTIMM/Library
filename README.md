@@ -33,6 +33,7 @@ Still in a 'omega' state. So bugs come and go.
 0.3.0
   * Added keyword processing to store-file-metadata.pl6 and
     File-metadata-manager.pm6
+  * Install-mimetypes.pl6 changed to store fileext as an array of extensions.
 0.2.1
   * Bugfixes in File-metadata-manager
   * Bugfixes updating entries.
