@@ -55,7 +55,7 @@ package Library {
         #
         my Hash $meta-data = {
           full-name     => $*SPEC.rel2abs($document-path),
-          doc-type      => 'directory',
+          object-type   => 'directory',
           file-name     => $f-io.basename,
           searchable    => $f-io.x,
           size          => $f-io.s,
@@ -105,7 +105,7 @@ package Library {
         my Hash $meta-data = {
           full-name     => $*SPEC.rel2abs($document-path),
           extension     => $f-io.extension,
-          doc-type      => 'file',
+          object-type   => 'file',
           dirname       => $f-io.dirname,
           file-name     => $f-io.basename,
           executable    => $f-io.x,
