@@ -10,7 +10,7 @@ package Library {
 
     my $cfg = $Library::cfg;
     our $database = $Library::connection.database($cfg.get('database'));
-    our $collection = $database.collection($cfg.get('collections')<documents>);
+    our $collection = $database.collection($cfg.get('collections')<objects>);
 
     method meta-insert ( Hash $document ) {
       $collection.insert($document);
