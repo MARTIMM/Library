@@ -30,6 +30,11 @@ sub MAIN ( *@files, Bool :$r = False, Str :$k ) {
   my @files-to-process = @files;                # Copy to rw-able array.
   my Array $sts_symbols = [<! s n u a>];        # See File-metadata-manager
 
+  if !?@files-to-process.elems {
+    say "No files to process";
+    exit(1);
+  }
+
   while @files-to-process.shift() -> $file {    # for will not go past the
                                                 # initial number of elements
 
