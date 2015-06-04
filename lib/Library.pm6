@@ -14,7 +14,7 @@ package Library:ver<0.3.0> {
               port => '27017',
               database => 'Library',
               collections => {
-                documents => 'docs_metadata',
+                objects => 'object_metadata',
                 mimetypes => 'mimetypes'
               }
             }
