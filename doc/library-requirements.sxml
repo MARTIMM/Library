@@ -103,41 +103,104 @@ $article xmlns=http://docbook.org/ns/docbook
             keywords, name and address of owner, project name etcetera.
           ]
         ]
+
         $listitem [
           $para [
             Store, update or delete meta information in the database. This is
             for automatically retrieved or explicitly provided information.
           ]
         ]
+
         $listitem [
           $para [
             Search meta information using exact match or regular expressions on
             any part of the meta information.
           ]
         ]
+
         $listitem [
           $para [
             Displaying output from searches by commandline program or by webpage
             in a browser.
           ]
         ]
+
         $listitem [
           $para [
             Actions can be started using mimetypes also stored as metadata.
           ]
         ]
+
         $listitem [
           $para [
             Relations between objects are stored in the database using
             directions of Web Ontology Language ($abbrev[OWL]).
+            These relations can be exported as OWL/XML documents or as RDF.
           ]
         ]
+
         $listitem [
           $para [
-            Relations stored in the database can be exported as OWL/XML
-            documents or as RDF.
+            Mimetypes are an important type of description method to show
+            what can be done with the document. The list can also be used
+            to start native applications to process a particular document.
+            According to their mimetype of the document it mostly has also
+            a proper suffix such as $*emphasis[.txt] or $*emphasis[.html]. See
+            also $*citation[MIMETYPES].
+          ]
+          $para [ A few examples are ]
+          $itemizedlist spacing=compact [
+            $listitem [
+              $para [
+                $*emphasis[text/plain:] This is simple text format mostly
+                created with simple text editors.
+              ]
+            ]
+            $listitem [
+              $para [
+                $*emphasis[audio/mpeg3:] A type of audio file with document
+                suffix of $*emphasis[mp3].
+              ]
+            ]
           ]
         ]
+
+        $listitem [
+          $para [
+            General meta information to store. Besides the list below, users
+            must be capable to add new metadata attributes.
+          ]
+
+          $itemizedlist spacing=compact [
+            $listitem [ $*emphasis[name:] Name of the object ]
+            $listitem [
+              $*emphasis[description:] Description of the object
+            ]
+            $listitem [
+              $*emphasis[author:] A set of data like name and surname,
+              address and email etc.
+            ]
+            $listitem [
+              $*emphasis[datetime:] Date and time of retrieval, date and time of
+              modification or current date and time.
+            ]
+            $listitem [
+              $*emphasis[object-type:] Type of object such as document,
+              directory or url.
+            ]
+            $listitem [
+              $*emphasis[keys:] A list of keywords under which the object can
+              be catagorized.
+            ]
+          ]
+        ]
+        
+        $listitem [
+          $para [
+            
+          ]
+        ]
+
         $listitem [
           $para [
           ]
@@ -157,6 +220,7 @@ $article xmlns=http://docbook.org/ns/docbook
             duplication can be caused by backups or archives.
           ]
         ]
+
         $listitem [
           $para [
             A document can be found on the local disk, externally connected
@@ -164,14 +228,49 @@ $article xmlns=http://docbook.org/ns/docbook
             storage ($abbrev[NAS]), media stores or on webservers.
           ]
         ]
+
         $listitem [
           $para [
-            As a side effect of locating documents on exernal servers, these
-            documents can be stored on disk for offline use.
+            As a side effect of locating documents on e.g. external servers,
+            these documents can be stored on disk for offline use.
           ]
         ]
+
         $listitem [
-          $para [
+          $para [ Document meta information to store. ]
+
+          $itemizedlist spacing=compact [
+            $listitem [
+              $*emphasis[full-name:] Complete and absolute path to the document
+            ]
+            $listitem [
+              $*emphasis[file-name:] Name of document object
+            ]
+            $listitem [
+              $*emphasis[extension:] Extention of the document. This is empty
+              for directory documents.
+            ]
+            $listitem [
+              $*emphasis[accessed:] Date and time of last access.
+            ]
+            $listitem [
+              $*emphasis[modified:] Date and time of last modification.
+            ]
+            $listitem [
+              $*emphasis[changed:] Date and time of last change.
+            ]
+            $listitem [
+              $*emphasis[size:] Size of document.
+            ]
+            $listitem [
+              $*emphasis[:]
+            ]
+            $listitem [
+              $*emphasis[:]
+            ]
+            $listitem [
+              $*emphasis[:]
+            ]
           ]
         ]
       ]
@@ -182,10 +281,52 @@ $article xmlns=http://docbook.org/ns/docbook
       $orderedlist spacing=compact [
         $listitem [
           $para [
+            A file on a disk is pointed to by a name and path and a drive when
+            working on windows. There are other ways to get to a document like
+            using a unified resource locator ($abbrev[URL]).
           ]
         ]
+
         $listitem [
           $para [
+            Protocols are used to get to the document before processing it.
+            E.g. the $*emphasis[http] protocol is used to get a webpage from a
+            site on the network and $*emphasis[file] is used often to get a
+            document from the local filesystem. See also
+            $*citation[MIMETYPES].
+          ]
+          $para [
+            The following list is a series of protocols which might be
+            supported.
+          ]
+          $itemizedlist spacing=compact [
+            $listitem [
+              $para [
+                $*emphasis[file:] Protocol to get documents from a
+                filesystem.
+              ]
+            ]
+            $listitem [
+              $para [
+                $*emphasis[http] and\ $*emphasis[https:] Protocols to get
+                webpage documents from a web server.
+              ]
+            ]
+            $listitem [
+              $para [
+                $*emphasis[ftp:] File transfer protocol.
+              ]
+            ]
+          ]
+        ]
+
+        $listitem [
+          $para [ Web meta information to store. ]
+
+          $itemizedlist spacing=compact [
+            $listitem [
+              $*emphasis[uri:] Url, uri or iri
+            ]
           ]
         ]
       ]
@@ -195,110 +336,9 @@ $article xmlns=http://docbook.org/ns/docbook
       $title [ Programs, modules and web ]
       $orderedlist spacing=compact [
         $listitem [
-          $para [
-          ]
-        ]
-      ]
-    ]
-
-    $sect2 [
-      $title [Not only files]
-      $para [
-        A file on a disk is pointed to by a name and path and a drive when
-        working on windows. There are other ways to get to a document like using
-        a unified resource locator ($abbrev[URL]).
-      ]
-
-      $sect3 [
-        $title [Use of mimetypes and document suffixes]
-        $para [
-          Mimetypes are an important type of description method to show
-          what can be done with the document. The list can also be used
-          to start native applications to process a particular document.
-          According to their mimetype of the document it mostly has also
-          a proper suffix such as $*emphasis[.txt] or $*emphasis[.html]. See
-          also $*citation[MIMETYPES].
-        ]
-        $para [ A few examples are ]
-        $itemizedlist [
-          $listitem [
-            $para [
-              $*emphasis[text/plain:] This is simple text format mostly
-              created with simple text editors.
-            ]
-          ]
-          $listitem [
-            $para [
-              $*emphasis[audio/mpeg3:] A type of audio file with document
-              suffix of $*emphasis[mp3].
-            ]
-          ]
-        ]
-      ]
-
-      $sect3 [
-        $title [Use of protocols]
-        $para [
-          Protocols are used to get to the document before processing it.
-          E.g. the $*emphasis[http] protocol is used to get a webpage from a
-          site on the network and $*emphasis[file] is used often to get a
-          document from the local filesystem. See also
-          $*citation[MIMETYPES].
-        ]
-        $para [
-          The following list is a series of protocols which might be
-          supported.
-        ]
-        $itemizedlist [
-          $listitem [
-            $para [
-              $*emphasis[file:] Protocol to get documents from a
-              filesystem.
-            ]
-          ]
-          $listitem [
-            $para [
-              $*emphasis[http] and\ $*emphasis[https:] Protocols to get
-              webpage documents from a web server.
-            ]
-          ]
-          $listitem [
-            $para [
-              $*emphasis[ftp:] File transfer protocol.
-            ]
-          ]
-        ]
-      ]
-    ]
-
-    $sect2 [
-      $title [Metadata]
-      $para [
-        What information do we want to store. Well, it must be something
-        about the document. Furthermore, keys under which a document might
-        be catagorized. A description will sometimes help. There are on the
-        internet numerous descriptions available of known items like books
-        and movies. Besides the list below, users must be capable to add
-        new metadat attributes.
-      ]
-      $itemizedlist [
-        $listitem [ $*emphasis[name:] Unique name ]
-        $listitem [
-          $*emphasis[path:] complete and absolute path to the document
-        ]
-        $listitem [
-          $*emphasis[uri:] url or uri
-        ]
-        $listitem [
-          $*emphasis[description:] a description
-        ]
-        $listitem [
-          $*emphasis[author:] a set of data like name and surname,
-          address and email etc.
-        ]
-        $listitem [
-          $*emphasis[datetime:] Date and time of retrieval, date and time of
-          modification or current date and time.
+          $para [install-mimetypes.pl6 to install ]
+          $para []
+          $para []
         ]
       ]
     ]
