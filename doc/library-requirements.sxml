@@ -63,7 +63,7 @@ $article xmlns=http://docbook.org/ns/docbook
       ]
     ]
   ]
-  
+
   $sect1 [
     $title [Introduction]
     $para [
@@ -89,7 +89,7 @@ $article xmlns=http://docbook.org/ns/docbook
   $sect1 [
     $title [Requirements]
     $para [
-    
+
     ]
 
     $sect2 [
@@ -171,6 +171,7 @@ $article xmlns=http://docbook.org/ns/docbook
             must be capable to add new metadata attributes.
           ]
 
+          $anchor xml:id=general.meta.list []
           $itemizedlist spacing=compact [
             $listitem [ $*emphasis[name:] Name of the object ]
             $listitem [
@@ -194,10 +195,10 @@ $article xmlns=http://docbook.org/ns/docbook
             ]
           ]
         ]
-        
+
         $listitem [
           $para [
-            
+
           ]
         ]
 
@@ -299,6 +300,7 @@ $article xmlns=http://docbook.org/ns/docbook
             The following list is a series of protocols which might be
             supported.
           ]
+
           $itemizedlist spacing=compact [
             $listitem [
               $para [
@@ -306,12 +308,14 @@ $article xmlns=http://docbook.org/ns/docbook
                 filesystem.
               ]
             ]
+
             $listitem [
               $para [
                 $*emphasis[http] and\ $*emphasis[https:] Protocols to get
                 webpage documents from a web server.
               ]
             ]
+
             $listitem [
               $para [
                 $*emphasis[ftp:] File transfer protocol.
@@ -331,23 +335,7 @@ $article xmlns=http://docbook.org/ns/docbook
         ]
       ]
     ]
-
-    $sect2 [
-      $title [ Programs, modules and web ]
-      $orderedlist spacing=compact [
-        $listitem [
-          $para [install-mimetypes.pl6 to install ]
-          $para []
-          $para []
-        ]
-      ]
-    ]
   ]
-#            $listitem:
-#               $ emphasis[], 
-#            $listitem:
-#               $ emphasis[], 
-# emphasis[], 
 
   $sect1 [
     $title [Implementation]
@@ -357,10 +345,11 @@ $article xmlns=http://docbook.org/ns/docbook
       making the software platform independent so everyone can be happy with
       it.
     ]
-    $itemizedlist [
+    $itemizedlist spacing=compact [
       $listitem [
-        $*emphasis [The programming language]
         $para [
+          $*emphasis [The programming language]
+        
           The first item to think about is the choice of programming
           language. A scripting language would be a proper choice because
           these languages have a higher level of coding and will access
@@ -374,15 +363,24 @@ $article xmlns=http://docbook.org/ns/docbook
           The second approach is to use a browser to do the work. There we can
           use $*emphasis[html5], $*emphasis[css3] and $*emphasis[javascript] and
           libraries. There is also a server side scripting which can be any of
-          $*emphasis[perl6], $*emphasis[perl 5] or javascript $*emphasis[(nodejs)]
+          $*emphasis[perl6], $*emphasis[perl 5] or javascript by means of
+          $*emphasis[(nodejs)]. There are also a great many javascript modules
+          which can be used.
         ]
       ]
+
       $listitem [
-        $*emphasis [The storage method]
-      ]
-      $listitem [
-        $*emphasis [Storage]
         $para [
+          $*emphasis [The storage method]
+          Because the information items on one object can be different than on
+          the other a hiërargycal database would be the choice. MongoDB is a
+          dayabase for which there is support from javascript as well as perl6.
+        ]
+      ]
+
+      $listitem [
+        $para [
+          $*emphasis [Storage]
           The name of the database and the names of the collections
         ]
       ]
@@ -397,7 +395,8 @@ $article xmlns=http://docbook.org/ns/docbook
       do we? We only try not to select those software which will bind it to
       some platform as explained above.
     ]
-    $itemizedlist [
+
+    $itemizedlist spacing=compact [
       $listitem [
         $para [
           $*emphasis[perl6:] The followup version of perl 5.*. The program
@@ -406,6 +405,7 @@ $article xmlns=http://docbook.org/ns/docbook
           intermediary
         ]
       ]
+
       $listitem [
         $para [
           $*emphasis[perl6:] The followup version of perl 5.*. The program
@@ -416,8 +416,59 @@ $article xmlns=http://docbook.org/ns/docbook
   ]
 
   $sect1 [
-    $title [Priorities]
+    $title [ State of affairs ]
     $para [
+      A list of programs and web pages created and made available for use. While
+      the project is still in a pristene state there presumable are several bugs
+      left behind. Also things in the database and programs might change when
+      other ideas arrive. Below there is a list of what has been made. For
+      documentation see $*<link xl:href=file:///home/marcel/Languages/Perl6/Projects/Library/doc/library.pdf
+      [library].
+    ]
+
+    $orderedlist spacing=compact [
+      $listitem [
+        $para [
+          The mongo database is $*emphasis[Library:] with several collections.
+          $itemizedlist [
+            $listitem [
+              $para [
+                $*emphasis[object_metadata:] Collection to store meta information
+                of any object found.
+              ]
+            ]
+
+            $listitem [
+              $para [
+                $*emphasis[mimetypes:] Collection to store mimetype information.
+                This can be connected to the object-type.
+# $*<link xl:id=general.meta.list [object-type].
+              ]
+            ]
+          ]
+        ]
+
+        $para [
+          install-mimetypes.pl6 is program to install mimetype information from
+          a $*<link xl:href=http://www.freeformatter.com/mime-types-list.html
+          [certain website].
+        ]
+
+        $para [
+          store-file-metadata.pl6 is a program to insert or modify metadata of
+          files and directories in the database.
+        ]
+
+        $para [
+
+        ]
+      ]
+    ]
+
+    $sect2 [
+      $title [Priorities]
+      $para [
+      ]
     ]
   ]
 
