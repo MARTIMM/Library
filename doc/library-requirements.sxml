@@ -335,6 +335,22 @@ $article xmlns=http://docbook.org/ns/docbook
         ]
       ]
     ]
+
+    $sect2 [
+      $title [ Other information ]
+      $para [
+        Other information besides meta information can be inported such as
+        agendas and contact information.
+      ]
+      $orderedlist spacing=compact [
+        $listitem [
+          $para [
+            Contact information can be imported from vcard files. This data can
+            also be linked to other meta items. 
+          ]
+        ]
+      ]
+    ]
   ]
 
   $sect1 [
