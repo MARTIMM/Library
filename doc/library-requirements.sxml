@@ -133,14 +133,6 @@ $article xmlns=http://docbook.org/ns/docbook
 
         $listitem [
           $para [
-            Relations between objects are stored in the database using
-            directions of Web Ontology Language ($abbrev[OWL]).
-            These relations can be exported as OWL/XML documents or as RDF.
-          ]
-        ]
-
-        $listitem [
-          $para [
             Mimetypes are an important type of description method to show
             what can be done with the document. The list can also be used
             to start native applications to process a particular document.
@@ -339,14 +331,32 @@ $article xmlns=http://docbook.org/ns/docbook
     $sect2 [
       $title [ Other information ]
       $para [
-        Other information besides meta information can be inported such as
+        Other information besides meta information can be imported such as
         agendas and contact information.
       ]
+
       $orderedlist spacing=compact [
         $listitem [
           $para [
             Contact information can be imported from vcard files. This data can
             also be linked to other meta items. 
+          ]
+        ]
+
+        $listitem [
+          $para [
+            Relations between objects are stored in the database using directions
+            of Topic Maps ($abbrev[TM]). Inport and export are done via
+            $*abbrev[XML] as $*abbrev[XTM] or encapsulated in $*abbrev[RDF].
+          ]
+        ]
+
+        $listitem [
+          $para [
+            Web Ontology Language ($abbrev[OWL]). Relations defined above with
+            $*abbrev[TM] can be tested using a reasoner reading this ontology
+            information. The rules for this language can be imported and exported
+            as $*abbrev[OWL/XML] documents or as $*<abbrev[RDF].
           ]
         ]
       ]
