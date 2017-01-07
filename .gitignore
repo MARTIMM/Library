@@ -1,7 +1,10 @@
+.precomp/*
+*/.precomp/*
 .directory
 *.html
-*.pdf
-*.csv
-*.xsl
 *.xml
-Old
+*.xsl
+*.log
+spellTmp*
+Old/*
+~*
