@@ -1,5 +1,5 @@
-.precomp/*
-*/.precomp/*
+.precomp
+*/.precomp
 .directory
 *.html
 *.xml

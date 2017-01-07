@@ -1,0 +1,469 @@
+
+$!d5b.article [
+  $|title [ Library Requirements Document ]
+
+  $!d5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
+              city=Haarlem country=Netherlands
+              copy-year='2015, 2016 ... Inf' copy-holder='Marcel Timmerman' [
+
+    $|para [
+      This is a small document of requirements which I think is needed for
+      this project. It describes the needed functionality, programs and
+      structures.
+    ]
+
+    $|para [ The latest version of this document is generated on date
+      $!SxmlCore.date
+    ]
+  ]
+
+
+  $|sect1 [
+    $|title [Introduction]
+    $|para [
+      Purpose of this project is to store meta information of objects which can
+      be documents, computernames, websites etcetera. This information is stored
+      centrally in a database and used by programs to search for the documents,
+      display info in tables or show relations between other objects.
+    ]
+
+    $|para [
+      This list of requirements will show what I like to include in this
+      system. It does not mention if this will be feasable or not. That will
+      come in a later part where things like dependencies will be
+      investigated.
+    ]
+
+    $|para [
+      From this document I try to make clear what is needed to build the
+      modules and program and what to build.
+    ]
+  ]
+
+  $|sect1 [
+    $|title [Requirements]
+    $|para [
+
+    ]
+
+    $|sect2 [
+      $|title [ General specifications of any object ]
+      $|orderedlist spacing=compact [
+        $|listitem [
+          $|para [
+            There are two types of information to be stored, A) automatically
+            found data such as ownership, path to document and volumename in
+            case of documents, and B) explicitly provided information like
+            keywords, name and address of owner, project name etcetera.
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            Store, update or delete meta information in the database. This is
+            for automatically retrieved or explicitly provided information.
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            Search meta information using exact match or regular expressions on
+            any part of the meta information.
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            Displaying output from searches by commandline program or by webpage
+            in a browser.
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            Actions can be started using mimetypes also stored as metadata.
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            Mimetypes are an important type of description method to show
+            what can be done with the document. The list can also be used
+            to start native applications to process a particular document.
+            According to their mimetype of the document it mostly has also
+            a proper suffix such as $**emphasis[.txt] or $**emphasis[.html]. See
+            also $**citation[MIMETYPES].
+          ]
+          $|para [ A few examples are ]
+          $|itemizedlist spacing=compact [
+            $|listitem [
+              $|para [
+                $**emphasis[text/plain:] This is simple text format mostly
+                created with simple text editors.
+              ]
+            ]
+            $|listitem [
+              $|para [
+                $**emphasis[audio/mpeg3:] A type of audio file with document
+                suffix of $**emphasis[mp3].
+              ]
+            ]
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            General meta information to store. Besides the list below, users
+            must be capable to add new metadata attributes.
+          ]
+
+          $|anchor xml:id=general.meta.list []
+          $|itemizedlist spacing=compact [
+            $|listitem [ $**emphasis[name:] Name of the object ]
+            $|listitem [
+              $**emphasis[description:] Description of the object
+            ]
+            $|listitem [
+              $**emphasis[author:] A set of data like name and surname,
+              address and email etc.
+            ]
+            $|listitem [
+              $**emphasis[datetime:] Date and time of retrieval, date and time of
+              modification or current date and time.
+            ]
+            $|listitem [
+              $**emphasis[object-type:] Type of object such as document,
+              directory or url.
+            ]
+            $|listitem [
+              $**emphasis[keys:] A list of keywords under which the object can
+              be catagorized.
+            ]
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+          ]
+        ]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [ Document objects ]
+      $|orderedlist spacing=compact [
+        $|listitem [
+          $|para [
+            This system will not manage documents. It will manage metadata
+            about the documents. Location of the document is stored as part
+            of this information.It is however nice when it can detect
+            duplicates when another document is entered by the user. This
+            duplication can be caused by backups or archives.
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            A document can be found on the local disk, externally connected
+            disk, other computers and network devices such as network attached
+            storage ($|abbrev[NAS]), media stores or on webservers.
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            As a side effect of locating documents on e.g. external servers,
+            these documents can be stored on disk for offline use.
+          ]
+        ]
+
+        $|listitem [
+          $|para [ Document meta information to store. ]
+
+          $|itemizedlist spacing=compact [
+            $|listitem [
+              $**emphasis[full-name:] Complete and absolute path to the document
+            ]
+            $|listitem [
+              $**emphasis[file-name:] Name of document object
+            ]
+            $|listitem [
+              $**emphasis[extension:] Extention of the document. This is empty
+              for directory documents.
+            ]
+            $|listitem [
+              $**emphasis[accessed:] Date and time of last access.
+            ]
+            $|listitem [
+              $**emphasis[modified:] Date and time of last modification.
+            ]
+            $|listitem [
+              $**emphasis[changed:] Date and time of last change.
+            ]
+            $|listitem [
+              $**emphasis[size:] Size of document.
+            ]
+            $|listitem [
+              $**emphasis[:]
+            ]
+            $|listitem [
+              $**emphasis[:]
+            ]
+            $|listitem [
+              $**emphasis[:]
+            ]
+          ]
+        ]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [ Website information ]
+      $|orderedlist spacing=compact [
+        $|listitem [
+          $|para [
+            A file on a disk is pointed to by a name and path and a drive when
+            working on windows. There are other ways to get to a document like
+            using a unified resource locator ($|abbrev[URL]).
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            Protocols are used to get to the document before processing it.
+            E.g. the $**emphasis[http] protocol is used to get a webpage from a
+            site on the network and $**emphasis[file] is used often to get a
+            document from the local filesystem. See also
+            $**citation[MIMETYPES].
+          ]
+          $|para [
+            The following list is a series of protocols which might be
+            supported.
+          ]
+
+          $|itemizedlist spacing=compact [
+            $|listitem [
+              $|para [
+                $**emphasis[file:] Protocol to get documents from a
+                filesystem.
+              ]
+            ]
+
+            $|listitem [
+              $|para [
+                $**emphasis[http] and\ $**emphasis[https:] Protocols to get
+                webpage documents from a web server.
+              ]
+            ]
+
+            $|listitem [
+              $|para [
+                $**emphasis[ftp:] File transfer protocol.
+              ]
+            ]
+          ]
+        ]
+
+        $|listitem [
+          $|para [ Web meta information to store. ]
+
+          $|itemizedlist spacing=compact [
+            $|listitem [
+              $**emphasis[uri:] Url, uri or iri
+            ]
+          ]
+        ]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [ Other information ]
+      $|para [
+        Other information besides meta information can be imported such as
+        agendas and contact information.
+      ]
+
+      $|orderedlist spacing=compact [
+        $|listitem [
+          $|para [
+            Contact information can be imported from vcard files. This data can
+            also be linked to other meta items. 
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            Relations between objects are stored in the database using directions
+            of Topic Maps ($|abbrev[TM]). Inport and export are done via
+            $**abbrev[XML] as $**abbrev[XTM] or encapsulated in $**abbrev[RDF].
+          ]
+        ]
+
+        $|listitem [
+          $|para [
+            Web Ontology Language ($|abbrev[OWL]). Relations defined above with
+            $**abbrev[TM] can be tested using a reasoner reading this ontology
+            information. The rules for this language can be imported and exported
+            as $**abbrev[OWL/XML] documents or as $*|abbrev[RDF].
+          ]
+        ]
+      ]
+    ]
+  ]
+
+  $|sect1 [
+    $|title [Implementation]
+    $|para [
+      This software package should come with several modules and programs to
+      suit several ways of accessing the data. There is also an issue of
+      making the software platform independent so everyone can be happy with
+      it.
+    ]
+    $|itemizedlist spacing=compact [
+      $|listitem [
+        $|para [
+          $**emphasis [The programming language]
+        
+          The first item to think about is the choice of programming
+          language. A scripting language would be a proper choice because
+          these languages have a higher level of coding and will access
+          the underlaying system in a platform independent way. The
+          language I want to choose is perl6. Yes, the still unfinished
+          perl version. I am very confident that the language gets its
+          first release this year(2015) and wanted to learn about the
+          language by doing this project.
+        ]
+        $|para [
+          The second approach is to use a browser to do the work. There we can
+          use $**emphasis[html5], $**emphasis[css3] and $**emphasis[javascript] and
+          libraries. There is also a server side scripting which can be any of
+          $**emphasis[perl6], $**emphasis[perl 5] or javascript by means of
+          $**emphasis[(nodejs)]. There are also a great many javascript modules
+          which can be used.
+        ]
+      ]
+
+      $|listitem [
+        $|para [
+          $**emphasis [The storage method]
+          Because the information items on one object can be different than on
+          the other a hiërargycal database would be the choice. MongoDB is a
+          dayabase for which there is support from javascript as well as perl6.
+        ]
+      ]
+
+      $|listitem [
+        $|para [
+          $**emphasis [Storage]
+          The name of the database and the names of the collections
+        ]
+      ]
+    ]
+  ]
+
+  $|sect1 [
+    $|title [Dependencies]
+    $|para [
+      The program will be depending on several modules and programs. That
+      is  only logical because we do not want to reinvent the wheel(s) again
+      do we? We only try not to select those software which will bind it to
+      some platform as explained above.
+    ]
+
+    $|itemizedlist spacing=compact [
+      $|listitem [
+        $|para [
+          $**emphasis[perl6:] The followup version of perl 5.*. The program
+          is not yet completely finished but will be soon (2015-01). This
+          program is a interpreter/compiler which can compile the script into some
+          intermediary
+        ]
+      ]
+
+      $|listitem [
+        $|para [
+          $**emphasis[perl6:] The followup version of perl 5.*. The program
+          is not yet completely finished but will be soon (2015-01).
+        ]
+      ]
+    ]
+  ]
+
+  $|sect1 [
+    $|title [ State of affairs ]
+    $|para [
+      A list of programs and web pages created and made available for use. While
+      the project is still in a pristene state there presumable are several bugs
+      left behind. Also things in the database and programs might change when
+      other ideas arrive. Below there is a list of what has been made. For
+      documentation see $*|link xl:href=file:///home/marcel/Languages/Perl6/Projects/Library/doc/library.pdf
+      [library].
+    ]
+
+    $|orderedlist spacing=compact [
+      $|listitem [
+        $|para [
+          The mongo database is $**emphasis[Library:] with several collections.
+          $|itemizedlist [
+            $|listitem [
+              $|para [
+                $**emphasis[object_metadata:] Collection to store meta information
+                of any object found.
+              ]
+            ]
+
+            $|listitem [
+              $|para [
+                $**emphasis[mimetypes:] Collection to store mimetype information.
+                This can be connected to the object-type.
+# $*|link xl:id=general.meta.list [object-type].
+              ]
+            ]
+          ]
+        ]
+
+        $|para [
+          install-mimetypes.pl6 is program to install mimetype information from
+          a $*|link xl:href=http://www.freeformatter.com/mime-types-list.html
+          [certain website].
+        ]
+
+        $|para [
+          store-file-metadata.pl6 is a program to insert or modify metadata of
+          files and directories in the database.
+        ]
+
+        $|para [
+
+        ]
+      ]
+    ]
+
+    $|sect2 [
+      $|title [Priorities]
+      $|para [
+      ]
+    ]
+  ]
+
+
+#   $|bibliolist:
+#      $|title: Bibliography
+  $|bibliography [
+    $|biblioentry [
+      $|abbrev [MIMETYPES]
+      $|title [A list of all mimetypes]
+      $|abstract [A list of mimetypes can be found on the site]
+      $|ulink url=http://www.sitepoint.com/web-foundations/mime-types-complete-list/ [
+ #        $|internet []
+      ]
+    ]
+  ]
+#   $|index:
+]
