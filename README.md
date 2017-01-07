@@ -1,10 +1,7 @@
 # Library - Meta data library
 
-## Version Perl on Moarvm
-
-```
-This is perl6 version 2015.01-77-gd320f00 built on MoarVM version 2015.01-21-g4ee4925
-```
+[![Build Status](https://travis-ci.org/MARTIMM/Library.svg?branch=master)](https://travis-ci.org/MARTIMM/Library)
+[![License](http://martimm.github.io/label/License-label.svg)](http://www.perlfoundation.org/artistic_license_2_0)
 
 ## Description
 
@@ -22,29 +19,14 @@ bin/store-file-metadata.pl6
 ## Documentation
 
 * ./doc/Library.mm, Freemind mindmapping.
-* ./doc/Docbook-docs/library-requirements-setup.pdf, Setup
+* ./doc/Requirements/library.pdf, Setup
 
-## Bugs
+## Version Perl on Moarvm
 
-Still in a 'omega' state. So bugs come and go.
-
-## Changes
-
-0.3.0
-  * Added keyword processing to store-file-metadata.pl6 and
-    File-metadata-manager.pm6
-  * Install-mimetypes.pl6 changed to store fileext as an array of extensions.
-0.2.1
-  * Bugfixes in File-metadata-manager
-  * Bugfixes updating entries.
-0.2.0
-  * Added install-mimetypes.pl6
-0.1.1
-  * Modified modules and finished store-file-metadata.pl6
-0.1.0
-  * Creation date. Lots of thinking.
+Latest version of perl 6 on rakudo en moarvm.
 
 ## Author
+
   M.Timmerman
   Github account MARTIMM
 

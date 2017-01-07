@@ -1,64 +1,39 @@
 use v6;
 use Test;
 
-use File::HomeDir;
-
 use Library::Configuration;
-#use_ok Library::Configuration;
+
+spurt( $*HOME ~ '/.library.toml', Q:to/EOCFG/);
+
+  # MongoDB server connection
+  uri             = 'mongodb://localhost:27017'
+
+  EOCFG
 
 #-------------------------------------------------------------------------------
-#
-my Library::Configuration $cfg .= new;
-ok $cfg.WHICH ~~ /Configuration\|\d+/, 'Check type';
+subtest 'configuration save', {
+  my Library::Configuration $cfg .= new;
+  isa-ok $cfg, 'Library::Configuration';
 
-my Str $filename = 'my-config.json';
-
-# Test filename
-#
-is $cfg.filename, 'Config.json', 'Check filename = Config.json';
-$cfg.filename = $filename;
-is $cfg.filename, $filename, "Check filename = '$filename'";
-is $cfg.get-config-path()
- , ([~] File::HomeDir.my_home, '/', '.001-Config/', $cfg.filename)
- , "Check config path in home dir"
- ;
-is $cfg.get-config-path(:!use-home-dir)
- , $cfg.filename
- , "Check config path in current dir"
- ;
-
-$cfg.set( {MongoDB_Server => 'localhost:2222'});
-$cfg.save(:!use-home-dir);
-$cfg.load(:!use-home-dir);
-
-ok $cfg.filename.IO ~~ :r, "$filename exists";
-
-my $server = $cfg.get('MongoDB_Server');
-is $server, 'localhost:2222', qq/Key check = '$server'/;
-
-$cfg.set( {MongoDB_Server => '192.168.0.22:2222'});
-$server = $cfg.get('MongoDB_Server');
-is $server, 'localhost:2222', qq/Key check still = '$server'/;
-
-$cfg.set( {MongoDB_Server => '192.168.0.22:2222'}, :redefine);
-$server = $cfg.get('MongoDB_Server');
-is $server, '192.168.0.22:2222', qq/Key changed now = '$server'/;
+  is $cfg.config<uri>, 'mongodb://localhost:27017', 'uri from config';
+  
+  $cfg.config<my-data> = 'test 1';
+  $cfg.save;
+}
 
 #-------------------------------------------------------------------------------
-$cfg.save();
-$cfg.load();
+subtest 'configuration load', {
+  my Library::Configuration $cfg .= new;
 
-$cfg.remove-config();
-my Str $cf-name = [~] File::HomeDir.my_home, '/', '.001-Config/', $cfg.filename;
-ok !($cf-name.IO ~~ :r), "$cf-name does'nt exist anymore";
-
-$cfg.remove-config(:!use-home-dir);
-ok !($cfg.filename.IO ~~ :r), "$filename doesn't exist anymore";
+  is $cfg.config<my-data>, 'test 1', 'found setting';
+  $cfg.config<my-data>:delete;
+  $cfg.save;
+}
 
 #-------------------------------------------------------------------------------
 
 
-done;
+done-testing;
 
 #unlink $filename;
 

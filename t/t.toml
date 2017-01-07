@@ -1,0 +1,16 @@
+# MongoDB server connection
+server-name     = 'localhost'
+server-port     = 27017
+
+
+
+
+# Following cannot be changed, program depends on it
+
+database        = 'Library'
+
+[ collections ]
+  objects       = 'object_metadata'
+  mimetypes     = 'mimetypes'
+
+
