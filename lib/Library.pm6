@@ -1,28 +1,17 @@
-use v6;
+use v6.c;
 
-
+use MongoDB;
+use MongoDB::Client;
+use MongoDB::Database;
+use MongoDB::Collection;
 use Library::Configuration;
-use MongoDB::Connection;
 
-#say 'Library file ping...';
+unit package Library:ver<0.3.0>;
 
-package Library:ver<0.3.0> {
+our $cfg = from-toml(:file<xt/t/t.toml>);
 
-#say 'Library package ping...';
-  our $cfg = Library::Configuration.new();
-  $cfg.set( { MongoDB_Server => 'localhost',
-              port => '27017',
-              database => 'Library',
-              collections => {
-                objects => 'object_metadata',
-                mimetypes => 'mimetypes'
-              }
-            }
-          );
-  $cfg.save();
+our $client = MongoDB::Client.new(
+  :uri("mongod://$cfg<server-name>:$sfg<$server-port>")
+);
 
-  our $connection = MongoDB::Connection.new(
-        :host($cfg.get('MongoDB_Server')),
-        :port(Int($cfg.get('port')))
-      );
-}
+

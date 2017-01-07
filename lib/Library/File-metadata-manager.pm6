@@ -1,10 +1,12 @@
-use v6;
+use v6.c;
 
-
-#use MongoDB;
 use Library;
 use Library::MetaDB;
-#use Library::Configuration;
+
+use MongoDB;
+use MongoDB::Client;
+use MongoDB::Database;
+use MongoDB::Collection;
 
 #-------------------------------------------------------------------------------
 #

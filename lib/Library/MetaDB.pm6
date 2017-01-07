@@ -1,9 +1,12 @@
-use v6;
+use v6.c;
 
-
-use MongoDB::Connection;
 use Library;
 use Library::Configuration;
+
+use MongoDB;
+use MongoDB::Client;
+use MongoDB::Database;
+use MongoDB::Collection;
 
 package Library {
   role Library::MetaDB {

@@ -1,0 +1,9 @@
+=begin pod
+
+=head1 Library::Configuration
+
+=for head2
+Class defining the location where program info can be stored.
+
+=end pod
+
