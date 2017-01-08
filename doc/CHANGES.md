@@ -1,5 +1,9 @@
 ## Release notes
 
+0.4.0
+  * Rewrite of Library::Configuration
+  * Rewrite of Library
+  * tests
 0.3.0
   * Added keyword processing to store-file-metadata.pl6 and
     File-metadata-manager.pm6

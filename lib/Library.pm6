@@ -1,17 +1,15 @@
 use v6.c;
 
-use MongoDB;
+#-------------------------------------------------------------------------------
+unit package Library:auth<github:MARTIMM>;
+
 use MongoDB::Client;
-use MongoDB::Database;
-use MongoDB::Collection;
 use Library::Configuration;
 
-unit package Library:ver<0.3.0>;
-
-our $cfg = from-toml(:file<xt/t/t.toml>);
-
-our $client = MongoDB::Client.new(
-  :uri("mongod://$cfg<server-name>:$sfg<$server-port>")
-);
+#-------------------------------------------------------------------------------
+our $library-config is export = Library::Configuration.new
+    unless ?$library-config;
+our $client = MongoDB::Client.new( :uri($library-config.config<uri>) )
+    unless $client;
 
 
