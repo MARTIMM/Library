@@ -9,9 +9,11 @@ perl6:
 
 install:
   - rakudobrew build-panda ${TRAVIS_PERL6_VERSION#latest}
-  - panda installdeps .
+#  - panda installdeps .
+  - panda update
+  - panda --notests install Config::DataLang::Refine
+  - panda --notests install MongoDB
 
 cache:
   directories:
     - $TRAVIS_BUILD_DIR/.rakudobrew
-
