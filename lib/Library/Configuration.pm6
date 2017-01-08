@@ -1,7 +1,7 @@
 use v6.c;
 
 #-------------------------------------------------------------------------------
-unit package Library;
+unit package Library:auth<github:MARTIMM>;
 
 use Config::TOML;
 
