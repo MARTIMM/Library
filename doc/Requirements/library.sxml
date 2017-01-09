@@ -19,42 +19,85 @@ $!d5b.article [
 
 
   $|sect1 [
-    $|title [Introduction]
+    $|title [ Introduction ]
     $|para [
       Purpose of this project is to store meta information of objects which can
-      be documents, computernames, websites etcetera. This information is stored
-      centrally in a database and used by programs to search for the documents,
-      display info in tables or show relations between other objects.
+      be any type of documents, on disks or located on websites. This
+      information is about the object in question and is meant to give some
+      extra meaning to it. For example to use labels or keywords it is possible
+      to group these objects together independent of the current location
+      of these objects. As mentioned, possible objects can be anything, a short
+      list:
+
+      $|itemizedlist spacing=compact [
+        $|listitem [
+          $**emphasis[File:] Files are objects with a content. E.g. text,
+          image, xml, scripts, archives and code. For these type objects there are
+          viewers and editors available.
+        ]
+
+        $|listitem [
+          $**emphasis[Device:] These are objects with a special purpose and should
+          not be manipulated. We can always say something about them so it might
+          be worthwhile to add metadata for it.
+        ]
+
+        $|listitem [
+          $**emphasis[Servers:] Objects with a content found on other servers.
+          There should be a difference between local servers where the data can
+          read via mountable filesystems and external servers where content can
+          only be retrieved using protocols like http, ssh, ftp smtp, ldap etc.
+          The data from external servers are copied to the local disk because
+          this type of data also tend to be more fleeting in nature.
+        ]
+
+        $|listitem [
+          $**emphasis[Special:] Objects can have a special meaning. Most of the
+          time these can be resource files or configuration files. Examples of
+          these are RDF, Html, SVG, vCard, calendar etc.
+        ]
+      ]
     ]
 
     $|para [
-      This list of requirements will show what I like to include in this
-      system. It does not mention if this will be feasable or not. That will
-      come in a later part where things like dependencies will be
-      investigated.
-    ]
-
-    $|para [
-      From this document I try to make clear what is needed to build the
-      modules and program and what to build.
+      This document is an investigation of requirements needed for this program.
+      It does not mention if this will be feasable or not. That will come in a
+      later part.
     ]
   ]
 
   $|sect1 [
-    $|title [Requirements]
-    $|para [
+    $|title [ Requirements ]
+#    $|para [
+#      
+#    ]
 
+    $|itemizedlist spacing=compact [
+      $|listitem [
+        $|emphasis[Configuration]. This is a location where the program can find
+        a config file. This file has e.g. info how to connect to the mongodb
+        database server and what database and collections to use. On this
+        location the program can store pid info of background programs and
+        logfiles.
+      ]
+
+      $|listitem [
+        $|emphasis[LIBRARY-CONFIG]. Environment variable holding the location on
+        disk of the library configuration.
+      ]
     ]
 
     $|sect2 [
       $|title [ General specifications of any object ]
-      $|orderedlist spacing=compact [
+      $|itemizedlist spacing=compact [
         $|listitem [
           $|para [
-            There are two types of information to be stored, A) automatically
+            There are three types of information to be stored, A) automatically
             found data such as ownership, path to document and volumename in
-            case of documents, and B) explicitly provided information like
-            keywords, name and address of owner, project name etcetera.
+            case of documents, B) sha1 generated numbers based on the location
+            and content of the object for searching and comparing, and C)
+            explicitly provided information like keywords, name and address of
+            owner, project name etcetera.
           ]
         ]
 
@@ -329,7 +372,7 @@ $!d5b.article [
       $|listitem [
         $|para [
           $**emphasis [The programming language]
-        
+
           The first item to think about is the choice of programming
           language. A scripting language would be a proper choice because
           these languages have a higher level of coding and will access
