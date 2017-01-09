@@ -7,10 +7,13 @@ use MongoDB::Client;
 use Library::Configuration;
 
 #-------------------------------------------------------------------------------
-our $library-config is export = Library::Configuration.new
-    unless ?$library-config;
+our $lib-cfg is export;
+our $client is export;
 
-our $client = MongoDB::Client.new( :uri($library-config.config<uri>) )
-    unless $client;
+#-------------------------------------------------------------------------------
+sub initialize-library ( Str :$library-config ) is export {
 
+  $lib-cfg = Library::Configuration.new(:$library-config);
+  $client = MongoDB::Client.new(:uri($lib-cfg.config<uri>));
+}
 

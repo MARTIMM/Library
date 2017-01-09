@@ -13,7 +13,7 @@ use MongoDB::Collection;
 #-------------------------------------------------------------------------------
 class Configuration {
 
-  has Str $!cfg-filename;
+  has Str $!config-filename;
   has Hash $.config;
 
   #-----------------------------------------------------------------------------
@@ -37,20 +37,20 @@ class Configuration {
       $!config = {};
     }
 
-    $!cfg-filename = $file;
+    $!config-filename = $file;
     self!check-config;
   }
 
   #-----------------------------------------------------------------------------
   submethod DESTROY ( ) {
 
-    spurt( $!cfg-filename, to-toml($!config));
+    spurt( $!config-filename, to-toml($!config));
   }
 
   #-----------------------------------------------------------------------------
   method save ( ) {
 
-    spurt( $!cfg-filename, to-toml($!config));
+    spurt( $!config-filename, to-toml($!config));
   }
 
   #-----------------------------------------------------------------------------

@@ -1,9 +1,7 @@
 use v6;
 use Test;
 
-BEGIN {%*ENV<LIBRARY-CONFIG> = 't/Lib3';}
 use Library;
-
 use Library::Configuration;
 
 #-------------------------------------------------------------------------------
@@ -44,7 +42,10 @@ subtest 'configuration load', {
 #-------------------------------------------------------------------------------
 subtest 'library module init', {
 
-  is $Library::library-config.config<uri>, 'mongodb://', 'found lib uri';
+  %*ENV<LIBRARY-CONFIG> = 't/Lib3';
+  initialize-library();
+
+  is $Library::lib-cfg.config<uri>, 'mongodb://', 'found lib uri';
   isa-ok $Library::client, 'MongoDB::Client';
 }
 
@@ -58,8 +59,8 @@ rmdir 't/Lib1';
 unlink 't/Lib2/config.toml';
 rmdir 't/Lib2';
 
-unlink 't/Lib3/config.toml';
-rmdir 't/Lib3';
+#unlink 't/Lib3/config.toml';
+#rmdir 't/Lib3';
 
 exit(0);
 
