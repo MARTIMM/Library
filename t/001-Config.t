@@ -16,7 +16,7 @@ subtest 'automatic configuration', {
 #-------------------------------------------------------------------------------
 subtest 'configuration load and save', {
 
-  mkdir 't/Lib2', 0o700;
+  mkdir 't/Lib2', 0o700 unless 't/Lib2'.IO ~~ :d;
   my Str $filename = 't/Lib2/config.toml';
   spurt( $filename, Q:to/EOCFG/);
 
@@ -59,8 +59,8 @@ rmdir 't/Lib1';
 unlink 't/Lib2/config.toml';
 rmdir 't/Lib2';
 
-#unlink 't/Lib3/config.toml';
-#rmdir 't/Lib3';
+unlink 't/Lib3/config.toml';
+rmdir 't/Lib3';
 
 exit(0);
 
