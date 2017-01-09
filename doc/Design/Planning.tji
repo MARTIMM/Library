@@ -1,0 +1,73 @@
+project Library "Meta data library and external sources store" '0.3.0.1' 2015-02-15 - 2020-01-01 {
+
+  now 2015-06-26
+  timeformat "%Y-%m-%d"
+  currency "EUR"
+}
+
+# one mans team, so holidays of me only and globally defined
+copyright "© 2015, 2016 ... Inf Marcel Timmerman"
+rate 1.0
+vacation "Holiday" 2016-12-18 - 2016-12-25
+vacation "Holiday" 2017-03-01 - 2017-03-31
+
+account dev "Development" cost
+account doc "Documentation" cost
+account tst "testing" cost
+
+#flags important
+
+resource devs "Developers" {
+  resource dev "Marcel Timmerman"
+  resource doc "Marcel Timmerman"
+  resource tst "Marcel Timmerman"
+
+#  flags team
+}
+
+
+task pstart 'Project start' {
+  start 2015-02-15
+  account dev
+  allocate dev
+
+  task setup 'Setup directories' { effort 10min }
+  task docs 'Primary documents: README, TODO, CHANGES, LICENSE, META6.json' { effort 20min }
+  task github 'Make github repository' { effort 10min }
+}
+
+task brain 'Brain storming, mind mapping' {
+  depends pstart
+#  duration 2y
+  account dev
+  allocate dev
+
+  task mm 'Mind mapping' { length 6m }
+  task req "Requirements" { length 6m }
+}
+
+task design 'Design' {
+  depends pstart
+#  duration 2y
+  account dev
+  allocate dev
+
+  task uml 'Drawing table' { effort 6m }
+}
+
+task scmods 'scetching modules and tests' {
+  depends pstart
+#  duration 2y
+  account dev
+  allocate dev
+}
+
+
+
+
+taskreport "Project overview" {
+  headline 'Project Library Gantt Chart'
+  columns hierarchindex, name, start, end, effort, duration, chart
+#  timeformat '%a %Y-%m-%d'
+  loadunit days
+}
