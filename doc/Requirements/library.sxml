@@ -68,9 +68,10 @@ $!d5b.article [
 
   $|sect1 [
     $|title [ Requirements ]
-#    $|para [
-#      
-#    ]
+    $|para [
+      First some specifications to define the environment and products needed to
+      run the programs.
+    ]
 
     $|itemizedlist spacing=compact [
       $|listitem [
@@ -85,10 +86,38 @@ $!d5b.article [
         $|emphasis[LIBRARY-CONFIG]. Environment variable holding the location on
         disk of the library configuration.
       ]
+      
+      $|listitem [
+        $|para [
+          $|emphasis[Database]. The data needed to save per object can be
+          diverse and varying depending on its type. Sometime there are only a
+          few field on other times a lot of extra fields are added, also which
+          have different field names. A choice is made on this phenomenon to use
+          a document based NoSQL database MongoDB. While developing, a
+          standalone server is setup but can later become a replica server on
+          serveral machines.
+        ]
+        
+        $|para [
+          An important aspect of data are its relations there might exist
+          between objects. Here things like Rdf and Tupple comes into play. To
+          describe those in a database another NoSQL typed database should be
+          used also. An example of this Neo4j which is a network database.
+        ]
+      ]
     ]
 
     $|sect2 [
       $|title [ General specifications of any object ]
+      $|para [
+        Objects found anywhere are only descibed in this system. Its content
+        will never be stored. Every object should always have a type. Some can
+        be automatically assigned e.g. for files and directories. Others need
+        help from the user of the system. E.g. a project description is not an
+        object found on disk but is mostly a group of files together with
+        other objects such as a server, websites or devices. 
+      ]
+
       $|itemizedlist spacing=compact [
         $|listitem [
           $|para [
