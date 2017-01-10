@@ -14,6 +14,9 @@
   "provides": {
     "Library":                        "lib/Library.pm6",
     "Library::Configuration":         "lib/Library/Configuration.pm6",
+    "Library::Database":              "lib/Library/Database",
+    "Library::Metadata::Database":    "lib/Library/Metadata/Database",
+
     "Library::File-metadata-manager": "lib/Library/File-metadata-manager.pm6"
   },
   "source-url":                       "git://github.com/MARTIMM/Library.git"
