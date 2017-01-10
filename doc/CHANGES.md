@@ -3,6 +3,7 @@
 0.4.0
   * Rewrite of Library::Configuration
   * Rewrite of Library
+  * Rewrite of Library::Metadata::Database
   * tests
 0.3.0
   * Added keyword processing to store-file-metadata.pl6 and

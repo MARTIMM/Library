@@ -4,7 +4,7 @@
   ],
   "description":                      "Metadata library",
   "name":                             "Library",
-  "version":                          "0.3.0.1",
+  "version":                          "0.4.0",
   "perl":                             "6.c",
   "depends": [
     "Config::TOML",
