@@ -1,0 +1,11 @@
+@startuml
+
+Library
+
+Library::Configuration
+
+Library::Database
+
+Library::Metadata::Database
+
+@enduml

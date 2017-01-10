@@ -2,10 +2,11 @@ project Library "Meta data library and external sources store" '0.3.0.1' 2015-02
 
   now 2015-06-26
   timeformat "%Y-%m-%d"
+  timezone "Europe/Amsterdam"
   currency "EUR"
 }
 
-# one mans team, so holidays of me only and globally defined
+# one mans team, so my holidays only and globally defined
 copyright "© 2015, 2016 ... Inf Marcel Timmerman"
 rate 1.0
 vacation "Holiday" 2016-12-18 - 2016-12-25
@@ -31,9 +32,9 @@ task pstart 'Project start' {
   account dev
   allocate dev
 
-  task setup 'Setup directories' { effort 10min }
-  task docs 'Primary documents: README, TODO, CHANGES, LICENSE, META6.json' { effort 20min }
-  task github 'Make github repository' { effort 10min }
+  task setup 'Setup directories' { effort 10min complete 100 }
+  task docs 'Primary documents: README, TODO, CHANGES, LICENSE, META6.json' { effort 20min complete 100 }
+  task github 'Make github repository' { effort 10min complete 100 }
 }
 
 task brain 'Brain storming, mind mapping' {
@@ -65,9 +66,12 @@ task scmods 'scetching modules and tests' {
 
 
 
-taskreport "Project overview" {
+taskreport rep1 "Overview.html" {
+  formats html
   headline 'Project Library Gantt Chart'
-  columns hierarchindex, name, start, end, effort, duration, chart
+#  columns hierarchindex, name, start, end, effort, duration, chart
+  columns name, start, end, daily
 #  timeformat '%a %Y-%m-%d'
   loadunit days
+  hideresource 0
 }
