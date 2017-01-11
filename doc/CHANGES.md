@@ -1,9 +1,10 @@
 ## Release notes
 
 0.4.0
-  * Rewrite of Library::Configuration
-  * Rewrite of Library
-  * Rewrite of Library::Metadata::Database
+  * Rewrite of Library::Configuration.
+  * Rewrite of Library.
+  * Add Library::Database role. Does the common operations like insert, update, delete and drop.
+  * Rewrite of Library::Metadata::Database. It is class which does the role Library::Database. Controls a specific database and collection for the operations and adds fields to documents depending on object type.
   * tests
 0.3.0
   * Added keyword processing to store-file-metadata.pl6 and

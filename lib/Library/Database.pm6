@@ -41,8 +41,13 @@ role Database {
   }
 
   #-----------------------------------------------------------------------------
-  method update ( $found_document, $modifications ) {
+  method update ( Array $updates --> BSON::Document ) {
 
+    $!database.run-command: (
+      update => $!collection.name,
+      updates => $updates,
+      ordered => True,
+    );
   }
 
   #-----------------------------------------------------------------------------

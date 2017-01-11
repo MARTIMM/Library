@@ -99,8 +99,18 @@ subtest 'Metadata database', {
       location => '/home/marcel/Languages/Perl6/Projects/Semi-xml'
     ),
   ];
-
   is $doc<ok>, 1, 'insert ok';
+
+
+  # update data
+  $doc = $meta.update: [ (
+      q => (object-name => 'Semi-xml',),
+      u => ('$set' => (f1 => 'v1',),),
+      upsert => True,
+    ),
+  ];
+  say $doc.perl;
+  is $doc<ok>, 1, 'update ok';
 
 
   # find document use all parameters of MongoDB::Collection.find()
@@ -113,14 +123,13 @@ subtest 'Metadata database', {
     is $document<object-type>, 'Project', 'object-type found';
   }
 
+
   # delete documents
   $doc = $meta.delete: [
     (q => ( object-name => 'Library',), limit => 1),
 #    (q => ( object-type => 'Project',), limit => 0),
 #    (q => ( location => '/home/marcel/Languages/Perl6/Projects/Library',), limit => 0),
   ];
-
-  say $doc.perl;
   is $doc<ok>, 1, 'delete ok';
 }
 
