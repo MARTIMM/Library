@@ -7,6 +7,8 @@ use MongoDB::Client;
 use Library::Configuration;
 
 #-------------------------------------------------------------------------------
+enum ObjectType is export <OT-File>;
+
 our $lib-cfg is export;
 our $client is export;
 
