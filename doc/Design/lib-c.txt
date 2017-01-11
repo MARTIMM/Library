@@ -14,7 +14,7 @@ package "Metadata library " #FFFFFF {
   class L as "Library" << (P,#FF8800) package >> {
     our Library::Configuration $lib-cfg
     our MongoDB::Client $client
-    
+
     initialize-library( Str :$library-config )
   }
 
@@ -31,7 +31,7 @@ package "Metadata library " #FFFFFF {
   class LD as "Library::Database" {
     has MongoDB::Database $!database;
     has MongoDB::Collection $!collection handles <find>;
-  
+
     method init ( Str:D :$database-key!, Str:D :$collection-key! )
     method insert ( Array $documents --> BSON::Document )
     method delete ( Array $deletes --> BSON::Document )
