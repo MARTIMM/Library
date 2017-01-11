@@ -1,11 +1,55 @@
 @startuml
 
-Library
 
-Library::Configuration
+package "MongoDB driver" #AAAAAA {
+'  set namespaceSeparator ::
+  class MC as "MongoDB::Client"
+  class MDB as "MongoDB::Database"
+  class MCL as "MongoDB::Collection"
+}
 
-Library::Database
 
-Library::Metadata::Database
+package "Metadata library " #FFFFFF {
+
+  class L as "Library" << (P,#FF8800) package >> {
+    our Library::Configuration $lib-cfg
+    our MongoDB::Client $client
+    
+    initialize-library( Str :$library-config )
+  }
+
+  class LC as "Library::Configuration" {
+    has Str $!config-filename
+    has Hash $.config
+
+    submethod BUILD ( Str :$library-config )
+    method save ( )
+
+    method !check-config ( )
+  }
+
+  class LD as "Library::Database" {
+    has MongoDB::Database $!database;
+    has MongoDB::Collection $!collection handles <find>;
+  
+    method init ( Str:D :$database-key!, Str:D :$collection-key! )
+    method insert ( Array $documents --> BSON::Document )
+    method delete ( Array $deletes --> BSON::Document )
+    method drop-database ( --> BSON::Document )
+  }
+
+  class LMD as "Library::Metadata::Database" {
+    submethod BUILD ( )
+  }
+
+  MC --o L
+  LC --* L
+
+  L --* LD
+  MDB --o LD
+  MCL --o LD
+
+  LD <|-- LMD
+}
 
 @enduml
