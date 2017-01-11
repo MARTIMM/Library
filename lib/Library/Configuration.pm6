@@ -39,12 +39,7 @@ class Configuration {
 
     $!config-filename = $file;
     self!check-config;
-  }
 
-  #-----------------------------------------------------------------------------
-  submethod DESTROY ( ) {
-
-    spurt( $!config-filename, to-toml($!config));
   }
 
   #-----------------------------------------------------------------------------
