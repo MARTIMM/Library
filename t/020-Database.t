@@ -1,10 +1,8 @@
 use v6;
-use Data::Dump::Tree;
 use Test;
 
 use Library;
 use Library::Database;
-use Library::Metadata::Database;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
@@ -64,15 +62,10 @@ subtest 'Database', {
 
   say $doc.perl;
   is $doc<ok>, 1, 'database dropped ok';
-}
 
-#-------------------------------------------------------------------------------
-subtest 'Metadata database', {
 
-  # setup config directory
-  mkdir 't/Lib4', 0o700 unless 't/Lib4'.IO ~~ :d;
-  %*ENV<LIBRARY-CONFIG> = 't/Lib4';
-  my Str $filename = 't/Lib4/config.toml';
+
+  # setup another config
   spurt( $filename, Q:to/EOCFG/);
 
     # MongoDB server connection
@@ -87,8 +80,10 @@ subtest 'Metadata database', {
 
   initialize-library();
 
+  # instantiate
+  my Mdb $eta .= new;
+
   # insert a document
-  my Library::Metadata::Database $meta .= new;
   my BSON::Document $doc = $meta.insert: [ (
       object-name => 'Library',
       object-type => 'Project',
