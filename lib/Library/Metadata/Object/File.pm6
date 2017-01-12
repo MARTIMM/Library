@@ -20,23 +20,26 @@ class Metadata::Object::File {
 
     my Str $path = $object.IO.abspath;
     my Str $file = $object.IO.basename;
+    my Str $extension = $object.IO.extension;
     $path ~~ s/ '/'? $file //;
 
     my Proc $p;
-    my @lines = ();
+    my Str $sha-content = '';
     if $object.IO ~~ :r {
       $p = run 'sha1sum', $object, :out;
-      @lines = $p.out.lines;
+      $sha-content = [~] $p.out.lines;
+      $sha-content ~~ s/ \s+ .* $//;
     }
 
     $!d<object-name> = $file;
+    $!d<object-extension> = $extension;
     $!d<object-path> = $path;
     $!d<object-type> = $type;
     $!d<object-exists> = $object.IO ~~ :r;
 
     $!d<file-sha1> = self!sha1($file);
     $!d<path-sha1> = self!sha1($path);
-    $!d<content-sha1> = [~] @lines;
+    $!d<content-sha1> = $sha-content if ?$sha-content;
   }
 
   #-----------------------------------------------------------------------------

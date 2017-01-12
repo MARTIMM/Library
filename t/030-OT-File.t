@@ -11,10 +11,23 @@ subtest 'OT File', {
   my Library::Metadata::Object::File $f;
   
   $f .= new( :object<t/030-OT-File.t>, :type(OT-File));
-  say $f.meta.perl;
+  my BSON::Document $d = $f.meta;
+  is $d<object-name>, '030-OT-File.t', $d<object-name>;
+  is $d<object-extension>, 't', $d<object-extension>;
+  like $d<object-path>, /:s t $/, $d<object-path>;
+  ok $d<object-exists>, 'object exists';
+  ok $d<content-sha1>, 'sha calculated on content';
+
+#  say $d.perl;
 
   $f .= new( :object<t/other-file.t>, :type(OT-File));
-  say $f.meta.perl;
+  $d = $f.meta;
+  is $d<object-name>, 'other-file.t', $d<object-name>;
+  like $d<object-path>, /:s t $/, $d<object-path>;
+  ok !$d<object-exists>, 'object does not exist';
+  ok !$d<content-sha1>, 'no sha on content';
+
+#  say $d.perl;
 }
 
 #-------------------------------------------------------------------------------
