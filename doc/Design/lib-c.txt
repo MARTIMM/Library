@@ -6,6 +6,9 @@ package "MongoDB driver" #AAAAAA {
   class MC as "MongoDB::Client"
   class MDB as "MongoDB::Database"
   class MCL as "MongoDB::Collection"
+  
+  MC -[hidden]- MDB
+  MDB -[hidden]- MCL
 }
 
 
@@ -28,28 +31,53 @@ package "Metadata library " #FFFFFF {
     method !check-config ( )
   }
 
-  class LD as "Library::Database" {
-    has MongoDB::Database $!database;
-    has MongoDB::Collection $!collection handles <find>;
+  class LD as "Library::Database" << (R,#FFFF00) role >> {
+    has MongoDB::Database $!database
+    has MongoDB::Collection $!collection handles <find>
 
     method init ( Str:D :$database-key!, Str:D :$collection-key! )
     method insert ( Array $documents --> BSON::Document )
     method delete ( Array $deletes --> BSON::Document )
+    method count ( List $query --> BSON::Document )
     method drop-database ( --> BSON::Document )
   }
 
   class LMD as "Library::Metadata::Database" {
+    has Library::MetaData::Object $!meta-object
     submethod BUILD ( )
+    method update-meta( Str $object, ObjectType $type )
   }
 
-  MC --o L
+  class Obj as "Library::Metadata::Object" << (R,#FFFF00) role >> {
+    has BSON::Document $!meta-data
+
+    method meta ( )
+    method !sha1 ( Str $s --> Str )
+    method !sha1-content ( Str $object --> Str )
+  }
+
+  class OTF as "Library::Metadata::Object::File" {
+    submethod BUILD ( Str :$object, ObjectType :$type )
+  }
+
+  class OTD as "Library::Metadata::Object::Directory" {
+    submethod BUILD ( Str :$object, ObjectType :$type )
+  }
+
+
+  MC --* L
   LC --* L
 
   L --* LD
-  MDB --o LD
-  MCL --o LD
+  MDB --* LD
+  MCL --* LD
 
   LD <|-- LMD
+  
+  OTF --* LMD
+  OTD --* LMD
+  Obj <|-- OTF
+  Obj <|-- OTD
 }
 
 @enduml
