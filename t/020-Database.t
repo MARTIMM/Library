@@ -81,10 +81,10 @@ subtest 'Database', {
   initialize-library();
 
   # instantiate
-  my Mdb $eta .= new;
+  my Mdb $meta .= new;
 
   # insert a document
-  my BSON::Document $doc = $meta.insert: [ (
+  $doc = $meta.insert: [ (
       object-name => 'Library',
       object-type => 'Project',
       location => '/home/marcel/Languages/Perl6/Projects/Library'
