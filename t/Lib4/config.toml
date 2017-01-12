@@ -1,0 +1,4 @@
+database = "test"
+uri = "mongodb://localhost:27017"
+[collection]
+meta-data = "meta-data"

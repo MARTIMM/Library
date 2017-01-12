@@ -6,13 +6,16 @@ unit package Library:auth<github:MARTIMM>;
 use Library;
 use Library::Configuration;
 use Library::Database;
-use Library::MetaData::Object::File;
+use Library::Metadata::Object;
+use Library::Metadata::Object::File;
 
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
 # Class using Database role to handle specific database and collection
 class Metadata::Database does Library::Database {
+
+  has Library::Metadata::Object $!meta-object;
 
   #-----------------------------------------------------------------------------
   submethod BUILD ( ) {
@@ -28,19 +31,31 @@ class Metadata::Database does Library::Database {
   }
 
   #-----------------------------------------------------------------------------
-  method update( Str $object, ObjectType $type ) {
+  method update-meta( Str :$object, ObjectType :$type ) {
 
-    my BSON::Document $d .= new;
-
-    given $object-type {
+    given $type {
       when OT-File {
 
-        my Library::MetaData::Object::File $o .= new( :$object, :$type);
-        $d = $o.meta;
+        $!meta-object = Library::Metadata::Object::File.new( :$object, :$type);
+      }
+
+      when OT-Directory {
+
+        $!meta-object = Library::Metadata::Object::Directory.new(
+          :$object, :$type
+        );
       }
     }
 
-    callwith([$d,]);
+    my BSON::Document $meta-data = $!meta-object.meta;
+    my BSON::Document $doc = self.count(
+      ( object-name => $meta-data<object-name>,)
+    );
+
+say $doc;
+    self.insert: [$meta-data] unless $doc<n>;
+#search ?? insert !! update
+#    self.update([$!meta-object.meta,]);
   }
 }
 

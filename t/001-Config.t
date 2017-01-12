@@ -50,7 +50,7 @@ subtest 'library module init', {
 }
 
 #-------------------------------------------------------------------------------
-#cleanup
+# cleanup
 done-testing;
 
 unlink 't/Lib1/config.toml';

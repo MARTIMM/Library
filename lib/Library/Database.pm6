@@ -59,6 +59,15 @@ role Database {
   }
 
   #-----------------------------------------------------------------------------
+  method count ( List $query = () --> BSON::Document ) {
+
+    my BSON::Document $req .= new;
+    $req<count> = $!collection.name;
+    $req<query> = $query if ?$query;
+    $!database.run-command($req);
+  }
+
+  #-----------------------------------------------------------------------------
   method drop-database ( --> BSON::Document ) {
 
     $!database.run-command: (dropDatabase => 1,);

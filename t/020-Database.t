@@ -65,6 +65,7 @@ subtest 'Database', {
 
 
 
+
   # setup another config
   spurt( $filename, Q:to/EOCFG/);
 
@@ -104,7 +105,6 @@ subtest 'Database', {
       upsert => True,
     ),
   ];
-  say $doc.perl;
   is $doc<ok>, 1, 'update ok';
 
 
@@ -126,10 +126,23 @@ subtest 'Database', {
 #    (q => ( location => '/home/marcel/Languages/Perl6/Projects/Library',), limit => 0),
   ];
   is $doc<ok>, 1, 'delete ok';
+
+
+  # count all records
+  $doc = $meta.count;
+  is $doc<ok>, 1, 'count ok';
+  ok $doc<n> >= 1, 'at least 1';
+  say $doc.perl;
+
+  # count only f1 == v1 records
+  $doc = $meta.count: ( f1 => 'v1', );
+  is $doc<ok>, 1, 'count ok';
+  ok $doc<n> >= 1, 'at least 1';
+  say $doc.perl;
 }
 
 #-------------------------------------------------------------------------------
-#cleanup
+# cleanup
 done-testing;
 
 unlink 't/Lib4/config.toml';

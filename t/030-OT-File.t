@@ -9,7 +9,7 @@ use BSON::Document;
 subtest 'OT File', {
 
   my Library::Metadata::Object::File $f;
-  
+
   $f .= new( :object<t/030-OT-File.t>, :type(OT-File));
   my BSON::Document $d = $f.meta;
   is $d<object-name>, '030-OT-File.t', $d<object-name>;
@@ -31,7 +31,7 @@ subtest 'OT File', {
 }
 
 #-------------------------------------------------------------------------------
-#cleanup
+# cleanup
 done-testing;
 
 #unlink 't/Lib4/config.toml';
