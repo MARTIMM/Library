@@ -6,11 +6,12 @@ package "MongoDB driver" #AAAAAA {
   class MC as "MongoDB::Client"
   class MDB as "MongoDB::Database"
   class MCL as "MongoDB::Collection"
-  
+
   MC -[hidden]- MDB
   MDB -[hidden]- MCL
 }
 
+class Client
 
 package "Metadata library " #FFFFFF {
 
@@ -50,8 +51,9 @@ package "Metadata library " #FFFFFF {
 
   class Obj as "Library::Metadata::Object" << (R,#FFFF00) role >> {
     has BSON::Document $!meta-data
-    has $!db-object where .^name ~~ 'Library::Metadata::Database'
+    has $!dbo where  .^name ~~ 'Library::Metadata::Database'
 
+    submethod BUILD ( :$dbo, Str :$object, ObjectType :$type )
     method meta ( --> BSON::Document )
     method init-meta ( Str :$object, ObjectType :$type ) { ... }   # Abstract
     method update-meta ( ) { ... } # Abstract
@@ -60,25 +62,26 @@ package "Metadata library " #FFFFFF {
   }
 
   class OTF as "Library::Metadata::Object::File" {
-    submethod init-meta ( Str :$object, ObjectType :$type )
+    method init-meta ( Str :$object, ObjectType :$type )
     method update-meta ( )
   }
 
   class OTD as "Library::Metadata::Object::Directory" {
-    submethod init-meta ( Str :$object, ObjectType :$type )
+    method init-meta ( Str :$object, ObjectType :$type )
     method update-meta ( )
   }
 
 
-  MC --* L
+  MC <--* L
   LC --* L
 
   L --* LD
-  MDB --* LD
-  MCL --* LD
+  MDB <-right-* LD
+  MCL <-right-* LD
 
+  Client *-right-> LMD
   LD <|-- LMD
-  
+
   OTF --* LMD
   OTD --* LMD
   Obj <|-- OTF
