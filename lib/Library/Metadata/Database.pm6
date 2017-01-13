@@ -24,7 +24,7 @@ class Metadata::Database does Library::Database {
 
     $lcg.config<database> = 'Library' unless ?$lcg.config<database>;
     $lcg.config<collection><meta-data> = 'meta-data'
-      unless ?$lcg.config<meta-data>;
+      unless ?$lcg.config<collection><meta-data>;
     $lcg.save;
 
     self.init( :database-key<database>, :collection-key<meta-data>);
@@ -33,6 +33,7 @@ class Metadata::Database does Library::Database {
   #-----------------------------------------------------------------------------
   method update-meta( Str :$object, ObjectType :$type ) {
 
+    # create object and generate metadata with the arguments
     given $type {
       when OT-File {
 
@@ -47,12 +48,13 @@ class Metadata::Database does Library::Database {
           :dbo(self), :$object, :$type
         );
       }
-    
+
       default {
         die "Type $type not yet implemented";
       }
     }
-    
+
+    # modify database if needed
     $!meta-object.update-meta;
   }
 }

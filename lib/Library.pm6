@@ -1,5 +1,4 @@
 use v6.c;
-use Data::Dump::Tree;
 
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
@@ -18,7 +17,6 @@ sub initialize-library ( Str :$library-config ) is export {
 
   $lib-cfg = Nil if $lib-cfg.defined;
   $lib-cfg = Library::Configuration.new(:$library-config);
-dump $lib-cfg.config;
 
   $client.cleanup if $client.defined;
   $client = Nil;
