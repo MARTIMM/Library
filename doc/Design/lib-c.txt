@@ -50,18 +50,23 @@ package "Metadata library " #FFFFFF {
 
   class Obj as "Library::Metadata::Object" << (R,#FFFF00) role >> {
     has BSON::Document $!meta-data
+    has $!db-object where .^name ~~ 'Library::Metadata::Database'
 
-    method meta ( )
+    method meta ( --> BSON::Document )
+    method init-meta ( Str :$object, ObjectType :$type ) { ... }   # Abstract
+    method update-meta ( ) { ... } # Abstract
     method !sha1 ( Str $s --> Str )
     method !sha1-content ( Str $object --> Str )
   }
 
   class OTF as "Library::Metadata::Object::File" {
-    submethod BUILD ( Str :$object, ObjectType :$type )
+    submethod init-meta ( Str :$object, ObjectType :$type )
+    method update-meta ( )
   }
 
   class OTD as "Library::Metadata::Object::Directory" {
-    submethod BUILD ( Str :$object, ObjectType :$type )
+    submethod init-meta ( Str :$object, ObjectType :$type )
+    method update-meta ( )
   }
 
 
