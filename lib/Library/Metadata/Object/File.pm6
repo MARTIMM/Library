@@ -12,7 +12,7 @@ use BSON::Document;
 class Metadata::Object::File does Library::Metadata::Object {
 
   #-----------------------------------------------------------------------------
-  submethod init-meta ( Str :$object, ObjectType :$type ) {
+  method init-meta ( Str :$object, ObjectType :$type ) {
 
     my Str $path = $object.IO.abspath;
     my Str $file = $object.IO.basename;
@@ -42,14 +42,15 @@ class Metadata::Object::File does Library::Metadata::Object {
     if $!meta-data<exists> {
 
       $doc = $!dbo.count: ( name => $!meta-data<name>,);
+say "Count: ", $doc.perl;
       $!dbo.insert: [$!meta-data] unless $doc<n>;
-say $doc;
+say "Insert: ", $doc.perl;
     }
-    
+
     # Object does not exist. Try to find it using the 
     else {
-    
-      
+
+
     }
 
 #search ?? insert !! update

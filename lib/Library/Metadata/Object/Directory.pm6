@@ -10,7 +10,7 @@ use Library::Metadata::Object;
 class Metadata::Object::Directory does Library::Metadata::Object {
 
   #-----------------------------------------------------------------------------
-  submethod init-meta ( Str :$object, ObjectType :$type ) {
+  method init-meta ( Str :$object, ObjectType :$type ) {
 
     my Str $path = $object.IO.abspath;
     my Str $dir = $object.IO.basename;
