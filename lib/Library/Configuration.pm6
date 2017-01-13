@@ -39,7 +39,6 @@ class Configuration {
 
     $!config-filename = $file;
     self!check-config;
-
   }
 
   #-----------------------------------------------------------------------------
