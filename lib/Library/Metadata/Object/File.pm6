@@ -42,9 +42,7 @@ class Metadata::Object::File does Library::Metadata::Object {
     if $!meta-data<exists> {
 
       $doc = $!dbo.count: ( name => $!meta-data<name>,);
-say "Count: ", $doc.perl;
       $!dbo.insert: [$!meta-data] unless $doc<n>;
-say "Insert: ", $doc.perl;
     }
 
     # Object does not exist. Try to find it using the 
