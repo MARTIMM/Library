@@ -2,24 +2,29 @@
   "authors": [
     "Marcel Timmerman"
   ],
-  "description":                      "Metadata library",
-  "name":                             "Library",
-  "version":                          "0.4.0",
-  "perl":                             "6.c",
+  "description":                          "Metadata library",
+  "name":                                 "Library",
+  "version":                              "0.5.0",
+  "perl":                                 "6.c",
   "depends": [
+    "Data::Dump::Tree",
+
     "Config::TOML",
     "MongoDB",
     "BSON",
     "OpenSSL"
   ],
   "provides": {
-    "Library":                        "lib/Library.pm6",
-    "Library::Configuration":         "lib/Library/Configuration.pm6",
-    "Library::Database":              "lib/Library/Database.pm6",
-    "Library::Metadata::Database":    "lib/Library/Metadata/Database.pm6",
-    "Library::Metadata::Object::File":  "lib/Library/Metadata/Object/File.pm6",
+    "Library":                            "lib/Library.pm6",
+    "Library::Configuration":             "lib/Library/Configuration.pm6",
+    "Library::Database":                  "lib/Library/Database.pm6",
 
-    "Library::File-metadata-manager": "lib/Library/File-metadata-manager.pm6"
+    "Library::Metadata::Database":        "lib/Library/Metadata/Database.pm6",
+    "Library::Metadata::Object":          "lib/Library/Metadata/Object.pm6",
+    "Library::Metadata::Object::Directory":    "lib/Library/Metadata/Object/Directory.pm6",
+    "Library::Metadata::Object::File":    "lib/Library/Metadata/Object/File.pm6",
+
+    "Library::File-metadata-manager":     "lib/Library/File-metadata-manager.pm6"
   },
-  "source-url":                       "git://github.com/MARTIMM/Library.git"
+  "source-url":                           "git://github.com/MARTIMM/Library.git"
 }

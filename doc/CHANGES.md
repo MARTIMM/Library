@@ -1,5 +1,7 @@
 ## Release notes
 
+0.5.0
+  * Added Object, Object-file, Object-directory
 0.4.0
   * Rewrite of Library::Configuration.
   * Rewrite of Library.

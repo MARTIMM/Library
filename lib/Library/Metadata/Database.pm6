@@ -9,7 +9,7 @@ use Library::Database;
 use Library::Metadata::Object;
 use Library::Metadata::Object::File;
 
-use BSON::Document;
+#use BSON::Document;
 
 #-------------------------------------------------------------------------------
 # Class using Database role to handle specific database and collection
@@ -36,26 +36,24 @@ class Metadata::Database does Library::Database {
     given $type {
       when OT-File {
 
-        $!meta-object = Library::Metadata::Object::File.new( :$object, :$type);
+        $!meta-object = Library::Metadata::Object::File.new(
+          :dbo(self), :$object, :$type
+        );
       }
 
       when OT-Directory {
 
         $!meta-object = Library::Metadata::Object::Directory.new(
-          :$object, :$type
+          :dbo(self), :$object, :$type
         );
       }
+    
+      default {
+        die "Type $type not yet implemented";
+      }
     }
-
-    my BSON::Document $meta-data = $!meta-object.meta;
-    my BSON::Document $doc = self.count(
-      ( object-name => $meta-data<object-name>,)
-    );
-
-say $doc;
-    self.insert: [$meta-data] unless $doc<n>;
-#search ?? insert !! update
-#    self.update([$!meta-object.meta,]);
+    
+    $!meta-object.update-meta;
   }
 }
 
