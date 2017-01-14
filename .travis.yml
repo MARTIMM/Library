@@ -8,11 +8,15 @@ perl6:
   - latest
 
 install:
+  - sh $TRAVIS_BUILD_DIR/Travis-ci/install-mongodb.sh 3.2.9
+
   - rakudobrew build-panda ${TRAVIS_PERL6_VERSION#latest}
-#  - panda installdeps .
   - panda update
-  - panda --notests install Config::DataLang::Refine
+
+  - panda --notests install Data::Dump::Tree
+  - panda --notests install Config::TOML
   - panda --notests install MongoDB
+  - panda installdeps .
 
 cache:
   directories:
