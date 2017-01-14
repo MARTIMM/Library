@@ -31,7 +31,10 @@ class Metadata::Database does Library::Database {
   }
 
   #-----------------------------------------------------------------------------
-  method update-meta( Str :$object, ObjectType :$type ) {
+  method update-meta(
+    Str :$object, ObjectType :$type
+    --> Library::Metadata::Object
+  ) {
 
     # create object and generate metadata with the arguments
     given $type {
@@ -56,6 +59,8 @@ class Metadata::Database does Library::Database {
 
     # modify database if needed
     $!meta-object.update-meta;
+
+    $!meta-object;
   }
 }
 

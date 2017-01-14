@@ -25,6 +25,8 @@ class Metadata::Object::Directory does Library::Metadata::Object {
 
     $!meta-data<directory-sha1> = self!sha1($dir);
     $!meta-data<path-sha1> = self!sha1($path);
+
+    self!add-meta;
   }
 
   #-----------------------------------------------------------------------------
