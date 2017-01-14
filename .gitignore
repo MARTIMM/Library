@@ -1,7 +1,7 @@
 .precomp
 */.precomp
 .directory
-Sandbox
+Sandbox/*
 *.html
 *.xml
 *.xsl
