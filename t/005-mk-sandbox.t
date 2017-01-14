@@ -3,6 +3,7 @@ use lib 't';
 
 use Test;
 use Test-support;
+
 use MongoDB;
 use MongoDB::Server::Control;
 
@@ -11,7 +12,7 @@ use MongoDB::Server::Control;
 #set-exception-process-level(MongoDB::Severity::Trace);
 info-message("Test $?FILE start");
 
-my MongoDB::Test-support $ts .= new;
+my Library::Test-support $ts .= new;
 
 #-------------------------------------------------------------------------------
 for $ts.server-range -> $server-number {

@@ -3,6 +3,7 @@ use lib 't';
 
 use Test;
 use Test-support;
+
 use MongoDB;
 
 #-------------------------------------------------------------------------------
@@ -10,7 +11,7 @@ use MongoDB;
 #set-exception-process-level(MongoDB::Severity::Debug);
 info-message("Test $?FILE start");
 
-my MongoDB::Test-support $ts .= new;
+my Library::Test-support $ts .= new;
 
 #-----------------------------------------------------------------------------
 #
