@@ -79,11 +79,11 @@ package "Metadata library " #FFFFFF {
   MDB <-right-* LD
   MCL <-right-* LD
 
-  Client *-right-> LMD
+  LMD <-up-* Client
   LD <|-- LMD
 
-  OTF --* LMD
-  OTD --* LMD
+  OTF <--* LMD
+  OTD <--* LMD
   Obj <|-- OTF
   Obj <|-- OTD
 }
