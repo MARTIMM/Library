@@ -22,9 +22,7 @@
     "Library::Metadata::Database":        "lib/Library/Metadata/Database.pm6",
     "Library::Metadata::Object":          "lib/Library/Metadata/Object.pm6",
     "Library::Metadata::Object::Directory":    "lib/Library/Metadata/Object/Directory.pm6",
-    "Library::Metadata::Object::File":    "lib/Library/Metadata/Object/File.pm6",
-
-    "Library::File-metadata-manager":     "lib/Library/File-metadata-manager.pm6"
+    "Library::Metadata::Object::File":    "lib/Library/Metadata/Object/File.pm6"
   },
   "source-url":                           "git://github.com/MARTIMM/Library.git"
 }
