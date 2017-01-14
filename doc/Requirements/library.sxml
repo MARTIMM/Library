@@ -1,10 +1,9 @@
-
 $!d5b.article [
   $|title [ Library Requirements Document ]
 
   $!d5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
-              city=Haarlem country=Netherlands
-              copy-year='2015, 2016 ... Inf' copy-holder='Marcel Timmerman' [
+             city=Haarlem country=Netherlands
+             copy-year='2015, 2016 ... Inf' copy-holder='Marcel Timmerman' [
 
     $|para [
       This is a small document of requirements which I think is needed for

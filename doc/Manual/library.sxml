@@ -1,37 +1,16 @@
-$|article xmlns=http://docbook.org/ns/docbook
-         xmlns:xi=http://www.w3.org/2001/XInclude
-         xmlns:xl=http://www.w3.org/1999/xlink
-         version=5.0
-         xml:lang=en [
+$d5b.article [
   $|title [ Using The Meta Library ]
-  $|info [
-    $|author [
-      $|personname [
-        $|firstname [ Marcel ]
-        $|surname [ Timmerman ]
-      ]
-      $|email [ mt1957@gmail.com ]
+
+  $!d5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
+             city=Haarlem country=Netherlands
+             copy-year='2015, 2016 ... Inf' copy-holder='Marcel Timmerman' [
+
+    $|para [
+      This document will describe the meta library modules and programs.
     ]
 
-    $|address [
-      $|city [ Haarlem ]
-      $|country [ Netherlands ]
-    ]
-
-    $|copyright [
-      $|year [ 2015, 2016 ... Inf ]
-      $|holder [ Marcel Timmerman ]
-    ]
-
-    $|date [ $!SxmlCore.date [] ]
-    $|abstract [
-      $|para [
-        This document will describe the meta library modules and programs.
-      ]
-
-      $|para [ The latest version of this document is generated on date
-        $!SxmlCore.date []
-      ]
+    $|para [
+      The latest version of this document is generated on date $!SxmlCore.date
     ]
   ]
   
