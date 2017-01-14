@@ -1,9 +1,16 @@
 use v6;
+use lib 't';
+
 use Test;
+use Test-support;
 
 use Library;
 use Library::Database;
 use BSON::Document;
+
+#-------------------------------------------------------------------------------
+my Library::Test-support $ts .= new;
+my Int $p1 = $ts.server-control.get-port-number('s1');
 
 #-------------------------------------------------------------------------------
 subtest 'Database', {
@@ -12,22 +19,18 @@ subtest 'Database', {
   mkdir 't/Lib4', 0o700 unless 't/Lib4'.IO ~~ :d;
   %*ENV<LIBRARY-CONFIG> = 't/Lib4';
   my Str $filename = 't/Lib4/config.toml';
-  spurt( $filename, Q:to/EOCFG/);
+  spurt( $filename, Q:qq:to/EOCFG/);
 
     # MongoDB server connection
-    uri         = 'mongodb://localhost:27017'
-
-    #database    = 'test'
-
-    [ collection ]
-    #  meta-data = 'test-meta'
+    uri         = "mongodb://localhost:$p1"
 
     EOCFG
 
   initialize-library();
 
 
-  # define class doing database work
+  # Define class doing database work. This class set database to 'xyz' and
+  # collection to 'abc'.
   class Mdb does Library::Database {
 
     submethod BUILD ( ) {
@@ -35,7 +38,7 @@ subtest 'Database', {
       my Library::Configuration $lcg := $Library::lib-cfg;
 
       $lcg.config<database> = 'xyz' unless ?$lcg.config<database>;
-      $lcg.config<collection><meta-data> = 'meta'
+      $lcg.config<collection><meta-data> = 'abc'
         unless ?$lcg.config<meta-data>;
       $lcg.save;
 
@@ -67,15 +70,10 @@ subtest 'Database', {
 
 
   # setup another config
-  spurt( $filename, Q:to/EOCFG/);
+  spurt( $filename, Q:qq:to/EOCFG/);
 
     # MongoDB server connection
-    uri         = 'mongodb://localhost:27017'
-
-    database    = 'test'
-
-    [ collection ]
-      meta-data = 'test-meta'
+    uri         = "mongodb://localhost:$p1"
 
     EOCFG
 
