@@ -16,7 +16,7 @@ role Metadata::Object {
 
   #-----------------------------------------------------------------------------
   submethod BUILD ( :$dbo, Str :$object, ObjectType :$type ) {
-say 'Build object';
+
     $!dbo = $dbo;
     $!meta-data .= new;
 
