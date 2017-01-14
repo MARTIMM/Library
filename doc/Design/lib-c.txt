@@ -46,19 +46,26 @@ package "Metadata library " #FFFFFF {
   class LMD as "Library::Metadata::Database" {
     has Library::MetaData::Object $!meta-object
     submethod BUILD ( )
-    method update-meta( Str $object, ObjectType $type )
+    method update-meta( Str $object, ObjectType $type --> Library::Metadata::Object )
   }
 
   class Obj as "Library::Metadata::Object" << (R,#FFFF00) role >> {
     has BSON::Document $!meta-data
     has $!dbo where  .^name ~~ 'Library::Metadata::Database'
 
-    submethod BUILD ( :$dbo, Str :$object, ObjectType :$type )
-    method meta ( --> BSON::Document )
     method init-meta ( Str :$object, ObjectType :$type ) { ... }   # Abstract
     method update-meta ( ) { ... } # Abstract
+
+    submethod BUILD ( :$dbo, Str :$object, ObjectType :$type )
+    method meta ( --> BSON::Document )
+    method get-user-metadata ( --> BSON::Document )
+    multi method set-user-metadata ( List:D $data --> BSON::Document )
+    multi method set-user-metadata ( BSON::Document:D $data --> BSON::Document )
+    method !update-usermeta ( --> BSON::Document )
     method !sha1 ( Str $s --> Str )
     method !sha1-content ( Str $object --> Str )
+    method !find-in-db ( List:D $query --> Bool )
+    method !add-meta ( )
   }
 
   class OTF as "Library::Metadata::Object::File" {
