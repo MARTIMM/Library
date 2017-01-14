@@ -12,6 +12,8 @@ use BSON::Document;
 class Metadata::Object::File does Library::Metadata::Object {
 
   #-----------------------------------------------------------------------------
+  # $!metadata and $!dbo are defined in Library::Metadata::Object and
+  # initialized in BUILD. BUILD calls init-meta to generated the metadata.
   method init-meta ( Str :$object, ObjectType :$type ) {
 
     my Str $path = $object.IO.abspath;
@@ -30,6 +32,9 @@ class Metadata::Object::File does Library::Metadata::Object {
     $!meta-data<file-sha1> = self!sha1($file);
     $!meta-data<path-sha1> = self!sha1($path);
     $!meta-data<content-sha1> = $sha-content if ?$sha-content;
+
+    $!meta-data<user-data> = ( keys => [], );
+    $!meta-data<user-data> = ( note => '', );
   }
 
   #-----------------------------------------------------------------------------
@@ -41,13 +46,27 @@ class Metadata::Object::File does Library::Metadata::Object {
     my BSON::Document $doc;
     if $!meta-data<exists> {
 
-      $doc = $!dbo.count: ( name => $!meta-data<name>,);
-      $!dbo.insert: [$!meta-data] unless $doc<n>;
+      # Check if it is moved from somewhere or renamed
+      # If moved it should be findable by file sha1
+
+      my Bool $by-file-sha = ? (
+        $!dbo.count: (
+          file-sha1 => $!meta-data<file-sha1>,
+        )
+      )<n>;
+
+say "Found by name: ", $by-file-sha;
+
+      # If renamed it should be findable by path sha1 but there are more files
+      # in the same directory!
+      my Bool $by-path-sha = ? ($!dbo.count: ( name => $!meta-data<name>,))<n>;
+
+      $doc = $!dbo.insert: [$!meta-data] unless $by-file-sha;
+say "insert: ", $doc.perl unless $by-file-sha;
     }
 
-    # Object does not exist. Try to find it using the 
+    # Object does not exist. Try to find it using the metadata
     else {
-
 
     }
 
