@@ -36,7 +36,7 @@ role Metadata::Object {
   #-----------------------------------------------------------------------------
   method get-user-metadata ( --> BSON::Document ) {
 
-    $!meta-data<user-data>;
+    $!meta-data<user-data> // BSON::Document.new;
   }
 
   #-----------------------------------------------------------------------------
@@ -80,6 +80,8 @@ role Metadata::Object {
   #-----------------------------------------------------------------------------
   method !sha1-content ( Str $object --> Str ) {
 
+    return '' unless $object.IO !~~ :d and $object.IO ~~ :r;
+
     my Str $sha-content = '';
 
     # If larger than 10 Mb do not suck it up but let another program work on it
@@ -97,6 +99,8 @@ role Metadata::Object {
 
       $sha-content = (sha1(slurp($object).encode)>>.fmt('%02x')).join('');
     }
+
+    $sha-content;
   }
 
   #-----------------------------------------------------------------------------
