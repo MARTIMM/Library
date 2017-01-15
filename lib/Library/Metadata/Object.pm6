@@ -60,8 +60,8 @@ role Metadata::Object {
     # store in database only if record is found
     $!dbo.update: [ (
         q => (
-          file-sha1 => $!meta-data<file-sha1>,
-          path-sha1 => $!meta-data<path-sha1>,
+          name => $!meta-data<name>,
+          path => $!meta-data<path>,
           content-sha1 => $!meta-data<content-sha1>,
         ),
 
@@ -109,6 +109,5 @@ role Metadata::Object {
   method !add-meta ( ) {
 
     $!meta-data<hostname> = qx[hostname];
-    $!meta-data<user-data> = ( note => '', );
   }
 }

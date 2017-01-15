@@ -28,9 +28,6 @@ class Metadata::Object::File does Library::Metadata::Object {
     $!meta-data<path> = $path;
     $!meta-data<type> = $type;
     $!meta-data<exists> = $object.IO ~~ :r;
-
-    $!meta-data<file-sha1> = self!sha1($file);
-    $!meta-data<path-sha1> = self!sha1($path);
     $!meta-data<content-sha1> = $sha-content if ?$sha-content;
 
     self!add-meta;
@@ -43,38 +40,40 @@ class Metadata::Object::File does Library::Metadata::Object {
     # on the existence of the file what to do.
     my BSON::Document $doc;
     if $!meta-data<exists> {
+      # Drop user data from this object to prevent overwriting
+      # existing user provided data
+      $!meta-data<user-data>:delete;
 
       # Check if it is moved from somewhere or renamed
       # If moved it should be findable by file sha1
 
       # First try to find exactly
       my Bool $found = self!find-in-db: (
-        file-sha1 => $!meta-data<file-sha1>,
-        path-sha1 => $!meta-data<path-sha1>,
+        name => $!meta-data<name>,
+        path => $!meta-data<path>,
         content-sha1 => $!meta-data<content-sha1>,
         hostname => $!meta-data<hostname>,
       );
 
-say "Found by file sha 0: ", $found;
+say "Found by file 0: ", $found;
+      # If file is found, we do not have to do anything
+      # So if not found ...
       if not $found {
 
-        # File maybe moved, so try without path-sha1
+        # File maybe moved, try without path
         $found = self!find-in-db: (
-          file-sha1 => $!meta-data<file-sha1>,
+          name => $!meta-data<name>,
           content-sha1 => $!meta-data<content-sha1>,
           hostname => $!meta-data<hostname>,
         );
 
-say "Found by file sha 1: ", $found;
+say "Found by file 1: ", $found;
         if $found {
-          # Drop user data from this generated object to prevent overwriting
-          # user provided data
-          $!meta-data<user-data>:delete;
 
           # Update the record to reflect current situation
           $!dbo.update: [ (
               q => (
-                file-sha1 => $!meta-data<file-sha1>,
+                name => $!meta-data<name>,
                 content-sha1 => $!meta-data<content-sha1>,
                 hostname => $!meta-data<hostname>,
               ),
