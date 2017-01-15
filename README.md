@@ -5,21 +5,15 @@
 
 ## Description
 
-Programs and modules to maintain a library of metadata of documents.
-
-```
-lib/Library.pm6
-lib/Library/Configuration.pm6
-lib/Library/File-metadata-manager.pm6
-
-bin/install-mimetypes.pl6
-bin/store-file-metadata.pl6
-```
+The modules help maintaining metadata about everything imaginable. But as a first goal metadata about documents on disk. The software makes use of a mongodb server where everything can be stored.
 
 ## Documentation
 
-* ./doc/Library.mm, Freemind mindmapping.
-* ./doc/Requirements/library.pdf, Setup
+* [Release notes](https://github.com/MARTIMM/Library/blob/master/doc/CHANGES.md)
+* [Todo and Bugs](https://github.com/MARTIMM/Library/blob/master/doc/TODO.md)
+
+* [Manual](https://github.com/MARTIMM/Library/blob/master/doc/Manual/library.pdf)
+* [Requirement document](https://github.com/MARTIMM/Library/blob/master/doc/Requirements/library.pdf)
 
 ## Version Perl on Moarvm
 
@@ -27,9 +21,5 @@ Latest version of perl 6 on rakudo en moarvm.
 
 ## Author
 
-  M.Timmerman
-  Github account MARTIMM
-
-## License
-
-Released under [Artistic License 2.0](http://www.perlfoundation.org/artistic_license_2_0).
+Marcel Timmerman
+Github account MARTIMM
