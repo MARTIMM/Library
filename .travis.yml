@@ -10,13 +10,19 @@ perl6:
 install:
   - sh $TRAVIS_BUILD_DIR/Travis-ci/install-mongodb.sh 3.2.9
 
-  - rakudobrew build-panda ${TRAVIS_PERL6_VERSION#latest}
-  - panda update
+#  - rakudobrew build-panda ${TRAVIS_PERL6_VERSION#latest}
+#  - panda update
 
-  - panda --notests install Data::Dump::Tree
-  - panda --notests install Config::TOML
-  - panda --notests install MongoDB
-  - panda installdeps .
+#  - panda --notests install Data::Dump::Tree
+#  - panda --notests install Config::TOML
+#  - panda --notests install MongoDB
+#  - panda installdeps .
+  - rakudobrew build zef
+  - zef update
+  - zef --/test install Data::Dump::Tree
+  - zef --/test install Config::TOML
+  - zef --/test install MongoDB
+  - zef --depsonly install .
 
 cache:
   directories:
