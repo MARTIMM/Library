@@ -8,8 +8,9 @@ use MongoDB;
 use MongoDB::Server::Control;
 
 #-------------------------------------------------------------------------------
-#set-logfile($*OUT);
-#set-exception-process-level(MongoDB::Severity::Trace);
+#drop-send-to('mongodb');
+#drop-send-to('screen');
+#add-send-to( 'screen', :to($*OUT), :level(* >= MongoDB::Loglevels::Trace));
 info-message("Test $?FILE start");
 
 my Library::Test-support $ts .= new;
@@ -24,5 +25,7 @@ for $ts.server-range -> $server-number {
 # Cleanup and close
 #
 info-message("Test $?FILE stop");
+sleep .2;
+drop-all-send-to();
 done-testing();
 exit(0);

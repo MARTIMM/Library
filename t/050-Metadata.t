@@ -12,8 +12,9 @@ use MongoDB;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
-set-logfile($*OUT);
-set-exception-process-level(MongoDB::Severity::Info);
+drop-send-to('mongodb');
+drop-send-to('screen');
+add-send-to( 'screen', :to($*OUT), :level(* >= MongoDB::Loglevels::Trace));
 info-message("Test $?FILE start");
 
 my Library::Test-support $ts .= new;
@@ -124,6 +125,8 @@ say "Doc 1: ", $doc.perl;
 
 #-------------------------------------------------------------------------------
 # cleanup
+sleep .2;
+drop-all-send-to();
 done-testing;
 
 unlink 't/Lib4/config.toml';

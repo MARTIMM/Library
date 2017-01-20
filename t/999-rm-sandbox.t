@@ -7,8 +7,9 @@ use Test-support;
 use MongoDB;
 
 #-------------------------------------------------------------------------------
-#set-logfile($*OUT);
-#set-exception-process-level(MongoDB::Severity::Debug);
+#drop-send-to('mongodb');
+#drop-send-to('screen');
+#add-send-to( 'screen', :to($*OUT), :level(* >= MongoDB::Loglevels::Trace));
 info-message("Test $?FILE start");
 
 my Library::Test-support $ts .= new;
@@ -27,5 +28,7 @@ $ts.cleanup-sandbox();
 # Cleanup and close
 #
 info-message("Test $?FILE start");
+sleep .2;
+drop-all-send-to();
 done-testing();
 exit(0);
