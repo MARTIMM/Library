@@ -4,11 +4,11 @@
   ],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.5.0.1",
+  "version":                              "0.5.1",
   "perl":                                 "6.c",
   "depends": [
     "Data::Dump::Tree",
-
+    "IO::Notification::Recursive",
     "Config::TOML",
     "MongoDB",
     "BSON",
