@@ -2,19 +2,49 @@
 
 use v6;
 
+use Library;
+use Library::Metadata::Database;
+use Library::Metadata::Object;
 
-use Library::File-metadata-manager;
+use MongoDB;
+use BSON::Document;
+use IO::Notification::Recursive;
 
 #-------------------------------------------------------------------------------
-#
-my Library::File-metadata-manager $file-meta .= new();
+drop-send-to('mongodb');
+#drop-send-to('screen');
+#add-send-to( 'screen', :to($*OUT), :level(* >= MongoDB::Loglevels::Trace));
+
+# setup config directory
+my $cfg-dir = "$*HOME/.library";
+
+mkdir $cfg-dir, 0o700 unless $cfg-dir.IO ~~ :d;
+%*ENV<LIBRARY-CONFIG> = $cfg-dir;
+my Str $cfg-file = "$cfg-dir/config.toml";
+spurt( $cfg-file, Q:qq:to/EOCFG/);
+
+  # MongoDB server connection
+  uri         = "mongodb://"
+
+  database    = 'Library'
+
+  [ collection ]
+    meta-data = 'Metadata'
+
+  EOCFG
+
+initialize-library();
+
+my Library::Metadata::Database $meta-db .= new();
 
 # Allow switches after positionals. Pinched from the panda program. Now it is
 # possible to make the sxml file executable with the path of this program.
 #
-@*ARGS = @*ARGS.grep(/^ '-'/), @*ARGS.grep(/^ <-[-]>/);
-#say @*ARGS;
+say "Args: ", @*ARGS;
+@*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
+say "MArgs: ", @*ARGS;
 
+#-------------------------------------------------------------------------------
 # Program to store metadata about files.
 #
 # --h   Help info
@@ -22,50 +52,65 @@ my Library::File-metadata-manager $file-meta .= new();
 # --r   Recursive search through directories
 #
 sub MAIN ( *@files, Bool :$r = False, Str :$k ) {
-  my Bool $recursive := $r;                     # Aliases to longer names
 
+  my Bool $recursive := $r;                     # Aliases to longer names
+  my Library::Metadata::Object $lmo;
+
+say "K: $k";
 #  my Array[Str] $keys = [$k.split(/ \s* ',' \s* /)];
-  my Array $keys = [$k.join(',').split(/ \s* ',' \s* /)];
+#  my Array $keys = [$k.join(',').split(/ \s* ',' \s* /)];
+  my Array $keys = [$k.split(/ \s* ',' \s* /)];
 
   my @files-to-process = @files;                # Copy to rw-able array.
-  my Array $sts_symbols = [<! s n u a>];        # See File-metadata-manager
 
   if !?@files-to-process.elems {
     say "No files to process";
     exit(1);
   }
 
-  while @files-to-process.shift() -> $file {    # for will not go past the
-                                                # initial number of elements
+  for @files-to-process -> $file {
+  
+#    next if $file ~~ m/^ '.' /;
 
     # Process directories
-    #
     if $file.IO ~~ :d {
-      my $directory := $file;                   # Alias to proper name
-      $file-meta.process-directory( $directory, $keys);
-      say '[', $sts_symbols[$file-meta.status], ']', " {$file.IO.absolute()}";
+
+      # Alias to proper name if dir
+      my $directory := $file;
+      $lmo = $meta-db.update-meta( :object($directory), :type(OT-Directory));
+
+      my BSON::Document $udata = $lmo.get-user-metadata;
+      $udata<keys> = $keys;
+      $lmo.set-user-metadata($udata);
+
+      info-message("Stored dir {$file.IO.absolute()}");
 
       if $recursive {
-        my @new-files = dir( $directory, :Str);
+        # only visible files
+        my @new-files = dir( $directory, :Str).grep(/^ <-[.]> /);
         @files-to-process.push(@new-files);
       }
 
       else {
-        say "Skip directory $directory";
+        info-message("Skip directory $directory"); 
       }
 
-      next;
+#      next;
     }
-    
+
     # Process plain files
-    #
     elsif $file.IO ~~ :f {
-      $file-meta.process-file( $file, $keys);
-      say '[', $sts_symbols[$file-meta.status], ']', " {$file.IO.absolute()}";
+
+      $lmo = $meta-db.update-meta( :object($file), :type(OT-File));
+
+      my BSON::Document $udata = $lmo.get-user-metadata;
+      $udata<keys> = $keys;
+      $lmo.set-user-metadata($udata);
+
+      info-message("Stored file {$file.IO.absolute()}");
     }
 
     # Ignore other type of files
-    #
     else {
       say "File $file is ignored, it is a special type of file";
     }
