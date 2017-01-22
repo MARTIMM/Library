@@ -50,7 +50,7 @@ subtest 'Metadata', {
   my BSON::Document $udata = $lmo.get-user-metadata;
   $udata<note> = 'This is a test file';
   $udata<keys> = [ < test library>];
-  $lmo.set-user-metadata($udata).perl;
+  $lmo.set-user-metadata($udata);
 
   for $mdb.find( :criteria( name => '030-OT-File.t',)) -> $doc {
 #say "Doc 0: ", $doc.perl;
@@ -73,7 +73,7 @@ subtest 'Moving files around', {
   my BSON::Document $udata = $lmo.get-user-metadata;
   $udata<note> = 'file to be manipulated';
   $udata<keys> = [< moved renamed edited>];
-  $lmo.set-user-metadata($udata).perl;
+  $lmo.set-user-metadata($udata);
 
   diag "rename $filename to 't/ghi.xyz'";
   $filename.IO.rename('t/ghi.xyz');
