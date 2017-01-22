@@ -8,7 +8,9 @@ use Library::Configuration;
 use Library::Database;
 use Library::Metadata::Object;
 use Library::Metadata::Object::File;
+use Library::Metadata::Object::Directory;
 
+use MongoDB;
 #use BSON::Document;
 
 #-------------------------------------------------------------------------------
@@ -53,7 +55,7 @@ class Metadata::Database does Library::Database {
       }
 
       default {
-        die "Type $type not yet implemented";
+        fatal-message("Type $type not yet implemented");
       }
     }
 
