@@ -11,7 +11,6 @@ use Library::Metadata::Object::File;
 use Library::Metadata::Object::Directory;
 
 use MongoDB;
-#use BSON::Document;
 
 #-------------------------------------------------------------------------------
 # Class using Database role to handle specific database and collection
@@ -25,7 +24,7 @@ class Metadata::Database does Library::Database {
     my Library::Configuration $lcg = $Library::lib-cfg;
 
     $lcg.config<database> = 'Library' unless ?$lcg.config<database>;
-    $lcg.config<collection><meta-data> = 'meta-data'
+    $lcg.config<collection><meta-data> = 'Metadata'
       unless ?$lcg.config<collection><meta-data>;
     $lcg.save;
 
@@ -60,7 +59,8 @@ class Metadata::Database does Library::Database {
     }
 
     # modify database if needed
-    $!meta-object.update-meta;
+    my $doc = $!meta-object.update-meta;
+note "L::M::D: ", $doc.perl;
 
     $!meta-object;
   }

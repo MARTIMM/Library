@@ -12,9 +12,7 @@ use MongoDB;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
-drop-send-to('mongodb');
-drop-send-to('screen');
-add-send-to( 'screen', :to($*OUT), :level(* >= MongoDB::Loglevels::Trace));
+modify-send-to( 'mongodb', :level(* >= MongoDB::Loglevels::Debug));
 info-message("Test $?FILE start");
 
 my Library::Test-support $ts .= new;
@@ -53,7 +51,7 @@ subtest 'Metadata', {
   $lmo.set-user-metadata($udata);
 
   for $mdb.find( :criteria( name => '030-OT-File.t',)) -> $doc {
-#say "Doc 0: ", $doc.perl;
+#note "Doc 0: ", $doc.perl;
     is $doc<name>, '030-OT-File.t', 'file stored';
     is $doc<user-data><note>, 'This is a test file', 'note found too';
   }
@@ -80,7 +78,7 @@ subtest 'Moving files around', {
   $filename = 't/ghi.xyz';
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
   for $mdb.find( :criteria( name => 'ghi.xyz',)) -> $doc {
-#say "Doc 1: ", $doc.perl;
+#note "Doc 0: ", $doc.perl;
     is $doc<name>, 'ghi.xyz', 'file renamed';
     is $doc<user-data><note>, 'file to be manipulated', 'note found too';
   }
@@ -90,7 +88,7 @@ subtest 'Moving files around', {
   $filename = 't/Lib4/ghi.xyz';
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
   for $mdb.find( :criteria( name => 'ghi.xyz',)) -> $doc {
-#say "Doc 1: ", $doc.perl;
+#note "Doc 1: " ~ $doc.perl;
     like $doc<path>, / 't/Lib4' /, 'file moved';
     is-deeply $doc<user-data><keys>, [< moved renamed edited>], 'keys found';
   }
@@ -99,8 +97,8 @@ subtest 'Moving files around', {
   $filename.IO.move('t/ghi.pqr');
   $filename = 't/ghi.pqr';
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
-  for $mdb.find( :criteria( name => 'ghi.xyz',)) -> $doc {
-#say "Doc 1: ", $doc.perl;
+  for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
+#note "Doc 2: " ~ $doc.perl;
     like $doc<path>, / 't/Lib4' /, 'file moved';
     is $doc<user-data><keys>[1], 'renamed', 'one key tested';
   }
@@ -108,17 +106,25 @@ subtest 'Moving files around', {
   diag "modify content of $filename";
   spurt $filename, 'en laten we vrolijk wezen';
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
-  for $mdb.find( :criteria( name => 'ghi.xyz',)) -> $doc {
-#say "Doc 1: ", $doc.perl;
+  for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
+#note "Doc 3: " ~ $doc.perl;
     like $doc<path>, / 't/Lib4' /, 'file modified';
     is $doc<user-data><keys>[0], 'moved', 'another key tested';
+  }
+
+  diag "ghi.pqr created in t/Lib4 directory with same content";
+#  spurt "t/Lib4/ghi.pqr", "weer in dir maken";
+  spurt "t/Lib4/ghi.pqr", "en laten we vrolijk wezen";
+  $lmo = $mdb.update-meta( :object("t/Lib4/ghi.pqr"), :type(OT-File));
+  for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
+note "Doc 4: " ~ $doc.perl;
+#    is $doc<exist>, False, 'exist updated';
   }
 
   diag "$filename removed";
   unlink $filename;
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
-  for $mdb.find( :criteria( name => 'ghi.xyz',)) -> $doc {
-say "Doc 1: ", $doc.perl;
+  for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
     is $doc<exist>, False, 'exist updated';
   }
 }
@@ -129,7 +135,8 @@ sleep .2;
 drop-all-send-to();
 done-testing;
 
-unlink 't/Lib4/config.toml';
-rmdir 't/Lib4';
+#unlink 't/Lib4/config.toml';
+#unlink 't/Lib4/ghi.pqr';
+#rmdir 't/Lib4';
 
 exit(0);

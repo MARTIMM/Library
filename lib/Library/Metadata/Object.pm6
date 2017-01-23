@@ -104,7 +104,12 @@ role Metadata::Object {
   }
 
   #-----------------------------------------------------------------------------
-  method !find-in-db ( List:D $query --> Bool ) {
+  multi method find-in-db ( List:D $query --> Bool ) {
+
+    ? ( $!dbo.count: ( $query ) )<n>;
+  }
+
+  multi method find-in-db ( BSON::Document:D $query --> Bool ) {
 
     ? ( $!dbo.count: ( $query ) )<n>;
   }
