@@ -13,7 +13,7 @@ use IO::Notification::Recursive;
 #-------------------------------------------------------------------------------
 drop-send-to('mongodb');
 #drop-send-to('screen');
-#add-send-to( 'screen', :to($*OUT), :level(* >= MongoDB::Loglevels::Trace));
+#add-send-to( 'screen', :to($*ERR), :level(* >= MongoDB::Loglevels::Debug));
 
 # setup config directory
 my $cfg-dir = "$*HOME/.library";
