@@ -4,7 +4,7 @@
   ],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.5.2",
+  "version":                              "0.5.2.1",
   "perl":                                 "6.c",
   "depends": [
     "Data::Dump::Tree",
