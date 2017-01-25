@@ -8,17 +8,9 @@ perl6:
   - latest
 
 install:
-  - sh $TRAVIS_BUILD_DIR/Travis-ci/install-mongodb.sh 3.2.9
+  - sh $HOMETravis-ci/install-mongodb.sh 3.2.9
+  - sh $HOME/Travis-ci/install-zef.sh
 
-#  - rakudobrew build-panda ${TRAVIS_PERL6_VERSION#latest}
-#  - panda update
-
-#  - panda --notests install Data::Dump::Tree
-#  - panda --notests install Config::TOML
-#  - panda --notests install MongoDB
-#  - panda installdeps .
-  - rakudobrew build zef
-  - zef update
   - zef --/test install Data::Dump::Tree
   - zef --/test install Config::TOML
   - zef --/test install MongoDB
@@ -26,4 +18,5 @@ install:
 
 cache:
   directories:
-    - $TRAVIS_BUILD_DIR/.rakudobrew
+    - $HOME/Travis-ci
+    - $HOME/.rakudobrew
