@@ -1,5 +1,7 @@
 ## Release notes
 
+* 0.5.2
+  * Metadata gathering for OT-Directory implemented.
 * 0.5.1
   * work on store-file-metadat.pl6
 * 0.5.0
