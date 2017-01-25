@@ -8,7 +8,7 @@ perl6:
   - latest
 
 install:
-  - sh $HOMETravis-ci/install-mongodb.sh 3.2.9
+  - sh $HOME/Travis-ci/install-mongodb.sh 3.2.9
   - sh $HOME/Travis-ci/install-zef.sh
 
   - zef --/test install Data::Dump::Tree
