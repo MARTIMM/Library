@@ -14,12 +14,18 @@ then
   git clone https://github.com/ugexe/zef.git
   cd zef
   perl6 -Ilib bin/zef install .
+  rehash
 
 else
 
+  rehash
   zef update
-  
+
 fi
 
-exit 0
+zef --/test install Data::Dump::Tree
+zef --/test install Config::TOML
+zef --/test install MongoDB
+zef --depsonly install .
 
+exit 0
