@@ -59,12 +59,30 @@ role Database {
   }
 
   #-----------------------------------------------------------------------------
-  method count ( List $query = () --> BSON::Document ) {
+  multi method count ( List $query = () --> BSON::Document ) {
 
     my BSON::Document $req .= new;
     $req<count> = $!collection.name;
     $req<query> = $query if ?$query;
     $!database.run-command($req);
+  }
+
+
+  multi method count (
+    BSON::Document $query = BSON::Document.new
+    --> BSON::Document
+  ) {
+
+    my BSON::Document $req .= new;
+    $req<count> = $!collection.name;
+    $req<query> = $query if ?$query;
+    $!database.run-command($req);
+  }
+
+  #-----------------------------------------------------------------------------
+  method drop-collection ( --> BSON::Document ) {
+
+    $!database.run-command: (drop => $!collection.name,);
   }
 
   #-----------------------------------------------------------------------------
