@@ -60,7 +60,7 @@ class Metadata::Database does Library::Database {
 
     # modify database if needed
     my $doc = $!meta-object.update-meta;
-note "L::M::D: ", $doc.perl;
+#note "L::M::D: ", $doc.perl;
 
     $!meta-object;
   }

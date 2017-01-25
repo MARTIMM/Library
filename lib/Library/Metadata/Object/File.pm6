@@ -41,190 +41,174 @@ class Metadata::Object::File does Library::Metadata::Object {
     my BSON::Document $doc .= new: (:ok(1));
     my BSON::Document $query;
 
-#    if $!meta-data<exists> {
-#      # Drop user data from this object to prevent overwriting
-#      # existing user provided data
-#      $!meta-data<user-data>:delete;
+    # If file is found in db, we do not have to do anything
+    if self.find-in-db: (
+      name => $!meta-data<name>,
+      path => $!meta-data<path>,
+      type => OT-File,
+      content-sha1 => $!meta-data<content-sha1>,
+      hostname => $!meta-data<hostname>,
+    ) {
 
-      # If file is found in db, we do not have to do anything
-      if self.find-in-db: (
-        name => $!meta-data<name>,
-        path => $!meta-data<path>,
-        type => OT-File,
-        content-sha1 => $!meta-data<content-sha1>,
-        hostname => $!meta-data<hostname>,
-      ) {
+      debug-message("$!meta-data<name> found by name, path and content, no update");
+    }
 
-        debug-message("$!meta-data<name> found by name, path and content, no update");
+    # So if not found ...
+    else {
+
+      debug-message("$!meta-data<name> not found by name, path, content");
+
+      # File maybe moved
+      $query .= new: (
+          name => $!meta-data<name>,
+          type => OT-File,
+          content-sha1 => $!meta-data<content-sha1>,
+          hostname => $!meta-data<hostname>,
+      );
+
+      if self.find-in-db($query) {
+
+        # Check first if file from this search has an existing file
+        # if so, do not modify the record.
+        my Bool $exists = False;
+        for $!dbo.find(:criteria($query)) -> $d {
+          if "$d<path>/$d<name>".IO ~~ :e {
+            $exists = True;
+            last;
+          }
+        }
+
+        unless $exists {
+          # Update the record to reflect current situation
+          $doc = $!dbo.update: [ (
+              q => $query,
+              u => ( '$set' => $!meta-data,),
+            ),
+          ];
+
+          if $doc<ok> == 1 {
+            info-message("$!meta-data<name> found -> must be moved, updated");
+          }
+
+          else {
+            error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
+          }
+        }
       }
 
-      # So if not found ...
+      # File may be renamed
+      elsif self.find-in-db($query .= new: (
+          type => OT-File,
+          path => $!meta-data<path>,
+          content-sha1 => $!meta-data<content-sha1>,
+          hostname => $!meta-data<hostname>,
+      )) {
+
+        # Check first if file from this search has an existing file
+        my Bool $exists = False;
+        for $!dbo.find(:criteria($query)) -> $d {
+          if "$d<path>/$d<name>".IO ~~ :e {
+            $exists = True;
+            last;
+          }
+        }
+
+        unless $exists {
+          # Update the record to reflect current situation
+          $doc = $!dbo.update: [ (
+              q => $query,
+              u => ( '$set' => $!meta-data,),
+            ),
+          ];
+
+          if $doc<ok> == 1 {
+            info-message("$!meta-data<name> found -> must be renamed, updated");
+          }
+
+          else {
+            error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
+          }
+        }
+      }
+
+      # File may be moved and renamed
+      elsif self.find-in-db($query .= new: (
+          type => OT-File,
+          content-sha1 => $!meta-data<content-sha1>,
+          hostname => $!meta-data<hostname>,
+      )) {
+
+        # Check first if file from this search has an existing file
+        my Bool $exists = False;
+        for $!dbo.find(:criteria($query)) -> $d {
+          if "$d<path>/$d<name>".IO ~~ :e {
+            $exists = True;
+            last;
+          }
+        }
+
+        unless $exists {
+          # Update the record to reflect current situation
+          $doc = $!dbo.update: [ (
+              q => $query,
+              u => ( '$set' => $!meta-data,),
+            ),
+          ];
+
+          if $doc<ok> == 1 {
+            info-message("$!meta-data<name> found -> must be renamed and moved, updated");
+          }
+
+          else {
+            error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
+          }
+        }
+      }
+
+      # File may be modified
+      elsif self.find-in-db($query .= new: (
+          name => $!meta-data<name>,
+          type => OT-File,
+          path => $!meta-data<path>,
+          hostname => $!meta-data<hostname>,
+      )) {
+
+        # Check first if file from this search has an existing file
+        my Bool $exists = False;
+        for $!dbo.find(:criteria($query)) -> $d {
+          if "$d<path>/$d<name>".IO ~~ :e {
+            $exists = True;
+            last;
+          }
+        }
+
+        unless $exists {
+          # Update the record to reflect current situation
+          $doc = $!dbo.update: [ (
+              q => $query,
+              u => ( '$set' => $!meta-data,),
+            ),
+          ];
+
+          if $doc<ok> == 1 {
+            info-message("$!meta-data<name> found -> must be modified or deleted, updated");
+          }
+
+          else {
+            error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
+          }
+        }
+      }
+
+      # different file
       else {
 
-        debug-message("$!meta-data<name> not found by name, path, content");
+        info-message("$!meta-data<name> not found -> must be new, updated");
 
-        # File maybe moved
-        $query .= new: (
-            name => $!meta-data<name>,
-            type => OT-File,
-            content-sha1 => $!meta-data<content-sha1>,
-            hostname => $!meta-data<hostname>,
-        );
-
-        if self.find-in-db($query) {
-
-          # Check first if file from this search has an existing file
-          # if so, do not modify the record.
-          my Bool $exists = False;
-          for $!dbo.find($query) -> $d {
-            if "$d<path>/$d<name>".IO ~~ :e {
-              $exists = True;
-              last;
-            }
-          }
-
-          unless $exists {
-            # Update the record to reflect current situation
-            $doc = $!dbo.update: [ (
-                q => $query,
-                u => ( '$set' => $!meta-data,),
-              ),
-            ];
-
-            if $doc<ok> == 1 {
-              info-message("$!meta-data<name> found -> must be moved, updated");
-            }
-
-            else {
-              error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
-            }
-          }
-        }
-
-        # File may be renamed
-        elsif self.find-in-db($query .= new: (
-            type => OT-File,
-            path => $!meta-data<path>,
-            content-sha1 => $!meta-data<content-sha1>,
-            hostname => $!meta-data<hostname>,
-        )) {
-
-          # Check first if file from this search has an existing file
-          my Bool $exists = False;
-          for $!dbo.find($query) -> $d {
-            if "$d<path>/$d<name>".IO ~~ :e {
-              $exists = True;
-              last;
-            }
-          }
-
-          unless $exists {
-            # Update the record to reflect current situation
-            $doc = $!dbo.update: [ (
-                q => $query,
-                u => ( '$set' => $!meta-data,),
-              ),
-            ];
-
-            if $doc<ok> == 1 {
-              info-message("$!meta-data<name> found -> must be renamed, updated");
-            }
-
-            else {
-              error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
-            }
-          }
-        }
-
-        # File may be moved and renamed
-        elsif self.find-in-db($query .= new: (
-            type => OT-File,
-            content-sha1 => $!meta-data<content-sha1>,
-            hostname => $!meta-data<hostname>,
-        )) {
-
-          # Check first if file from this search has an existing file
-          my Bool $exists = False;
-          for $!dbo.find($query) -> $d {
-            if "$d<path>/$d<name>".IO ~~ :e {
-              $exists = True;
-              last;
-            }
-          }
-
-          unless $exists {
-            # Update the record to reflect current situation
-            $doc = $!dbo.update: [ (
-                q => (
-                  type => OT-File,
-                  content-sha1 => $!meta-data<content-sha1>,
-                  hostname => $!meta-data<hostname>,
-                ),
-                u => ( '$set' => $!meta-data,),
-              ),
-            ];
-
-            if $doc<ok> == 1 {
-              info-message("$!meta-data<name> found -> must be renamed and moved, updated");
-            }
-
-            else {
-              error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
-            }
-          }
-        }
-
-        # File may be modified
-        elsif self.find-in-db($query .= new: (
-            name => $!meta-data<name>,
-            type => OT-File,
-            path => $!meta-data<path>,
-            hostname => $!meta-data<hostname>,
-        )) {
-
-          # Check first if file from this search has an existing file
-          my Bool $exists = False;
-          for $!dbo.find($query) -> $d {
-            if "$d<path>/$d<name>".IO ~~ :e {
-              $exists = True;
-              last;
-            }
-          }
-
-          unless $exists {
-            # Update the record to reflect current situation
-            $doc = $!dbo.update: [ (
-                q => (
-                  name => $!meta-data<name>,
-                  type => OT-File,
-                  path => $!meta-data<path>,
-                  hostname => $!meta-data<hostname>,
-                ),
-                u => ( '$set' => $!meta-data,),
-              ),
-            ];
-
-            if $doc<ok> == 1 {
-              info-message("$!meta-data<name> found -> must be modified or deleted, updated");
-            }
-
-            else {
-              error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
-            }
-          }
-        }
-
-        # different file
-        else {
-
-          info-message("$!meta-data<name> not found -> must be new, updated");
-
-          $doc = $!dbo.insert: [$!meta-data];
-        }
+        $doc = $!dbo.insert: [$!meta-data];
       }
-#    }
+    }
 
-note "M::O::F: ", $doc.perl;
     $doc;
   }
 }
