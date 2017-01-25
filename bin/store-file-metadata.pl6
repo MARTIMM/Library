@@ -11,7 +11,7 @@ use BSON::Document;
 use IO::Notification::Recursive;
 
 #-------------------------------------------------------------------------------
-drop-send-to('mongodb');
+#drop-send-to('mongodb');
 #drop-send-to('screen');
 #add-send-to( 'screen', :to($*ERR), :level(* >= MongoDB::Loglevels::Debug));
 
@@ -69,7 +69,7 @@ say "K: $k";
   }
 
   for @files-to-process -> $file {
-  
+
 #    next if $file ~~ m/^ '.' /;
 
     # Process directories
