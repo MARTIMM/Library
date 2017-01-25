@@ -94,13 +94,17 @@ subtest 'Moving files around', {
   }
 
   diag "move and rename $filename to 't/ghi.pqr'";
+  my Str $content-sha1;
   $filename.IO.move('t/ghi.pqr');
   $filename = 't/ghi.pqr';
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
   for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
 #note "Doc 2: " ~ $doc.perl;
-    like $doc<path>, / 't/Lib4' /, 'file moved';
+    next unless $doc<path> ~~ m/ 't' $/;
+
+    like $doc<path>, / '/t' /, 'file moved and renamed';
     is $doc<user-data><keys>[1], 'renamed', 'one key tested';
+    $content-sha1 = $doc<content-sha1>;
   }
 
   diag "modify content of $filename";
@@ -108,35 +112,47 @@ subtest 'Moving files around', {
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
   for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
 #note "Doc 3: " ~ $doc.perl;
-    like $doc<path>, / 't/Lib4' /, 'file modified';
+    next unless $doc<path> ~~ m/ 't' $/;
+
+    like $doc<path>, / '/t' /, 'path still the same';
     is $doc<user-data><keys>[0], 'moved', 'another key tested';
+    nok $content-sha1 ne $doc<content-sha1>, 'Content changed';
+    $content-sha1 = $doc<content-sha1>;
   }
 
   diag "ghi.pqr created in t/Lib4 directory with same content";
-#  spurt "t/Lib4/ghi.pqr", "weer in dir maken";
   spurt "t/Lib4/ghi.pqr", "en laten we vrolijk wezen";
   $lmo = $mdb.update-meta( :object("t/Lib4/ghi.pqr"), :type(OT-File));
   for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
-note "Doc 4: " ~ $doc.perl;
-#    is $doc<exist>, False, 'exist updated';
+#note "Doc 4: " ~ $doc.perl;
+    next unless $doc<path> ~~ m/ 't/Lib4' $/;
+
+    like $doc<path>, / '/t/Lib4' /, 'file created anew';
+    nok $content-sha1 eq $doc<content-sha1>, 'Content same as other file';
   }
 
   diag "$filename removed";
   unlink $filename;
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
   for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
-    is $doc<exist>, False, 'exist updated';
+    next unless $doc<path> ~~ m/ 't' $/;
+
+#note "Doc 5: " ~ $doc.perl;
+    is $doc<exists>, False, 'exists updated';
   }
+  
+ my BSON::Document $d = $mdb.drop-collection;
+ note $d.perl;
 }
 
 #-------------------------------------------------------------------------------
 # cleanup
 sleep .2;
-drop-all-send-to();
 done-testing;
 
-#unlink 't/Lib4/config.toml';
-#unlink 't/Lib4/ghi.pqr';
-#rmdir 't/Lib4';
+unlink 't/ghi.pqr';
+unlink 't/Lib4/config.toml';
+unlink 't/Lib4/ghi.pqr';
+rmdir 't/Lib4';
 
 exit(0);
