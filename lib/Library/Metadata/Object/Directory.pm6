@@ -17,7 +17,7 @@ class Metadata::Object::Directory does Library::Metadata::Object {
   # initialized in BUILD. BUILD calls init-meta to generated the metadata.
   method init-meta ( Str :$object, ObjectType :$type ) {
 
-    my Str $path = $object.IO.abspath;
+    my Str $path = $object.IO.absolute;
     my Str $dir = $object.IO.basename;
     $path ~~ s/ '/'? $dir $//;
 
