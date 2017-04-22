@@ -5,7 +5,8 @@
   "description":                          "Metadata library",
   "name":                                 "Library",
   "version":                              "0.5.2.2",
-  "perl":                                 "6.c",
+  "license":                              "Artistic-2.0",
+  "perl":                                 "6",
   "depends": [
     "Data::Dump::Tree",
     "IO::Notification::Recursive",
