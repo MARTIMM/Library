@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
@@ -54,5 +54,3 @@ class Configuration {
     self.save;
   }
 }
-
-

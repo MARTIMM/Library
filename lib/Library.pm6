@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
@@ -22,4 +22,3 @@ sub initialize-library ( Str :$library-config ) is export {
   $client = Nil;
   $client = MongoDB::Client.new(:uri($lib-cfg.config<uri>));
 }
-

@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
@@ -91,4 +91,3 @@ role Database {
     $!database.run-command: (dropDatabase => 1,);
   }
 }
-

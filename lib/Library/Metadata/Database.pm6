@@ -1,4 +1,4 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
@@ -65,4 +65,3 @@ class Metadata::Database does Library::Database {
     $!meta-object;
   }
 }
-
