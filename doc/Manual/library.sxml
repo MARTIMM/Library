@@ -1,22 +1,22 @@
-$d5b.article [
-  $|title [ Using The Meta Library ]
+$!d5b.article [
+  $title [ Using The Meta Library ]
 
   $!d5b.info firstname=Marcel surname=Timmerman email=mt1957@gmail.com
              city=Haarlem country=Netherlands
              copy-year='2015, 2016 ... Inf' copy-holder='Marcel Timmerman' [
 
-    $|para [
+    $para [
       This document will describe the meta library modules and programs.
     ]
 
-    $|para [
+    $para [
       The latest version of this document is generated on date $!SxmlCore.date
     ]
   ]
-  
-  $|sect1 [
-    $|title [Introduction]
-    $|para [
+
+  $sect1 [
+    $title [Introduction]
+    $para [
       Long ago I've started to think about how to maintain the large amount of
       documents on my system which consists of anything textual or other kinds
       of imagery like photos, films, music and books. Storing on disk you can
@@ -27,30 +27,30 @@ $d5b.article [
     ]
   ]
 
-  $|sect1 [
-    $|title [ x ]
-    $|para [
+  $sect1 [
+    $title [ x ]
+    $para [
     ]
   ]
 
-  $|sect1 [
-    $|title [ x ]
-    $|para [
+  $sect1 [
+    $title [ x ]
+    $para [
     ]
   ]
 
 
-#   $|bibliolist:
-#      $|title: Bibliography
-  $|bibliography [
-    $|biblioentry [
-      $|abbrev [MIMETYPES]
-      $|title [A list of all mimetypes]
-      $|abstract [A list of mimetypes can be found on the]
-      $|ulink url=http://www.sitepoint.com/web-foundations/mime-types-complete-list/ [
-#        $|internet []
+#   $bibliolist:
+#      $title: Bibliography
+  $bibliography [
+    $biblioentry [
+      $abbrev [MIMETYPES]
+      $title [A list of all mimetypes]
+      $abstract [A list of mimetypes can be found on the]
+      $ulink url=http://www.sitepoint.com/web-foundations/mime-types-complete-list/ [
+#        $internet []
       ]
     ]
   ]
-#   $|index:
+#   $index:
 ]
