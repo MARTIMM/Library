@@ -23,7 +23,6 @@ else
 
 fi
 
-zef --/test install Data::Dump::Tree
 zef --/test install Config::TOML
 zef --/test install MongoDB
 zef --depsonly install .

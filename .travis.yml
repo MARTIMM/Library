@@ -13,7 +13,6 @@ install:
   - rakudobrew build-zef ${TRAVIS_PERL6_VERSION#latest}
   - zef update
 
-  - zef --/test install Data::Dump::Tree
   - zef --/test install Config::TOML
   - zef --/test install MongoDB
   - zef --depsonly install .

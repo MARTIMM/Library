@@ -8,7 +8,6 @@
   "license":                              "Artistic-2.0",
   "perl":                                 "6",
   "depends": [
-    "Data::Dump::Tree",
     "IO::Notification::Recursive",
     "Config::TOML",
     "MongoDB",
