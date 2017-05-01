@@ -1,7 +1,7 @@
-use v6.c;
+use v6;
 
 #-------------------------------------------------------------------------------
-unit package Library:auth<https://github.com/MARTIMM>;
+unit package Library:auth<github:MARTIMM>;
 
 use BSON::Document;
 use MongoDB::Collection;
@@ -207,8 +207,3 @@ class Test-support {
     rmdir "Sandbox";
   }
 }
-
-
-
-
-
