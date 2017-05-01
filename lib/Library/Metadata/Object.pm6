@@ -106,6 +106,7 @@ role Metadata::Object {
   #-----------------------------------------------------------------------------
   multi method find-in-db ( List:D $query --> Bool ) {
 
+    # use n to see the number of found records 0 coerces to False, True otherwise
     ? ( $!dbo.count: ( $query ) )<n>;
   }
 
