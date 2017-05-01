@@ -11,26 +11,31 @@ use BSON::Document;
 use IO::Notification::Recursive;
 
 #-------------------------------------------------------------------------------
+# setup logging
 modify-send-to( 'screen', :level(* >= MongoDB::Loglevels::Debug));
 
 # setup config directory
-my $cfg-dir = "$*HOME/.library";
+my $cfg-dir;
+if %*ENV<LIBRARY-CONFIG>:exists and %*ENV<LIBRARY-CONFIG>.IO ~~ :d {
+  $cfg-dir = %*ENV<LIBRARY-CONFIG>;
+}
 
+else {
+  $cfg-dir = "$*HOME/.library";
+  %*ENV<LIBRARY-CONFIG> = $cfg-dir;
+}
 
 mkdir $cfg-dir, 0o700 unless $cfg-dir.IO ~~ :d;
-modify-send-to(
-  'mongodb',
-  :pipe("sort > $cfg-dir/store-file-metadata.log")
-);
+modify-send-to( 'mongodb', :pipe("sort > $cfg-dir/store-file-metadata.log"));
 
-%*ENV<LIBRARY-CONFIG> = $cfg-dir;
+# set config file if needed
 my Str $cfg-file = "$cfg-dir/config.toml";
-spurt( $cfg-file, Q:qq:to/EOCFG/);
+spurt( $cfg-file, Q:qq:to/EOCFG/) unless $cfg-file.IO ~~ :r;
 
   # MongoDB server connection
   uri         = "mongodb://"
-
   database    = 'Library'
+  recursive-scan-dirs = []
 
   [ collection ]
     meta-data = 'Metadata'
@@ -40,9 +45,8 @@ spurt( $cfg-file, Q:qq:to/EOCFG/);
 initialize-library();
 
 
-# Allow switches after positionals. Pinched from the panda program. Now it is
-# possible to make the sxml file executable with the path of this program.
-#
+# Allow switches after positionals. Pinched from the old panda program. Now it is
+# possible to make the script files executable with the path of this program.
 #say "Args: ", @*ARGS;
 @*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
 #say "MArgs: ", @*ARGS;
@@ -95,7 +99,7 @@ sub MAIN ( *@files, Bool :$r = False, Str :$k = '', Str :$dk = '' ) {
 
       else {
 
-        info-message("Skip directory $directory"); 
+        info-message("Skip directory $directory");
       }
     }
 
@@ -118,4 +122,3 @@ sub MAIN ( *@files, Bool :$r = False, Str :$k = '', Str :$dk = '' ) {
     }
   }
 }
-
