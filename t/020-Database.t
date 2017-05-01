@@ -127,7 +127,7 @@ subtest 'Database', {
 
 
   # count all records
-  $doc = $meta.count;
+  $doc = $meta.count: ();
   is $doc<ok>, 1, 'count ok';
   ok $doc<n> >= 1, 'at least 1';
   say $doc.perl;
@@ -147,4 +147,3 @@ unlink 't/Lib4/config.toml';
 rmdir 't/Lib4';
 
 exit(0);
-
