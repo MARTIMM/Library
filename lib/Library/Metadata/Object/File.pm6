@@ -50,13 +50,13 @@ class Metadata::Object::File does Library::Metadata::Object {
       hostname => $!meta-data<hostname>,
     ) {
 
-      debug-message("$!meta-data<name> found by name, path and content, no update");
+      info-message("File $!meta-data<name> found by name, path and content, no update");
     }
 
     # So if not found ...
     else {
 
-      debug-message("$!meta-data<name> not found by name, path, content");
+      info-message("File $!meta-data<name> not found by name, path, content");
 
       # File maybe moved
       $query .= new: (
