@@ -40,12 +40,12 @@ run the programs.
 Two diagrams to show how the user interacts with the system. The important points are
 * the user changes the configuration by editor or using other components of the system.
 * the system starts the gathering processes.
-* the gathering processes use the configuration to know what to search for. Then the data is examined to set default meta information and sends it to the database.
+* the gathering processes use the configuration to know what to search for. Then the data is examined to set default meta information and sends it to the database. These processes are also checking for possible changes in the file system like renamed or moved files.
 * the user is able to modify the meta data by adding keys or modify those keys.
 
 ```plantuml
 
-'title User view to the system
+title User view to the system
 
 actor user
 
@@ -54,6 +54,7 @@ file cfg as "config\nfile"
 component gather as "gather\nservices"
 component dmeta as "meta\ndefault"
 component mmeta as "meta\nmodify"
+component imeta as "meta\ninfo"
 
 database mdb as "MongoDB"
 node mdbs as "db\nserver"
@@ -68,11 +69,14 @@ gather -> dmeta
 mmeta <--> mdbs
 dmeta <-> mdbs
 
+imeta <-- mdbs
+user <-- imeta
+
 ```
 
 ```plantuml
 
-'title System view to the system
+title System view to the system
 
 actor system
 
@@ -122,19 +126,19 @@ ge <--> store
 
 ### General specifications of any object
 
-Objects found anywhere are only descibed in this system. Its content
-will never be stored. Every object should always have a type. Some can
-be automatically assigned e.g. for files and directories. Others need
-help from the user of the system. E.g. a project description is not an
-object found on disk but is mostly a group of files together with
-other objects such as a server, websites or devices.
+Objects found anywhere are only described by system. Its content will never be changed. External objects may be copied to the local system. Every object should always have a type. Some can be automatically assigned e.g. for files and directories. Others need help from the user of the system. E.g. a project description is not an object found on disk but is mostly a group of files together with other objects such as a server, websites or devices.
 
-* There are three types of information to be stored, A) automatically
-found data such as ownership, path to document and volumename in
-case of documents, B) sha1 generated numbers based on the location
-and content of the object for searching and comparing, and C)
-explicitly provided information like keywords, name and address of
-owner, project name etcetera.
+* There are three types of information to be stored
+  * Automatically found data such as ownership, path to document and volume name in case of documents
+  * Sha1 generated numbers based on the location and content of the object for searching and comparing. This can help to find e.g. a renamed file and attach the meta information already in the database. Only the general info need to be modified. Actions which could take place are
+    * Move a file from one place to another on the file system.
+    * Rename a file
+    * Rename and move in one operation
+    * Modify its contents
+    * Modify ownership or access rights
+    * Remove the file
+    * Modify URI
+  * Explicitly provided information like keywords, name and address of owner, project name etcetera.
 
 * Store, update or delete meta information in the database. This is
 for automatically retrieved or explicitly provided information.
@@ -303,6 +307,50 @@ files and directories in the database.
 ## Priorities
 
 # Design
+
+```plantuml
+
+title Overview
+
+class Client
+
+package "MongoDB driver" #AAAAAA {
+  '  set namespaceSeparator ::
+  class MC as "MongoDB::Client"
+  class MDB as "MongoDB::Database"
+  class MCL as "MongoDB::Collection"
+
+  MC -[hidden]- MDB
+  MDB -[hidden]- MCL
+}
+
+package "Metadata library " #FFFFFF {
+
+  class L as "Library" << (P,#FF8800) package >>
+  class LC as "Library::Configuration"
+  class LD as "Library::Database" << (R,#FFFF00) role >>
+  class LMD as "Library::Metadata::Database"
+  class Obj as "Library::Metadata::Object" << (R,#FFFF00) role >>
+  class OTF as "Library::Metadata::Object::File"
+  class OTD as "Library::Metadata::Object::Directory"
+
+  MC <--* L
+  LC --* L
+
+  L --* LD
+  MDB <-right-* LD
+  MCL <-right-* LD
+
+  LMD <-up-* Client
+  LD <|-- LMD
+
+  OTF <--* LMD
+  OTD <--* LMD
+  Obj <|-- OTF
+  Obj <|-- OTD
+}
+
+```
 
 ```plantuml
 
