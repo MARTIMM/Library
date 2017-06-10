@@ -312,10 +312,11 @@ files and directories in the database.
 
 title Overview
 
-class Client
+hide members
+class Client as "Client\nApplication"
 
-package "MongoDB driver" #AAAAAA {
-  '  set namespaceSeparator ::
+package MongoDB #AAAAAA {
+  'set namespaceSeparator ::
   class MC as "MongoDB::Client"
   class MDB as "MongoDB::Database"
   class MCL as "MongoDB::Collection"
@@ -324,7 +325,7 @@ package "MongoDB driver" #AAAAAA {
   MDB -[hidden]- MCL
 }
 
-package "Metadata library " #FFFFFF {
+package library #FFFFFF {
 
   class L as "Library" << (P,#FF8800) package >>
   class LC as "Library::Configuration"
@@ -341,11 +342,10 @@ package "Metadata library " #FFFFFF {
   MDB <-right-* LD
   MCL <-right-* LD
 
-  LMD <-up-* Client
-  LD <|-- LMD
+  Client *-> LMD
+  LD --|> LMD
 
-  OTF <--* LMD
-  OTD <--* LMD
+  LMD -> Obj
   Obj <|-- OTF
   Obj <|-- OTD
 }
