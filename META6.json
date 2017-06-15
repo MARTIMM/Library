@@ -1,7 +1,5 @@
 {
-  "authors": [
-    "Marcel Timmerman"
-  ],
+  "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
   "version":                              "0.5.2.2",
@@ -11,9 +9,11 @@
     "IO::Notification::Recursive",
     "Config::TOML",
     "MongoDB",
-    "BSON",
     "OpenSSL"
   ],
+  "test-depends": [ "Test::META"],
+  "build-depends": [ ],
+  "tags": [ "meta", "library", "mongodb"],
   "provides": {
     "Library":                            "lib/Library.pm6",
     "Library::Configuration":             "lib/Library/Configuration.pm6",
