@@ -331,7 +331,7 @@ package library #FFFFFF {
   class LC as "Library::Configuration"
   class LD as "Library::Database" << (R,#FFFF00) role >>
   class LMD as "Library::Metadata::Database"
-  class Obj as "Library::Metadata::Object" << (R,#FFFF00) role >>
+  class Obj as "Library::Metadata::Object"
   class OTF as "Library::Metadata::Object::File"
   class OTD as "Library::Metadata::Object::Directory"
 
@@ -342,10 +342,10 @@ package library #FFFFFF {
   MDB <-right-* LD
   MCL <-right-* LD
 
-  Client *-> LMD
-  LD --|> LMD
+  Client *-> Obj
+  LD <|-- LMD
 
-  LMD -> Obj
+  LMD <- Obj
   Obj <|-- OTF
   Obj <|-- OTD
 }
