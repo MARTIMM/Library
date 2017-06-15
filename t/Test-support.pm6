@@ -48,7 +48,7 @@ class Test-support {
           mongod = '$*CWD/Travis-ci/MongoDB/mongod'
 
         [mongod]
-          nojournal = true
+          #nojournal = true
           fork = true
           smallfiles = true
           oplogSize = 128
