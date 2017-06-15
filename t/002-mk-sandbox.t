@@ -8,24 +8,26 @@ use MongoDB;
 use MongoDB::Server::Control;
 
 #-------------------------------------------------------------------------------
-#drop-send-to('mongodb');
-#drop-send-to('screen');
-#add-send-to( 'screen', :to($*ERR), :level(* >= MongoDB::Loglevels::Trace));
+modify-send-to( 'screen', :level(* >= MongoDB::MdbLoglevels::Trace));
 info-message("Test $?FILE start");
 
 my Library::Test-support $ts .= new;
 
 #-------------------------------------------------------------------------------
 for $ts.server-range -> $server-number {
-  ok $ts.server-control.start-mongod("s$server-number"),
-     "Server $server-number started";
+  try {
+    ok $ts.server-control.start-mongod("s$server-number"),
+       "Server $server-number started";
+    CATCH {
+      when X::MongoDB {
+        like .message, /:s exited unsuccessfully /,
+             "Server 's$server-number' already started";
+      }
+    }
+  }
 }
 
 #-------------------------------------------------------------------------------
 # Cleanup and close
-#
-info-message("Test $?FILE stop");
-sleep .2;
-drop-all-send-to();
 done-testing();
 exit(0);
