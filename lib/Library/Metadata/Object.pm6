@@ -4,6 +4,7 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
+use Library::Metadata::Database;
 
 use OpenSSL::Digest;
 use BSON::Document;
@@ -12,25 +13,46 @@ use BSON::Document;
 role Metadata::Object {
 
   has BSON::Document $!meta-data;
-  has $!dbo where .^name ~~ 'Library::Metadata::Database';
+  has Library::Metadata::Database $!dbo handles <
+    insert update delete count find drop-collection drop-database
+  >;
 
   #-----------------------------------------------------------------------------
-  method init-meta ( Str :$object, ObjectType :$type ) { ... }
-  method update-meta ( ) { ... }
+  #method init-meta ( Str :$object, ObjectType :$type ) { ... }
+  #method update-meta ( ) { ... }
 
   #-----------------------------------------------------------------------------
-  submethod BUILD ( :$dbo, Str :$object, ObjectType :$type ) {
+  submethod BUILD ( ) {
 
-    $!dbo = $dbo;
     $!meta-data .= new;
-
-    self.init-meta( :$object, :$type);
+    $!dbo .= new;
   }
 
   #-----------------------------------------------------------------------------
   method meta ( --> BSON::Document ) {
 
     $!meta-data;
+  }
+
+  #-----------------------------------------------------------------------------
+  method init-meta(
+    Str :$object, ObjectType :$type
+    --> Library::Metadata::Object
+  ) {
+
+    # create object of this classes child and generate metadata
+    # with the arguments provided by the child
+    my $class-type = "Library::Metadata::Object::$type";
+    require ::($class-type);
+    my $meta-object = ::($class-type).new( :$object, :$type);
+note "XO: ", $meta-object.perl;
+
+    # modify database if needed
+    $meta-object.specific-init-meta( :$object, :$type);
+    my $doc = $meta-object.update-meta;
+note "L::M::D: ", $doc.perl;
+
+    $meta-object;
   }
 
   #-----------------------------------------------------------------------------
@@ -112,12 +134,13 @@ role Metadata::Object {
 
   multi method find-in-db ( BSON::Document:D $query --> Bool ) {
 
-    ? ( $!dbo.count: ( $query ) )<n>;
+    my BSON::Document $r = $!dbo.count: ( $query );
+    ? ($r<ok> and $r<n>);
   }
 
   #-----------------------------------------------------------------------------
   method !add-meta ( ) {
 
-    $!meta-data<hostname> = qx[hostname];
+    $!meta-data<hostname> = qx[hostname].chomp;
   }
 }

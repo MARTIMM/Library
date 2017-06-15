@@ -12,7 +12,8 @@ use MongoDB;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
-modify-send-to( 'mongodb', :level(* >= MongoDB::Loglevels::Debug));
+#modify-send-to( 'mongodb', :level(* >= MongoDB::MdbLoglevels::Debug));
+modify-send-to( 'screen', :level(* >= MongoDB::MdbLoglevels::Trace));
 info-message("Test $?FILE start");
 
 my Library::Test-support $ts .= new;
@@ -34,35 +35,41 @@ spurt( $filename, Q:qq:to/EOCFG/);
 
   EOCFG
 
+info-message("Initialize library");
 initialize-library();
 
 #-------------------------------------------------------------------------------
 subtest 'Metadata', {
 
   my $filename = 't/030-OT-File.t';
-  my Library::Metadata::Database $mdb .= new;
-  my Library::Metadata::Object $lmo = $mdb.update-meta(
+  diag "update metadata for $filename";
+  my Library::Metadata::Object $lmo .= init-meta(
     :object($filename), :type(OT-File)
   );
 
+  diag "get metadata";
   my BSON::Document $udata = $lmo.get-user-metadata;
   $udata<note> = 'This is a test file';
   $udata<keys> = [ < test library>];
+  info-message("Set user data to %$udata");
   $lmo.set-user-metadata($udata);
 
-  for $mdb.find( :criteria( name => '030-OT-File.t',)) -> $doc {
+  for $lmo.find( :criteria( name => '030-OT-File.t',)) -> $doc {
 #note "Doc 0: ", $doc.perl;
     is $doc<name>, '030-OT-File.t', 'file stored';
     is $doc<user-data><note>, 'This is a test file', 'note found too';
   }
 }
 
+done-testing;
+=finish
+
 #-------------------------------------------------------------------------------
 subtest 'Moving files around', {
 
   my $filename = 't/abc.def';
-  spurt $filename, 'hoeperdepoep zat op de stoep';
   diag "set $filename and provide content";
+  spurt $filename, 'hoeperdepoep zat op de stoep';
 
   my Library::Metadata::Database $mdb .= new;
   my Library::Metadata::Object $lmo;
@@ -84,7 +91,7 @@ subtest 'Moving files around', {
   }
 
   diag "move $filename to 't/Lib4/ghi.xyz'";
-  $filename.IO.move('t/Lib4/ghi.xyz');
+  $filename.IO.move('t/Lib4/ghi.xyz') unless $filename eq 't/Lib4/ghi.xyz';
   $filename = 't/Lib4/ghi.xyz';
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
   for $mdb.find( :criteria( name => 'ghi.xyz',)) -> $doc {
@@ -95,7 +102,7 @@ subtest 'Moving files around', {
 
   diag "move and rename $filename to 't/ghi.pqr'";
   my Str $content-sha1;
-  $filename.IO.move('t/ghi.pqr');
+  $filename.IO.move('t/ghi.pqr') unless $filename eq 't/ghi.pqr';
   $filename = 't/ghi.pqr';
   $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
   for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
@@ -140,14 +147,20 @@ subtest 'Moving files around', {
 #note "Doc 5: " ~ $doc.perl;
     is $doc<exists>, False, 'exists updated';
   }
-  
- my BSON::Document $d = $mdb.drop-collection;
- note $d.perl;
+
+  my BSON::Document $d = $mdb.drop-collection;
+  note $d.perl;
+}
+
+#-------------------------------------------------------------------------------
+CATCH {
+  default {
+    .note;
+  }
 }
 
 #-------------------------------------------------------------------------------
 # cleanup
-sleep .2;
 done-testing;
 
 unlink 't/ghi.pqr';

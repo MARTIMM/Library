@@ -7,7 +7,9 @@ use MongoDB::Client;
 use Library::Configuration;
 
 #-------------------------------------------------------------------------------
-enum ObjectType is export <OT-File OT-Directory>;
+enum ObjectType is export <<
+  :OT-File('File') :OT-Directory('Directory')
+>>;
 
 our $lib-cfg is export;
 our $client is export;
@@ -19,6 +21,5 @@ sub initialize-library ( Str :$library-config ) is export {
   $lib-cfg = Library::Configuration.new(:$library-config);
 
   $client.cleanup if $client.defined;
-  $client = Nil;
   $client = MongoDB::Client.new(:uri($lib-cfg.config<uri>));
 }
