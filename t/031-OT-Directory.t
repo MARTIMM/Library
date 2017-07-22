@@ -36,7 +36,7 @@ subtest 'OT File', {
 
   my Library::Metadata::Database $dbo .= new;
   my Library::Metadata::Object::Directory $dir;
-  
+
   $dir .= new( :$dbo, :object<lib/Library>, :type(OT-Directory));
   my BSON::Document $d = $dir.meta;
   is $d<name>, 'Library', $d<name>;

@@ -38,8 +38,7 @@ subtest 'Database', {
       my Library::Configuration $lcg := $Library::lib-cfg;
 
       $lcg.config<database> = 'xyz' unless ?$lcg.config<database>;
-      $lcg.config<collection><meta-data> = 'abc'
-        unless ?$lcg.config<meta-data>;
+      $lcg.config<collection><meta-data> = 'abc' unless ?$lcg.config<meta-data>;
       $lcg.save;
 
       self.init( :database-key<database>, :collection-key<meta-data>);
@@ -63,7 +62,7 @@ subtest 'Database', {
   # delete database
   $doc = $mdb.drop-database;
 
-  say $doc.perl;
+  diag $doc.perl;
   is $doc<ok>, 1, 'database dropped ok';
 
 
@@ -93,7 +92,9 @@ subtest 'Database', {
       location => '/home/marcel/Languages/Perl6/Projects/Semi-xml'
     ),
   ];
+  diag $doc.perl;
   is $doc<ok>, 1, 'insert ok';
+  is $doc<n>, 2, 'two docs inserted';
 
 
   # update data

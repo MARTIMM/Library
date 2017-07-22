@@ -7,15 +7,9 @@ use Test-support;
 use Library;
 use Library::Metadata::Database;
 use Library::Metadata::Object;
-
-use MongoDB;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
-#modify-send-to( 'mongodb', :level(* >= MongoDB::MdbLoglevels::Debug));
-modify-send-to( 'screen', :level(* >= MongoDB::MdbLoglevels::Trace));
-info-message("Test $?FILE start");
-
 my Library::Test-support $ts .= new;
 my Int $p1 = $ts.server-control.get-port-number('s1');
 
@@ -35,7 +29,6 @@ spurt( $filename, Q:qq:to/EOCFG/);
 
   EOCFG
 
-info-message("Initialize library");
 initialize-library();
 
 #-------------------------------------------------------------------------------
@@ -51,7 +44,6 @@ subtest 'Metadata', {
   my BSON::Document $udata = $lmo.get-user-metadata;
   $udata<note> = 'This is a test file';
   $udata<keys> = [ < test library>];
-  info-message("Set user data to %$udata");
   $lmo.set-user-metadata($udata);
 
   for $lmo.find( :criteria( name => '030-OT-File.t',)) -> $doc {
