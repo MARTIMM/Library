@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-#set -ev
+set -evx
 
 # Install mongod of specified version, unpack and create a link to the bin
 # directory: ${TRAVIS_BUILD_DIR}/Travis-ci/MongoDB
@@ -15,8 +15,13 @@ fi
 
 echo Installing MongoDB version $1
 
+if [ "${TRAVIS_BUILD_DIR}x" == "x" ]
+then
+  TRAVIS_BUILD_DIR='.'
+fi
+
 cd ${TRAVIS_BUILD_DIR}/Travis-ci
-/bin/ls -l
+#/bin/ls -l
 
 if [ ! -e mongodb-linux-x86_64-${version}.tgz ]
 then

@@ -4,13 +4,9 @@ use lib 't';
 use Test;
 use Test-support;
 
-use MongoDB;
 use MongoDB::Server::Control;
 
 #-------------------------------------------------------------------------------
-modify-send-to( 'screen', :level(* >= MongoDB::MdbLoglevels::Trace));
-info-message("Test $?FILE start");
-
 my Library::Test-support $ts .= new;
 
 #-------------------------------------------------------------------------------

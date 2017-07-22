@@ -1,21 +1,13 @@
 use v6;
-use lib 't';
+use lib 't';#, '../mongo-perl6-driver/lib';
 
 use Test;
 use Test-support;
 
-use MongoDB;
-
-#-------------------------------------------------------------------------------
-#drop-send-to('mongodb');
-#drop-send-to('screen');
-#add-send-to( 'screen', :to($*ERR), :level(* >= MongoDB::Loglevels::Trace));
-info-message("Test $?FILE start");
-
+#------------------------------------------------------------------------------
 my Library::Test-support $ts .= new;
 
-#-----------------------------------------------------------------------------
-#
+#------------------------------------------------------------------------------
 for $ts.server-range -> $server-number {
 
   try {
@@ -32,11 +24,7 @@ for $ts.server-range -> $server-number {
 
 $ts.cleanup-sandbox();
 
-#-----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Cleanup and close
-#
-info-message("Test $?FILE start");
-sleep .2;
-drop-all-send-to();
 done-testing();
 exit(0);

@@ -62,14 +62,10 @@ note "L::M::D: ", $doc.perl;
   }
 
   #-----------------------------------------------------------------------------
-  multi method set-user-metadata ( List:D $data --> BSON::Document ) {
-
-    # modify user metadata and update document
-    $!meta-data<user-data> = $data;
-    self!update-usermeta;
-  }
-
-  multi method set-user-metadata ( BSON::Document:D $data --> BSON::Document ) {
+  method set-user-metadata (
+    $data where (? $_ and $_ ~~ any(List|BSON::Document))
+    --> BSON::Document
+  ) {
 
     # modify user metadata and update document
     $!meta-data<user-data> = $data;
