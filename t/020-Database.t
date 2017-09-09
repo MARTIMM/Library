@@ -6,7 +6,14 @@ use Test-support;
 
 use Library;
 use Library::Database;
+use MongoDB;
 use BSON::Document;
+
+#------------------------------------------------------------------------------
+drop-send-to('mongodb');
+#drop-send-to('screen');
+modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
+info-message("Test $?FILE start");
 
 #-------------------------------------------------------------------------------
 my Library::Test-support $ts .= new;
@@ -131,13 +138,11 @@ subtest 'Database', {
   $doc = $meta.count: ();
   is $doc<ok>, 1, 'count ok';
   ok $doc<n> >= 1, 'at least 1';
-  say $doc.perl;
 
   # count only f1 == v1 records
   $doc = $meta.count: ( f1 => 'v1', );
   is $doc<ok>, 1, 'count ok';
   ok $doc<n> >= 1, 'at least 1';
-  say $doc.perl;
 }
 
 #-------------------------------------------------------------------------------
