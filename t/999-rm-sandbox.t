@@ -1,30 +1,13 @@
 use v6;
-use lib 't';#, '../mongo-perl6-driver/lib';
-
+use lib 't';
 use Test;
 use Test-support;
 
 #------------------------------------------------------------------------------
-my Library::Test-support $ts .= new;
-
-#------------------------------------------------------------------------------
-for $ts.server-range -> $server-number {
-
-  try {
-    ok $ts.server-control.stop-mongod('s' ~ $server-number),
-       "Server $server-number is stopped";
-    CATCH {
-      when X::MongoDB {
-        like .message, /:s exited unsuccessfully/,
-             "Server 's$server-number' already down";
-      }
-    }
-  }
+subtest 'Cleanup sandbox and server data', {
+  Library::Test-support.new.cleanup-sandbox;
+  nok "$*CWD/Sandbox".IO.d, "Sandbox deleted";
 }
 
-$ts.cleanup-sandbox();
-
 #------------------------------------------------------------------------------
-# Cleanup and close
-done-testing();
-exit(0);
+done-testing;

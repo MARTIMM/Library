@@ -9,115 +9,35 @@ use MongoDB::Collection;
 use MongoDB::Server::Control;
 use MongoDB::Client;
 
+#------------------------------------------------------------------------------
 #drop-send-to('mongodb');
 #drop-send-to('screen');
-modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Trace));
+#modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Debug));
+
 #------------------------------------------------------------------------------
 class Test-support {
-
-  # N servers needed for the tests
-  has Int $!nbr-of-servers;
-  has Range $.server-range;
 
   has MongoDB::Server::Control $.server-control;
 
   submethod BUILD ( ) {
 
-    # Init here because of need in BUILD later
-    $!nbr-of-servers = 1;
-    $!server-range = (^$!nbr-of-servers + 1);
-
-    #--------------------------------------------------------------------------
-    # If we are under the scrutany of TRAVIS then adjust the path where to
-    # find the mongod/mongos binaries
-    #
-    if ? %*ENV<TRAVIS> {
-      %*ENV<PATH> = "$*CWD/Travis-ci/MongoDB:%*ENV<PATH>";
-    }
-
-    #--------------------------------------------------------------------------
-    # Check directory Sandbox and start config file
-    #
-    unless 'Sandbox'.IO ~~ :d {
-
-      mkdir( 'Sandbox', 0o700);
-      my Int $start-portnbr = 65100;
-      my Str $config-text = Q:qq:to/EOCONFIG/;
-
-        # Configuration file for the servers in the Sandbox
-        # Settings are specifically for test situations and not for deployment
-        # situations!
-        #
-        [Binaries]
-          mongod = '$*CWD/Travis-ci/MongoDB/mongod'
-
-        [mongod]
-          #nojournal = true
-          fork = true
-          smallfiles = true
-          oplogSize = 128
-          #ipv6 = true
-          #quiet = true
-          #verbose = '=command=v =nework=v'
-          verbose = 'vv'
-          logappend = true
-
-        EOCONFIG
-
-
-      #------------------------------------------------------------------------
-      for @$!server-range -> Int $server-number {
-
-        my Str $server-dir = "Sandbox/Server$server-number";
-        mkdir( $server-dir, 0o700) unless $server-dir.IO ~~ :d;
-        mkdir( "$server-dir/m.data", 0o700) unless "$server-dir/m.data".IO ~~ :d;
-
-        my Int $port-number = self!find-next-free-port($start-portnbr);
-        $start-portnbr = $port-number + 1;
-
-        # Save portnumber for later tests
-        #
-        spurt "$server-dir/port-number", $port-number;
-
-        $config-text ~= Q:qq:to/EOCONFIG/;
-
-          # Configuration for Server $server-number
-          #
-          [mongod.s$server-number]
-            logpath = '$*CWD/$server-dir/m.log'
-            pidfilepath = '$*CWD/$server-dir/m.pid'
-            dbpath = '$*CWD/$server-dir/m.data'
-            port = $port-number
-
-          EOCONFIG
-      }
-
-      my Str $file = 'Sandbox/config.toml';
-      spurt( $file, $config-text);
-    }
-
-#    $!server-control .= new(:file<Sandbox/config.toml>);
+    # initialize Control object with config
     $!server-control .= new(
       :locations(['Sandbox',]),
       :config-name<config.toml>
-    );
-#    say "SC: ", $!server-control.perl, ", Def: ", $!server-control.defined;
+    ) if 'Sandbox'.IO ~~ :d;
   }
 
   #----------------------------------------------------------------------------
   # Get a connection.
-  #
-  method get-connection ( Int :$server = 1 --> MongoDB::Client ) {
+  method get-connection ( Str:D :$server-key! --> MongoDB::Client ) {
 
-    $server = 1 unless $server ~~ any $!server-range;
-
-    my Int $port-number = $!server-control.get-port-number("s$server");
-    MongoDB::Client.new(:uri("mongodb://localhost:$port-number"));
+    my Int $port-number = $!server-control.get-port-number($server-key);
+    MongoDB::Client.new(:uri("mongodb://localhost:$port-number"))
   }
 
   #----------------------------------------------------------------------------
   # Search and show content of documents
-  #
   method show-documents (
     MongoDB::Collection $collection,
     BSON::Document $criteria,
@@ -184,7 +104,148 @@ class Test-support {
       }
     }
 
-    $port-number;
+    $port-number
+  }
+
+  #----------------------------------------------------------------------------
+  multi method serverkeys ( Str $serverkeys is copy ) {
+
+    %*ENV<SERVERKEYS> = $serverkeys // 's1';
+  }
+
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi method serverkeys ( --> List ) {
+
+    my $l = ();
+    $l = %*ENV<SERVERKEYS>.split(',').List
+      if %*ENV<SERVERKEYS>:exists and ?%*ENV<SERVERKEYS>;
+
+    $l ?? $l !! ('s1',)
+  }
+
+  #----------------------------------------------------------------------------
+  method create-clients ( --> Hash ) {
+
+    my Hash $h = {};
+    for @(self.serverkeys) -> $skey {
+      $h{$skey} = self.get-connection(:server-key($skey));
+    }
+
+    # if %*ENV<SERVERKEYS> is not set then take default server s1
+    $h ?? $h !! %( s1 => self.get-connection(:server-key<s1>) )
+  }
+
+  #----------------------------------------------------------------------------
+  method create-sandbox ( ) {
+
+    # if we are under the scrutany of TRAVIS then adjust the path where to find the
+    # mongod/mongos binaries
+#    if ? %*ENV<TRAVIS> {
+#      %*ENV<PATH> = "$*CWD/t/Travis-ci/MongoDB:%*ENV<PATH>";
+#    }
+
+    mkdir( 'Sandbox', 0o700);
+    my Int $start-portnbr = 65010;
+    my Str $config-text = Q:qq:to/EOCONFIG/;
+
+    # Configuration file for the servers in the Sandbox
+    # Settings are specifically for test situations and not for deployment
+    # situations!
+    [ account ]
+      user = 'test_user'
+      pwd = 'T3st-Us3r'
+
+    [ binaries ]
+      mongod = '$*CWD/t/Travis-ci/3.2.9/mongod'
+      mongos = '$*CWD/t/Travis-ci/3.2.9/mongos'
+
+    [ mongod ]
+      nojournal = true
+      fork = true
+      smallfiles = true
+      oplogSize = 128
+      #ipv6 = true
+      #quiet = true
+      #verbose = '=command=v =nework=v'
+      verbose = 'vv'
+      logappend = true
+
+    EOCONFIG
+
+    # setup non-default values for the servers
+    my Hash $server-setup = {
+      # in this setup there is always a server s1 because defaults in other
+      # methods can be set to 's1'. Furthermore, keep server keys simple because
+      # of sorting in some of the test programs. E.g. s1, s2, s3 etc.
+      s1 => {
+        authenticate => True,
+        account => {
+          user => 'Dondersteen',
+          pwd => 'w@tD8jeDan',
+        },
+      },
+    };
+
+    for $server-setup.keys -> Str $skey {
+
+      my Str $server-dir = "$*CWD/Sandbox/Server-$skey";
+      mkdir( $server-dir, 0o700) unless $server-dir.IO ~~ :d;
+      mkdir( "$server-dir/m.data", 0o700) unless "$server-dir/m.data".IO ~~ :d;
+
+      my Int $port-number = self!find-next-free-port($start-portnbr);
+      $start-portnbr = $port-number + 1;
+
+      $config-text ~= Q:qq:to/EOCONFIG/;
+
+      # Configuration for Server $skey
+      [ mongod.$skey ]
+        logpath = '$server-dir/m.log'
+        pidfilepath = '$server-dir/m.pid'
+        dbpath = '$server-dir/m.data'
+        port = $port-number
+      EOCONFIG
+
+
+      for $server-setup{$skey}<replicas>.keys -> $rkey {
+        $config-text ~= Q:qq:to/EOCONFIG/;
+
+        [ mongod.$skey.$rkey ]
+          replSet = '$server-setup{$skey}<replicas>{$rkey}'
+        EOCONFIG
+      }
+
+      if $server-setup{$skey}<authenticate> {
+        $config-text ~= Q:qq:to/EOCONFIG/;
+
+        [ mongod.$skey.authenticate ]
+          auth = true
+        EOCONFIG
+      }
+
+      if $server-setup{$skey}<account>:exists {
+        $config-text ~= Q:qq:to/EOCONFIG/;
+
+        [ account.$skey ]
+          user = '$server-setup{$skey}<account><user>'
+          pwd = '$server-setup{$skey}<account><pwd>'
+        EOCONFIG
+      }
+
+      if $server-setup{$skey}<server-version> {
+        $config-text ~= Q:qq:to/EOCONFIG/;
+
+        [ binaries.$skey ]
+          mongod = '$*CWD/t/Travis-ci/{$server-setup{$skey}<server-version>}/mongod'
+          mongos = '$*CWD/t/Travis-ci/{$server-setup{$skey}<server-version>}/mongos'
+        EOCONFIG
+      }
+    } # for $server-setup.keys -> Str $skey
+
+    my Str $file = 'Sandbox/config.toml';
+    spurt( $file, $config-text);
+
+note "Current dir: $*CWD";
+note "Server config:\n$config-text";
   }
 
   #----------------------------------------------------------------------------
