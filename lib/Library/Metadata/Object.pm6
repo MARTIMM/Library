@@ -7,6 +7,7 @@ use Library;
 use Library::Metadata::Database;
 
 use OpenSSL::Digest;
+use MongoDB;
 use BSON::Document;
 
 #------------------------------------------------------------------------------
