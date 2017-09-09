@@ -9,3 +9,4 @@ Sandbox/*
 spellTmp*
 Old/*
 ~*
+t/Travis-ci/*.tgz
