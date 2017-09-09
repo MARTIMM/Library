@@ -7,7 +7,14 @@ use Test-support;
 use Library;
 use Library::Metadata::Database;
 use Library::Metadata::Object::Directory;
+use MongoDB;
 use BSON::Document;
+
+#------------------------------------------------------------------------------
+drop-send-to('mongodb');
+#drop-send-to('screen');
+modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
+info-message("Test $?FILE start");
 
 #-------------------------------------------------------------------------------
 my Library::Test-support $ts .= new;
@@ -37,21 +44,20 @@ subtest 'OT File', {
   my Library::Metadata::Database $dbo .= new;
   my Library::Metadata::Object::Directory $dir;
 
-  $dir .= new( :$dbo, :object<lib/Library>, :type(OT-Directory));
+  $dir .= new( :$dbo, :object<t/Lib4>, :type(OT-Directory));
   my BSON::Document $d = $dir.meta;
-  is $d<name>, 'Library', $d<name>;
-  like $d<path>, /:s lib $/, $d<path>;
+  diag $d.perl;
+  is $d<name>, 'Lib4', $d<name>;
+  like $d<path>, /:s t $/, $d<path>;
   ok $d<exists>, 'object exists';
 
-  say $d.perl;
 
-  $dir .= new( :$dbo, :object<lib/Library/no-dir>, :type(OT-Directory));
+  $dir .= new( :$dbo, :object<t/Lib4/no-dir>, :type(OT-Directory));
   $d = $dir.meta;
+  diag $d.perl;
   is $d<name>, 'no-dir', $d<name>;
-  like $d<path>, /:s Library $/, $d<path>;
+  like $d<path>, /:s t\/Lib4 $/, $d<path>;
   ok !$d<exists>, 'object does not exist';
-
-  say $d.perl;
 }
 
 #-------------------------------------------------------------------------------
