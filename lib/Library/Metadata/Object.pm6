@@ -44,19 +44,19 @@ role Metadata::Object {
     $!meta-data .= new;
     self.specific-init-meta( :$object, :$type);
     self!add-global-meta;
-    self.update-meta;
+    self.update-meta
   }
 
   #----------------------------------------------------------------------------
   method meta ( --> BSON::Document ) {
 
-    $!meta-data;
+    $!meta-data
   }
 
   #----------------------------------------------------------------------------
   method get-user-metadata ( --> BSON::Document ) {
 
-    $!meta-data<user-data> // BSON::Document.new;
+    $!meta-data<user-data> // BSON::Document.new
   }
 
   #----------------------------------------------------------------------------
@@ -67,7 +67,7 @@ role Metadata::Object {
 
     # modify user metadata and update document
     $!meta-data<user-data> = $data;
-    self!update-usermeta;
+    self!update-usermeta
   }
 
   #----------------------------------------------------------------------------
@@ -84,13 +84,13 @@ role Metadata::Object {
         u => ( '$set' => ( user-data => $!meta-data<user-data>,),),
         upsert => False,
       ),
-    ];
+    ]
   }
 
   #----------------------------------------------------------------------------
   method !sha1 ( Str $s --> Str ) {
 
-    (sha1( $s.encode)>>.fmt('%02x')).join('');
+    (sha1( $s.encode)>>.fmt('%02x')).join('')
   }
 
   #----------------------------------------------------------------------------
@@ -116,14 +116,14 @@ role Metadata::Object {
       $sha-content = (sha1(slurp($object).encode)>>.fmt('%02x')).join('');
     }
 
-    $sha-content;
+    $sha-content
   }
 
   #----------------------------------------------------------------------------
   method is-in-db ( List:D $query --> Bool ) {
 
     # use n to see the number of found records. 0 coerces to False, True otherwise
-    ? ( $!dbo.count: ( $query ) )<n>;
+    ? ( $!dbo.count: ( $query ) )<n>
   }
 
   #----------------------------------------------------------------------------
@@ -131,5 +131,17 @@ role Metadata::Object {
   method !add-global-meta ( ) {
 
     $!meta-data<hostname> = qx[hostname].chomp;
+  }
+
+  #----------------------------------------------------------------------------
+  method !log-update-message ( BSON::Document:D $doc ) {
+
+    if $doc<ok> == 1 {
+      info-message("meta data of $!meta-data<name> updated");
+    }
+
+    else {
+      error-message("updating meta data of $!meta-data<name> failed, err: $doc<errmsg>");
+    }
   }
 }
