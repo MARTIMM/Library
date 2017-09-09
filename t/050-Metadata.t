@@ -7,9 +7,18 @@ use Test-support;
 use Library;
 use Library::Metadata::Database;
 use Library::Metadata::Object;
+use Library::Metadata::Object::File;
+
+use MongoDB;
 use BSON::Document;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+drop-send-to('mongodb');
+#drop-send-to('screen');
+modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
+info-message("Test $?FILE start");
+
+#------------------------------------------------------------------------------
 my Library::Test-support $ts .= new;
 my Int $p1 = $ts.server-control.get-port-number('s1');
 
@@ -31,41 +40,35 @@ spurt( $filename, Q:qq:to/EOCFG/);
 
 initialize-library();
 
-#-------------------------------------------------------------------------------
-subtest 'Metadata', {
+#------------------------------------------------------------------------------
+subtest 'User added metadata', {
 
   my $filename = 't/030-OT-File.t';
   diag "update metadata for $filename";
-  my Library::Metadata::Object $lmo .= init-meta(
-    :object($filename), :type(OT-File)
-  );
+  my Library::Metadata::Object::File $lmo .= new(:object($filename));
 
   diag "get metadata";
   my BSON::Document $udata = $lmo.get-user-metadata;
   $udata<note> = 'This is a test file';
-  $udata<keys> = [ < test library>];
+  $udata<keys> = [< test library>];
   $lmo.set-user-metadata($udata);
 
   for $lmo.find( :criteria( name => '030-OT-File.t',)) -> $doc {
 #note "Doc 0: ", $doc.perl;
     is $doc<name>, '030-OT-File.t', 'file stored';
-    is $doc<user-data><note>, 'This is a test file', 'note found too';
+    is $doc<user-meta><note>, 'This is a test file', 'note found too';
   }
 }
 
-done-testing;
-=finish
-
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 subtest 'Moving files around', {
 
   my $filename = 't/abc.def';
   diag "set $filename and provide content";
   spurt $filename, 'hoeperdepoep zat op de stoep';
 
-  my Library::Metadata::Database $mdb .= new;
-  my Library::Metadata::Object $lmo;
-  $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
+  my Library::Metadata::Object::File $lmo;
+  $lmo .= new(:object($filename));
 
   my BSON::Document $udata = $lmo.get-user-metadata;
   $udata<note> = 'file to be manipulated';
@@ -75,54 +78,56 @@ subtest 'Moving files around', {
   diag "rename $filename to 't/ghi.xyz'";
   $filename.IO.rename('t/ghi.xyz');
   $filename = 't/ghi.xyz';
-  $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
-  for $mdb.find( :criteria( name => 'ghi.xyz',)) -> $doc {
+  $lmo.init-meta(:object($filename));
+  diag $lmo.meta.perl;
+#  diag $lmo.find( :criteria(:name<ghi.xyz>,)).perl;
+  for $lmo.find( :criteria(:name<ghi.xyz>,)) -> $doc {
 #note "Doc 0: ", $doc.perl;
     is $doc<name>, 'ghi.xyz', 'file renamed';
-    is $doc<user-data><note>, 'file to be manipulated', 'note found too';
+    is $doc<user-meta><note>, 'file to be manipulated', 'note found too';
   }
 
   diag "move $filename to 't/Lib4/ghi.xyz'";
   $filename.IO.move('t/Lib4/ghi.xyz') unless $filename eq 't/Lib4/ghi.xyz';
   $filename = 't/Lib4/ghi.xyz';
-  $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
-  for $mdb.find( :criteria( name => 'ghi.xyz',)) -> $doc {
+  $lmo.init-meta(:object($filename));
+  for $lmo.find( :criteria( name => 'ghi.xyz',)) -> $doc {
 #note "Doc 1: " ~ $doc.perl;
     like $doc<path>, / 't/Lib4' /, 'file moved';
-    is-deeply $doc<user-data><keys>, [< moved renamed edited>], 'keys found';
+    is-deeply $doc<user-meta><keys>, [< moved renamed edited>], 'keys found';
   }
 
   diag "move and rename $filename to 't/ghi.pqr'";
   my Str $content-sha1;
   $filename.IO.move('t/ghi.pqr') unless $filename eq 't/ghi.pqr';
   $filename = 't/ghi.pqr';
-  $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
-  for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
+  $lmo.init-meta( :object($filename), :type(OT-File));
+  for $lmo.find( :criteria( name => 'ghi.pqr',)) -> $doc {
 #note "Doc 2: " ~ $doc.perl;
     next unless $doc<path> ~~ m/ 't' $/;
 
     like $doc<path>, / '/t' /, 'file moved and renamed';
-    is $doc<user-data><keys>[1], 'renamed', 'one key tested';
+    is $doc<user-meta><keys>[1], 'renamed', 'one key tested';
     $content-sha1 = $doc<content-sha1>;
   }
 
   diag "modify content of $filename";
   spurt $filename, 'en laten we vrolijk wezen';
-  $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
-  for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
+  $lmo.init-meta( :object($filename), :type(OT-File));
+  for $lmo.find( :criteria( name => 'ghi.pqr',)) -> $doc {
 #note "Doc 3: " ~ $doc.perl;
     next unless $doc<path> ~~ m/ 't' $/;
 
     like $doc<path>, / '/t' /, 'path still the same';
-    is $doc<user-data><keys>[0], 'moved', 'another key tested';
+    is $doc<user-meta><keys>[0], 'moved', 'another key tested';
     nok $content-sha1 ne $doc<content-sha1>, 'Content changed';
     $content-sha1 = $doc<content-sha1>;
   }
 
   diag "ghi.pqr created in t/Lib4 directory with same content";
   spurt "t/Lib4/ghi.pqr", "en laten we vrolijk wezen";
-  $lmo = $mdb.update-meta( :object("t/Lib4/ghi.pqr"), :type(OT-File));
-  for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
+  $lmo.init-meta( :object("t/Lib4/ghi.pqr"), :type(OT-File));
+  for $lmo.find( :criteria( name => 'ghi.pqr',)) -> $doc {
 #note "Doc 4: " ~ $doc.perl;
     next unless $doc<path> ~~ m/ 't/Lib4' $/;
 
@@ -132,26 +137,26 @@ subtest 'Moving files around', {
 
   diag "$filename removed";
   unlink $filename;
-  $lmo = $mdb.update-meta( :object($filename), :type(OT-File));
-  for $mdb.find( :criteria( name => 'ghi.pqr',)) -> $doc {
+  $lmo.init-meta( :object($filename), :type(OT-File));
+  for $lmo.find( :criteria( name => 'ghi.pqr',)) -> $doc {
     next unless $doc<path> ~~ m/ 't' $/;
 
 #note "Doc 5: " ~ $doc.perl;
     is $doc<exists>, False, 'exists updated';
   }
 
-  my BSON::Document $d = $mdb.drop-collection;
-  note $d.perl;
+#  my BSON::Document $d = $lmo.drop-collection;
+#  note $d.perl;
 }
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 CATCH {
   default {
     .note;
   }
 }
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # cleanup
 done-testing;
 
@@ -159,5 +164,3 @@ unlink 't/ghi.pqr';
 unlink 't/Lib4/config.toml';
 unlink 't/Lib4/ghi.pqr';
 rmdir 't/Lib4';
-
-exit(0);
