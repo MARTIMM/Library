@@ -1,6 +1,6 @@
 use v6;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
@@ -9,10 +9,10 @@ use Library::Metadata::Object;
 use MongoDB;
 use BSON::Document;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 class Metadata::Object::File does Library::Metadata::Object {
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   # Set the default informaton for a file in the meta structure
   method specific-init-meta ( Str :$object, ObjectType :$type ) {
 
@@ -28,12 +28,11 @@ class Metadata::Object::File does Library::Metadata::Object {
     $!meta-data<exists> = $object.IO ~~ :r;
     $!meta-data<content-sha1> = self!sha1-content($object);
 
-    self!add-meta;
     info-message("metadata set for $object");
     debug-message($!meta-data.perl);
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   # Update database with the data in the meta structure.
   # Returns result document with at least key field 'ok'
   method update-meta ( --> BSON::Document ) {

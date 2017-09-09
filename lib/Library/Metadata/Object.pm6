@@ -1,6 +1,6 @@
 use v6;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
@@ -9,7 +9,7 @@ use Library::Metadata::Database;
 use OpenSSL::Digest;
 use BSON::Document;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 role Metadata::Object {
 
   has BSON::Document $!meta-data;
@@ -17,11 +17,11 @@ role Metadata::Object {
     insert update delete count find drop-collection drop-database
   >;
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method specific-init-meta ( Str :$object, ObjectType :$type ) { ... }
   method update-meta ( ) { ... }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   submethod BUILD ( Str :$object, Library::ObjectType :$type ) {
 
     $!dbo .= new;
@@ -34,7 +34,7 @@ role Metadata::Object {
     }
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method init-meta(
     Str :$object, Library::ObjectType :$type
     --> BSON::Document
@@ -43,22 +43,23 @@ role Metadata::Object {
     # modify database if needed
     $!meta-data .= new;
     self.specific-init-meta( :$object, :$type);
+    self!add-global-meta;
     self.update-meta;
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method meta ( --> BSON::Document ) {
 
     $!meta-data;
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method get-user-metadata ( --> BSON::Document ) {
 
     $!meta-data<user-data> // BSON::Document.new;
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method set-user-metadata (
     $data where (? $_ and $_ ~~ any(List|BSON::Document))
     --> BSON::Document
@@ -69,7 +70,7 @@ role Metadata::Object {
     self!update-usermeta;
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method !update-usermeta ( --> BSON::Document ) {
 
     # store in database only if record is found
@@ -86,13 +87,13 @@ role Metadata::Object {
     ];
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method !sha1 ( Str $s --> Str ) {
 
     (sha1( $s.encode)>>.fmt('%02x')).join('');
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method !sha1-content ( Str $object --> Str ) {
 
     return '' unless $object.IO !~~ :d and $object.IO ~~ :r;
@@ -118,16 +119,16 @@ role Metadata::Object {
     $sha-content;
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method is-in-db ( List:D $query --> Bool ) {
 
     # use n to see the number of found records. 0 coerces to False, True otherwise
     ? ( $!dbo.count: ( $query ) )<n>;
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   # Add global defaults to the meta structure
-  method !add-meta ( ) {
+  method !add-global-meta ( ) {
 
     $!meta-data<hostname> = qx[hostname].chomp;
   }
