@@ -186,6 +186,6 @@ class Metadata::Object::File does Library::Metadata::Object {
     }
 
     # return database operations result
-    $doc;
+    $doc
   }
 }
