@@ -18,41 +18,38 @@ role Metadata::Object {
   >;
 
   #-----------------------------------------------------------------------------
-  #method init-meta ( Str :$object, ObjectType :$type ) { ... }
-  #method update-meta ( ) { ... }
+  method specific-init-meta ( Str :$object, ObjectType :$type ) { ... }
+  method update-meta ( ) { ... }
 
   #-----------------------------------------------------------------------------
-  submethod BUILD ( ) {
+  submethod BUILD ( Str :$object, Library::ObjectType :$type ) {
 
-    $!meta-data .= new;
     $!dbo .= new;
+    if ?$object and ?$type {
+      self.init-meta( :$object, :$type);
+    }
+
+    else {
+      $!meta-data .= new;
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method init-meta(
+    Str :$object, Library::ObjectType :$type
+    --> BSON::Document
+  ) {
+
+    # modify database if needed
+    $!meta-data .= new;
+    self.specific-init-meta( :$object, :$type);
+    self.update-meta;
   }
 
   #-----------------------------------------------------------------------------
   method meta ( --> BSON::Document ) {
 
     $!meta-data;
-  }
-
-  #-----------------------------------------------------------------------------
-  method init-meta(
-    Str :$object, ObjectType :$type
-    --> Library::Metadata::Object
-  ) {
-
-    # create object of this classes child and generate metadata
-    # with the arguments provided by the child
-    my $class-type = "Library::Metadata::Object::$type";
-    require ::($class-type);
-    my $meta-object = ::($class-type).new( :$object, :$type);
-note "XO: ", $meta-object.perl;
-
-    # modify database if needed
-    $meta-object.specific-init-meta( :$object, :$type);
-    my $doc = $meta-object.update-meta;
-note "L::M::D: ", $doc.perl;
-
-    $meta-object;
   }
 
   #-----------------------------------------------------------------------------
@@ -122,19 +119,14 @@ note "L::M::D: ", $doc.perl;
   }
 
   #-----------------------------------------------------------------------------
-  multi method find-in-db ( List:D $query --> Bool ) {
+  method is-in-db ( List:D $query --> Bool ) {
 
-    # use n to see the number of found records 0 coerces to False, True otherwise
+    # use n to see the number of found records. 0 coerces to False, True otherwise
     ? ( $!dbo.count: ( $query ) )<n>;
   }
 
-  multi method find-in-db ( BSON::Document:D $query --> Bool ) {
-
-    my BSON::Document $r = $!dbo.count: ( $query );
-    ? ($r<ok> and $r<n>);
-  }
-
   #-----------------------------------------------------------------------------
+  # Add global defaults to the meta structure
   method !add-meta ( ) {
 
     $!meta-data<hostname> = qx[hostname].chomp;
