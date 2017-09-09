@@ -1,6 +1,6 @@
 use v6;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
@@ -9,10 +9,11 @@ use Library::Metadata::Object;
 use MongoDB;
 use BSON::Document;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 class Metadata::Object::Directory does Library::Metadata::Object {
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
+  # Set the default informaton for a directory in the meta structure
   method specific-init-meta ( Str :$object, ObjectType :$type ) {
 
     my Str $path = $object.IO.absolute;
@@ -21,13 +22,13 @@ class Metadata::Object::Directory does Library::Metadata::Object {
 
     $!meta-data<name> = $dir;
     $!meta-data<path> = $path;
-    $!meta-data<type> = $type.Str;
+    $!meta-data<meta-type> = $type.Str;
     $!meta-data<exists> = $object.IO ~~ :r;
-
-    self!add-meta;
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
+  # Update database with the data in the meta structure.
+  # Returns result document with at least key field 'ok'
   method update-meta ( ) {
 
     # Get the metadata and search in database using count. It depends
@@ -36,121 +37,76 @@ class Metadata::Object::Directory does Library::Metadata::Object {
     my BSON::Document $query;
 
     # If file is found in db, we do not have to do anything
-    if self.find-in-db: (
+    if self.is-in-db: (
       name => $!meta-data<name>,
       path => $!meta-data<path>,
       type => OT-Directory,
       hostname => $!meta-data<hostname>,
     ) {
 
-      info-message("Directory $!meta-data<name> found by name, path and content, no update");
+      info-message("Directory $!meta-data<name> found by name and path, no update");
     }
 
     # So if not found ...
     else {
 
-      info-message("Directory $!meta-data<name> not found by name, path, content");
+      info-message("Directory $!meta-data<name> not found by name and path");
 
-      # File maybe moved
-      $query .= new: (
+      if self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
           type => OT-Directory,
           hostname => $!meta-data<hostname>,
-      );
+        )
+      ) {
 
-      if self.find-in-db($query) {
+        info-message("Directory $!meta-data<name> found by name only");
 
-        # Check first if file from this search has an existing file
-        # if so, do not modify the record.
-        my Bool $exists = False;
+        # Check first if file from this search has an existing directory on disk
+        # if so, modify the record found in the query.
         for self.find(:criteria($query)) -> $d {
           if "$d<path>/$d<name>".IO ~~ :e {
-            $exists = True;
+
+            info-message("$!meta-data<name> found on disk elsewhere, must have been moved, updated");
+
+# What if query returns more of the same, is that possible?
+            # Update the record to reflect current situation
+            $doc = self.update: [ (
+                q => $query,
+                u => ( '$set' => $!meta-data,),
+              ),
+            ];
+
+            self!log-update-message($doc);
             last;
-          }
-        }
-
-        unless $exists {
-          # Update the record to reflect current situation
-          $doc = self.update: [ (
-              q => $query,
-              u => ( '$set' => $!meta-data,),
-            ),
-          ];
-
-          if $doc<ok> == 1 {
-            info-message("$!meta-data<name> found -> must be moved, updated");
-          }
-
-          else {
-            error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
           }
         }
       }
 
-      # File may be renamed
-      elsif self.find-in-db($query .= new: (
+      # directory may be renamed
+      elsif self.is-in-db( $query .= new: (
           type => OT-Directory,
           path => $!meta-data<path>,
           hostname => $!meta-data<hostname>,
-      )) {
+        )
+      ) {
+
+        info-message("Directory $!meta-data<name> found by path");
 
         # Check first if file from this search has an existing file
-        my Bool $exists = False;
         for self.find(:criteria($query)) -> $d {
           if "$d<path>/$d<name>".IO ~~ :e {
-            $exists = True;
+
+            info-message("$!meta-data<name> found on disk elsewhere, must have been renamed, updated");
+
+            # Update the record to reflect current situation
+            $doc = self.update: [ (
+                q => $query,
+                u => ( '$set' => $!meta-data,),
+              ),
+            ];
+
+            self!log-update-message($doc);
             last;
-          }
-        }
-
-        unless $exists {
-          # Update the record to reflect current situation
-          $doc = self.update: [ (
-              q => $query,
-              u => ( '$set' => $!meta-data,),
-            ),
-          ];
-
-          if $doc<ok> == 1 {
-            info-message("$!meta-data<name> found -> must be renamed, updated");
-          }
-
-          else {
-            error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
-          }
-        }
-      }
-
-      # File may be moved and renamed
-      elsif self.find-in-db($query .= new: (
-          type => OT-Directory,
-          hostname => $!meta-data<hostname>,
-      )) {
-
-        # Check first if file from this search has an existing file
-        my Bool $exists = False;
-        for self.find(:criteria($query)) -> $d {
-          if "$d<path>/$d<name>".IO ~~ :e {
-            $exists = True;
-            last;
-          }
-        }
-
-        unless $exists {
-          # Update the record to reflect current situation
-          $doc = self.update: [ (
-              q => $query,
-              u => ( '$set' => $!meta-data,),
-            ),
-          ];
-
-          if $doc<ok> == 1 {
-            info-message("$!meta-data<name> found -> must be renamed and moved, updated");
-          }
-
-          else {
-            error-message("updating $!meta-data<name> failed, err: $doc<errmsg>\($doc<code>\)");
           }
         }
       }
