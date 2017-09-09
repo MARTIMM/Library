@@ -64,9 +64,9 @@ role Database {
     my BSON::Document $req .= new;
     $req<count> = $!collection.name;
     $req<query> = $query if ?$query;
-note "L req: ", $req.perl;
+#note "L req: ", $req.perl;
     my $d = $!database.run-command($req);
-note "L count: ", $d.perl;
+#note "L count: ", $d.perl;
     $d;
   }
 
@@ -79,9 +79,9 @@ note "L count: ", $d.perl;
     my BSON::Document $req .= new;
     $req<count> = $!collection.name;
     $req<query> = $query if ?$query;
-note "B req: ", $req.perl;
+#note "B req: ", $req.perl;
     my $d = $!database.run-command($req);
-note "B: count: ", $d.perl;
+#note "B: count: ", $d.perl;
     $d;
   }
 
