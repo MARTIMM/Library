@@ -8,16 +8,9 @@ perl6:
   - latest
 
 before_install:
-  - sh $TRAVIS_BUILD_DIR/Travis-ci/install-mongodb.sh 3.2.9
+  # See also https://www.mongodb.org/dl/linux/
+  - sh $TRAVIS_BUILD_DIR/t/Travis-ci/install-mongodb.sh 3.2.9
 
 install:
   - rakudobrew build zef
-  - zef update
-  - zef --/test install Config::TOML
-  - zef --/test install MongoDB
-  - zef --depsonly install .
-
-cache:
-  directories:
-    - $HOME/Travis-ci
-    - $HOME/.rakudobrew
+  - zef --/test --depsonly install .
