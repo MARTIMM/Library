@@ -217,7 +217,7 @@ of Topic Maps ($abbrev[TM]). Import and export are done via
 * object-type: Type of object such as document, directory or url.
 * keys: A list of keywords under which the object can be catagorized.
 
-### Document meta data fields.
+### Document meta data fields derived from files and directories
 
 * full-name: Complete and absolute path to the document
 * file-name: Name of document object
@@ -237,6 +237,65 @@ of Topic Maps ($abbrev[TM]). Import and export are done via
 * arguments: key-value pairs found on the url
 * location: Place where document is downloaded
 
+```erd {cmd=true output="html" hide=true args=["-i", "$input_file", "-f", "svg"]}
+
+title {
+  label: "Collections and sub documents. Types are perl6 types",
+  size: "18"
+}
+
+header {size: "12"}
+entity {bgcolor: "#fafaf8", size: "10"}
+relationship {size: "9"}
+
+[FileMeta]
+*metaType {label: "ObjectType, ¬ ∅"}
+*name {label: "Str, ¬ ∅"}
+contentType {label: "Str"}
+path {label: "Str, ¬ ∅"}
+exists {label: "Bool, ¬ ∅"}
+contentSha1 {label: "Str, ¬ ∅"}
+
+[DirMeta]
+*metaType {label: "ObjectType, ¬ ∅"}
+*name {label: "Str, ¬ ∅"}
+path {label: "Str, ¬ ∅"}
+exists {label: "Bool, ¬ ∅"}
+
+[WebMeta]
+*metaType {label: "ObjectType, ¬ ∅"}
+uri {label: "Str, ¬ ∅"}
+protocol {label: "Str, ¬ ∅"}
+server {label: "Str, ¬ ∅"}
+path {label: "Str, ¬ ∅"}
+arguments {label: "Str, ¬ ∅"}
+location {label: "Str, ¬ ∅"}
+
+[UserMeta]
+*metaType {label: "ObjectType, ¬ ∅"}
+anyitem
+
+[ProgramMeta]
+*metaType {label: "ObjectType, ¬ ∅"}
+anyitem
+
+# Each relationship must be between exactly two entities, which need not
+# be distinct. Each entity in the relationship has exactly one of four
+# possible cardinalities:
+#
+# Cardinality    Syntax
+# 0 or 1         ?
+# exactly 1      1
+# 0 or more      *
+# 1 or more      +
+FileMeta 1--? WebMeta
+FileMeta 1--* UserMeta
+FileMeta 1--* ProgramMeta
+DirMeta 1--? UserMeta
+#ProgramMeta 1--? WebMeta
+ProgramMeta 1--? UserMeta
+WebMeta 1--? UserMeta
+```
 
 ## Implementation
 
@@ -342,10 +401,11 @@ package library #FFFFFF {
   MDB <-right-* LD
   MCL <-right-* LD
 
-  Client *-> Obj
+  Client *--> Obj
   LD <|-- LMD
 
-  LMD <- Obj
+  'LMD <- Obj
+  Obj -> LMD
   Obj <|-- OTF
   Obj <|-- OTD
 }
