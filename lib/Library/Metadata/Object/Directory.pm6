@@ -29,7 +29,7 @@ class Metadata::Object::Directory does Library::Metadata::Object {
   #----------------------------------------------------------------------------
   # Update database with the data in the meta structure.
   # Returns result document with at least key field 'ok'
-  method update-meta ( ) {
+  method update-meta ( --> BSON::Document ) {
 
     # Get the metadata and search in database using count. It depends
     # on the existence of the directory what to do.
@@ -40,7 +40,7 @@ class Metadata::Object::Directory does Library::Metadata::Object {
     if self.is-in-db: (
       name => $!meta-data<name>,
       path => $!meta-data<path>,
-      type => OT-Directory,
+      meta-type => OT-Directory,
       hostname => $!meta-data<hostname>,
     ) {
 
@@ -54,7 +54,7 @@ class Metadata::Object::Directory does Library::Metadata::Object {
 
       if self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
-          type => OT-Directory,
+          meta-type => OT-Directory,
           hostname => $!meta-data<hostname>,
         )
       ) {
@@ -84,7 +84,7 @@ class Metadata::Object::Directory does Library::Metadata::Object {
 
       # directory may be renamed
       elsif self.is-in-db( $query .= new: (
-          type => OT-Directory,
+          meta-type => OT-Directory,
           path => $!meta-data<path>,
           hostname => $!meta-data<hostname>,
         )
@@ -120,7 +120,7 @@ class Metadata::Object::Directory does Library::Metadata::Object {
       }
     }
 
-#note "M::O::F: ", $doc.perl;
-    $doc;
+    # return database operations result
+    $doc
   }
 }
