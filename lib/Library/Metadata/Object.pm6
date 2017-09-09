@@ -19,15 +19,15 @@ role Metadata::Object {
   >;
 
   #----------------------------------------------------------------------------
-  method specific-init-meta ( Str :$object, ObjectType :$type ) { ... }
+  method specific-init-meta ( Str :$object ) { ... }
   method update-meta ( ) { ... }
 
   #----------------------------------------------------------------------------
-  submethod BUILD ( Str :$object, Library::ObjectType :$type ) {
+  submethod BUILD ( Str :$object ) {
 
     $!dbo .= new;
-    if ?$object and ?$type {
-      self.init-meta( :$object, :$type);
+    if ?$object {
+      self.init-meta(:$object);
     }
 
     else {
@@ -36,14 +36,11 @@ role Metadata::Object {
   }
 
   #----------------------------------------------------------------------------
-  method init-meta(
-    Str :$object, Library::ObjectType :$type
-    --> BSON::Document
-  ) {
+  method init-meta ( Str :$object --> BSON::Document ) {
 
     # modify database if needed
     $!meta-data .= new;
-    self.specific-init-meta( :$object, :$type);
+    self.specific-init-meta(:$object);
     self!add-global-meta;
     self.update-meta
   }

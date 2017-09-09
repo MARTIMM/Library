@@ -14,7 +14,7 @@ class Metadata::Object::File does Library::Metadata::Object {
 
   #----------------------------------------------------------------------------
   # Set the default informaton for a file in the meta structure
-  method specific-init-meta ( Str :$object, ObjectType :$type ) {
+  method specific-init-meta ( Str :$object ) {
 
     my Str $path = $object.IO.absolute;
     my Str $file = $object.IO.basename;
@@ -24,7 +24,7 @@ class Metadata::Object::File does Library::Metadata::Object {
     $!meta-data<name> = $file;
     $!meta-data<content-type> = $extension;
     $!meta-data<path> = $path;
-    $!meta-data<meta-type> = $type.Str;
+    $!meta-data<meta-type> = OT-File.Str;
     $!meta-data<exists> = $object.IO ~~ :r;
     $!meta-data<content-sha1> = self!sha1-content($object);
 
