@@ -99,7 +99,7 @@ class Metadata::Object::File does Library::Metadata::Object {
         )
       ) {
 
-        info-message("File $!meta-data<name> found by name. path and content");
+        info-message("File $!meta-data<name> found by path and content");
 
         # Check first if file from this search has an existing file
         for self.find(:criteria($query)) -> $d {
