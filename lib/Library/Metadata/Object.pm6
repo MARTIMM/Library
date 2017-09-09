@@ -54,7 +54,7 @@ role Metadata::Object {
   #----------------------------------------------------------------------------
   method get-user-metadata ( --> BSON::Document ) {
 
-    $!meta-data<user-data> // BSON::Document.new
+    $!meta-data<user-meta> // BSON::Document.new
   }
 
   #----------------------------------------------------------------------------
@@ -64,7 +64,7 @@ role Metadata::Object {
   ) {
 
     # modify user metadata and update document
-    $!meta-data<user-data> = $data;
+    $!meta-data<user-meta> = $data;
     self!update-usermeta
   }
 
@@ -79,7 +79,7 @@ role Metadata::Object {
           content-sha1 => $!meta-data<content-sha1>,
         ),
 
-        u => ( '$set' => ( user-data => $!meta-data<user-data>,),),
+        u => ( '$set' => ( user-meta => $!meta-data<user-meta>,),),
         upsert => False,
       ),
     ]
