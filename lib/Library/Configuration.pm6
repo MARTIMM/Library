@@ -1,7 +1,9 @@
 use v6;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
+
+use Library::X;
 
 use Config::TOML;
 
@@ -10,44 +12,50 @@ use MongoDB::Client;
 use MongoDB::Database;
 use MongoDB::Collection;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 class Configuration {
 
   has Str $!config-filename;
   has Hash $.config;
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   # We only have to load it once, after that, saving is the only step needed
   # after every update
-  #
-  submethod BUILD ( Str :$library-config ) {
+  submethod BUILD ( ) {
 
-    my Str $file = $library-config
-                 // %*ENV<LIBRARY-CONFIG>
-                 // "$*HOME/.library";
+    my Str $config-dir = %*ENV<LIBRARY-CONFIG> // "$*HOME/.library";
 
-    if $file.IO ~~ :d {
-      $file ~= '/config.toml';
-      $!config = $file.IO ~~ :r ?? from-toml(:$file) !! {};
+    # check if directory exists
+    if $config-dir.IO ~~ :d {
+      my Str $file = $config-dir ~ '/config.toml';
+      $!config-filename = $file;
+      $!config = $config-dir.IO ~~ :r ?? from-toml(:$file) !! {};
     }
 
+    # else check if existent
+    elsif $config-dir.IO ~~ :e {
+      die X::Library.new(:message("Name $config-dir exists but isn't a directory"));
+    }
+
+    # create directory
     else {
-      mkdir $file, 0o750;
-      $file ~= '/config.toml';
+      mkdir $config-dir, 0o750;
+      my Str $file = $config-dir ~ '/config.toml';
+      $!config-filename = $file;
+      $config-dir ~= '/config.toml';
       $!config = {};
     }
 
-    $!config-filename = $file;
     self!check-config;
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method save ( ) {
 
     spurt( $!config-filename, to-toml($!config));
   }
 
-  #-----------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method !check-config ( ) {
 
     $!config<uri> = 'mongodb://' unless ? $!config<uri>;
