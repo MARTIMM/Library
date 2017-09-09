@@ -42,7 +42,7 @@ class Metadata::Object::File does Library::Metadata::Object {
     my BSON::Document $doc .= new: (:ok(1));
     my BSON::Document $query;
 
-    # If file is found in db, we do not have to do anything
+    # search file using all its meta data
     if self.is-in-db: (
       name => $!meta-data<name>,
       path => $!meta-data<path>,
@@ -51,14 +51,16 @@ class Metadata::Object::File does Library::Metadata::Object {
       hostname => $!meta-data<hostname>,
     ) {
 
+      # if file is found in db, we do not have to do anything
       info-message("File $!meta-data<name> found by name, path and content, no update");
     }
 
     # So if not found ...
     else {
 
-      info-message("File $!meta-data<name> not found by name, path, content");
+      info-message("file $!meta-data<name> not found by name, path and content");
 
+      # search again using name and content
       if self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
           meta-type => ~OT-File,
@@ -67,9 +69,9 @@ class Metadata::Object::File does Library::Metadata::Object {
         )
       ) {
 
-        info-message("File $!meta-data<name> found by name and content");
+        info-message("file $!meta-data<name> found by name and content");
 
-        # Check first if file from this search has an existing file on disk
+        # Check first if file from this search is also an existing file on disk
         # if so, modify the record found in the query.
         for self.find(:criteria($query)) -> $d {
           if "$d<path>/$d<name>".IO ~~ :e {
@@ -90,7 +92,7 @@ class Metadata::Object::File does Library::Metadata::Object {
         }
       }
 
-      # File may be renamed
+      # else search with path and content
       elsif self.is-in-db( $query .= new: (
           meta-type => ~OT-File,
           path => $!meta-data<path>,
@@ -103,8 +105,9 @@ class Metadata::Object::File does Library::Metadata::Object {
 
         # Check first if file from this search has an existing file
         for self.find(:criteria($query)) -> $d {
-          if "$d<path>/$d<name>".IO ~~ :e {
-
+note "Found ", $d.perl;
+          if "$d<path>/$!meta-data<name>".IO ~~ :e {
+#!!!!!!
             info-message("$!meta-data<name> found on disk elsewhere, must have been renamed, updated");
 
             # Update the record to reflect current situation
@@ -120,7 +123,7 @@ class Metadata::Object::File does Library::Metadata::Object {
         }
       }
 
-      # File may be moved and renamed
+      # else search for its content only
       elsif self.is-in-db( $query .= new: (
           meta-type => ~OT-File,
           content-sha1 => $!meta-data<content-sha1>,
@@ -148,7 +151,7 @@ class Metadata::Object::File does Library::Metadata::Object {
         }
       }
 
-      # File may be modified
+      # else search for name and path
       elsif self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
           meta-type => ~OT-File,
