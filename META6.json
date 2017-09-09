@@ -8,6 +8,7 @@
   "depends": [
     "IO::Notification::Recursive",
     "Config::TOML",
+    "BSON",
     "MongoDB",
     "OpenSSL"
   ],
