@@ -16,7 +16,7 @@ drop-send-to('mongodb');
 modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
 info-message("Test $?FILE start");
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 my Library::Test-support $ts .= new;
 my Int $p1 = $ts.server-control.get-port-number('s1');
 
@@ -36,9 +36,9 @@ spurt( $filename, Q:qq:to/EOCFG/);
 
   EOCFG
 
-initialize-library();
+initialize-library;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 subtest 'OT File', {
 
   my Library::Metadata::Database $dbo .= new;
@@ -60,7 +60,7 @@ subtest 'OT File', {
   ok !$d<exists>, 'object does not exist';
 }
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # cleanup
 done-testing;
 
