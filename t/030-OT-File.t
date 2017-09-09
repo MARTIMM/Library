@@ -7,7 +7,14 @@ use Test-support;
 use Library;
 use Library::Metadata::Database;
 use Library::Metadata::Object::File;
+use MongoDB;
 use BSON::Document;
+
+#------------------------------------------------------------------------------
+drop-send-to('mongodb');
+#drop-send-to('screen');
+modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
+info-message("Test $?FILE start");
 
 #-------------------------------------------------------------------------------
 my Library::Test-support $ts .= new;
@@ -29,35 +36,31 @@ spurt( $filename, Q:qq:to/EOCFG/);
 
   EOCFG
 
-initialize-library();
+initialize-library;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 subtest 'OT File', {
 
-  my Library::Metadata::Database $dbo .= new;
-  my Library::Metadata::Object::File $f;
+  my Library::Metadata::Object::File $f .= new;
+  diag "Init meta: " ~ $f.init-meta( :object<t/030-OT-File.t>, :type(OT-File)).perl;
 
-  $f .= new( :$dbo, :object<t/030-OT-File.t>, :type(OT-File));
   my BSON::Document $d = $f.meta;
+  diag "Meta data: $d.perl()";
   is $d<name>, '030-OT-File.t', $d<name>;
-  is $d<extension>, 't', $d<extension>;
+  is $d<content-type>, 't', $d<content-type>;
   like $d<path>, /:s t $/, $d<path>;
   ok $d<exists>, 'object exists';
   ok $d<content-sha1>, 'sha calculated on content';
 
-#  say $d.perl;
-
-  $f .= new( :$dbo, :object<t/other-file.t>, :type(OT-File));
+  $f .= new( :object<t/other-file.t>, :type(OT-File));
   $d = $f.meta;
   is $d<name>, 'other-file.t', $d<name>;
   like $d<path>, /:s t $/, $d<path>;
   ok !$d<exists>, 'object does not exist';
   ok !$d<content-sha1>, 'no sha on content';
-
-#  say $d.perl;
 }
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # cleanup
 done-testing;
 
