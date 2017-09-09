@@ -59,15 +59,6 @@ class Metadata::Object::File does Library::Metadata::Object {
 
       info-message("File $!meta-data<name> not found by name, path, content");
 
-#`{{
-      # File maybe moved
-      $query .= new: (
-          name => $!meta-data<name>,
-          meta-type => ~OT-File,
-          content-sha1 => $!meta-data<content-sha1>,
-          hostname => $!meta-data<hostname>,
-      );
-}}
       if self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
           meta-type => ~OT-File,
@@ -78,13 +69,14 @@ class Metadata::Object::File does Library::Metadata::Object {
 
         info-message("File $!meta-data<name> found by name and content");
 
-        # Check first if file from this search has an existing file
-        # if so, do not modify the record.
+        # Check first if file from this search has an existing file on disk
+        # if so, modify the record found in the query.
         for self.find(:criteria($query)) -> $d {
           if "$d<path>/$d<name>".IO ~~ :e {
 
             info-message("$!meta-data<name> found on disk elsewhere, must have been moved, updated");
 
+# What if query returns more of the same, is that possible?
             # Update the record to reflect current situation
             $doc = self.update: [ (
                 q => $query,
@@ -92,14 +84,7 @@ class Metadata::Object::File does Library::Metadata::Object {
               ),
             ];
 
-            if $doc<ok> == 1 {
-              info-message("meta data of $!meta-data<name> updated");
-            }
-
-            else {
-              error-message("updating meta data of $!meta-data<name> failed, err: $doc<errmsg>");
-            }
-
+            self!log-update-message($doc);
             last;
           }
         }
@@ -129,14 +114,7 @@ class Metadata::Object::File does Library::Metadata::Object {
               ),
             ];
 
-            if $doc<ok> == 1 {
-              info-message("meta data of $!meta-data<name> updated");
-            }
-
-            else {
-              error-message("updating meta data of $!meta-data<name> failed, err: $doc<errmsg>");
-            }
-
+            self!log-update-message($doc);
             last;
           }
         }
@@ -164,14 +142,7 @@ class Metadata::Object::File does Library::Metadata::Object {
               ),
             ];
 
-            if $doc<ok> == 1 {
-              info-message("meta data of $!meta-data<name> updated");
-            }
-
-            else {
-              error-message("updating meta data of $!meta-data<name> failed, err: $doc<errmsg>");
-            }
-
+            self!log-update-message($doc);
             last;
           }
         }
@@ -200,14 +171,7 @@ class Metadata::Object::File does Library::Metadata::Object {
               ),
             ];
 
-            if $doc<ok> == 1 {
-              info-message("meta data of $!meta-data<name> updated");
-            }
-
-            else {
-              error-message("updating meta data of $!meta-data<name> failed, err: $doc<errmsg>");
-            }
-
+            self!log-update-message($doc);
             last;
           }
         }
