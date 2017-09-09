@@ -121,7 +121,13 @@ role Metadata::Object {
   }
 
   #----------------------------------------------------------------------------
-  method is-in-db ( List:D $query --> Bool ) {
+  multi method is-in-db ( List:D $query --> Bool ) {
+
+    # use n to see the number of found records. 0 coerces to False, True otherwise
+    ? ( $!dbo.count: ( $query ) )<n>
+  }
+
+  multi method is-in-db ( BSON::Document:D $query --> Bool ) {
 
     # use n to see the number of found records. 0 coerces to False, True otherwise
     ? ( $!dbo.count: ( $query ) )<n>
