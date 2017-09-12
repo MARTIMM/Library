@@ -5,6 +5,8 @@ use v6;
 use Library;
 use Library::Metadata::Database;
 use Library::Metadata::Object;
+use Library::Metadata::Object::File;
+use Library::Metadata::Object::Directory;
 
 use MongoDB;
 use BSON::Document;
@@ -12,7 +14,9 @@ use IO::Notification::Recursive;
 
 #-------------------------------------------------------------------------------
 # setup logging
-modify-send-to( 'screen', :level(* >= MongoDB::Loglevels::Debug));
+#drop-send-to('mongodb');
+#drop-send-to('screen');
+modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
 
 # setup config directory
 my $cfg-dir;
@@ -55,18 +59,22 @@ initialize-library();
 # Program to store metadata about files.
 #
 # --*   Help info
-# --k   supply keywords. Separated by commas or repetition of option
-# --dk  remove keys when there are any
+# --t   supply tags. Separated by commas or repetition of option
+# --et  extract tags from filename
+# --dt  remove tags when there are any
 # --r   Recursive search through directories
 #
-sub MAIN ( *@files, Bool :$r = False, Str :$k = '', Str :$dk = '' ) {
+sub MAIN (
+  *@files, Bool :$r = False,
+  Str :$t = '', Bool :$et = False, Str :$dt = ''
+) {
 
-  my Library::Metadata::Object $lmo;
-  my Library::Metadata::Database $meta-db .= new();
+  my Library::Metadata::Object::File $mof;
+  my Library::Metadata::Object::Directory $mod;
 
-  my Bool $recursive := $r;                     # Aliases to longer names
-  my Array $keys = [$k.split(/ \s* ',' \s* /)];
-  my Array $drop-keys = [$dk.split(/ \s* ',' \s* /)];
+  my Bool $recursive := $r;                     # Aliases to longer name
+  my Array $arg-tags = [$t.split(/:s \s* <punct>+ \s* /)];
+  my Array $drop-tags = [$dt.split(/ \s* <punct>+ \s* /)];
 
   my @files-to-process = @files;                # Copy to rw-able array.
   if !@files-to-process {
@@ -80,21 +88,20 @@ sub MAIN ( *@files, Bool :$r = False, Str :$k = '', Str :$dk = '' ) {
     # Process directories
     if $file.IO ~~ :d {
 
-      info-message("process dir {$file.IO.absolute()}");
-
       # Alias to proper name if dir
       my $directory := $file;
-      $lmo = $meta-db.update-meta( :object($directory), :type(OT-Directory));
 
-      my BSON::Document $udata = $lmo.get-user-metadata;
-      $udata<keys> = $keys;
-      $lmo.set-user-metadata($udata);
+      info-message("process directory '$directory'");
+
+      $mod .= new(:object($directory));
+      set-user-meta-data( $mod, $directory, :$et, :$arg-tags, :$drop-tags);
 
       if $recursive {
 
         # only 'content' files no '.' or '..'
-        my @new-files = dir( $directory, :Str); #.grep(/^ <-[.]> <-[.]>? $/);
-        @files-to-process.push(@new-files);
+        my @new-files = dir( $directory).List>>.absolute;
+
+        @files-to-process.push(|@new-files);
       }
 
       else {
@@ -106,19 +113,63 @@ sub MAIN ( *@files, Bool :$r = False, Str :$k = '', Str :$dk = '' ) {
     # Process plain files
     elsif $file.IO ~~ :f {
 
-      info-message("process file {$file.IO.absolute()}");
+      info-message("process file $file");
 
-      $lmo = $meta-db.update-meta( :object($file), :type(OT-File));
-
-      my BSON::Document $udata = $lmo.get-user-metadata;
-      $udata<keys> = $keys;
-      $lmo.set-user-metadata($udata);
+      $mof .= new(:object($file));
+      set-user-meta-data( $mof, $file, :$et, :$arg-tags, :$drop-tags);
     }
 
     # Ignore other type of files
     else {
 
-      say "File $file is ignored, it is a special type of file";
+      warn-message("File $file is ignored, it is a special type of file");
     }
   }
+}
+
+#------------------------------------------------------------------------------
+sub set-user-meta-data (
+  Library::Metadata::Object:D $object, Str:D $object-name,
+  Bool :$et = False, Array :$arg-tags = [], Array :$drop-tags = [],
+) {
+
+  my Array $tags = [];
+
+  # get user meta data
+  my BSON::Document $udata = $object.get-user-metadata;
+  my Array $prev-tags = $udata<tags> // [];
+
+  # check if to extract tags from object name
+  if $et {
+    my Str $tagstr = $object-name;
+    $tagstr ~~ s:s:i/ the || also || are || all || and || him || his ||
+            hers? || mine || ours? || was || following || some || various ||
+            see || most || much || many || about || you
+            //;
+
+    $tags = [ $arg-tags.Slip,
+              $tagstr.split(/ [\s || <punct> || \d]+ /).List.Slip,
+              $prev-tags.Slip
+            ];
+  }
+
+  else {
+    $tags = [ $arg-tags.Slip, $prev-tags.Slip];
+  }
+
+  # Filter tags shorter than 3 chars, lowercase convert, remove
+  # doubles then sort
+  my @tlist = $tags.grep(/^...+/)>>.lc.unique.sort.List;
+  $tags = [$tags.grep(/^...+/)>>.lc.unique.sort.List.Slip];
+
+  # remove any tags
+  for @$drop-tags -> $t {
+    if my $index = $tags.first( $t, :k) {
+      $tags.splice( $index, 1);
+    }
+  }
+
+  # save new set of tags
+  $udata<tags> = $tags;
+  $object.set-user-metadata($udata);
 }
