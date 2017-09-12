@@ -1,5 +1,8 @@
 ## Release notes
 
+* 0.5.3
+  * Many modules rewritten and bugs fixed
+  * Program store-file-metadata.pl6 is now functional
 * 0.5.2
   * Metadata gathering for OT-Directory implemented.
 * 0.5.1
