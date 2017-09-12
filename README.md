@@ -9,17 +9,28 @@ The modules help maintaining metadata about everything imaginable. But as a firs
 
 ## Documentation
 
-* [Release notes](https://github.com/MARTIMM/Library/blob/master/doc/CHANGES.md)
-* [Todo and Bugs](https://github.com/MARTIMM/Library/blob/master/doc/TODO.md)
-
-* [Manual](https://github.com/MARTIMM/Library/blob/master/doc/Manual/library.pdf)
-* [Requirement document](https://github.com/MARTIMM/Library/blob/master/doc/Requirements/library.pdf)
+* [Release notes][release]
+* [Todo and Bugs][todo]
+* [Manual][man]
+* [Requirement document][requir]
 
 ## Version Perl on Moarvm
 
 Latest version of perl 6 on rakudo en moarvm.
 
+## Installation
+
+`zef install github:MARTIMM/Library.git`
+
 ## Author
 
 Marcel Timmerman
 Github account MARTIMM
+
+
+
+
+[release]: https://github.com/MARTIMM/Library/blob/master/doc/CHANGES.md
+[todo]: https://github.com/MARTIMM/Library/blob/master/doc/TODO.md
+[man]: https://github.com/MARTIMM/Library/blob/master/doc/manual.pdf
+[requir]: https://github.com/MARTIMM/Library/blob/master/doc/requirements.pdf
