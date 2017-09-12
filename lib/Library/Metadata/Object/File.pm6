@@ -71,14 +71,19 @@ class Metadata::Object::File does Library::Metadata::Object {
 
         info-message("file $!meta-data<name> found by name and content");
 
-        # Check first if file from this search is also an existing file on disk
-        # if so, modify the record found in the query.
+        # get the documents
         for self.find(:criteria($query)) -> $d {
+
+          # check first if file in this document is also an existing file on disk
+          # if it exists, the file is moved (same name and contant).
+          # modify the record found in the query to set the new .
           if "$d<path>/$d<name>".IO ~~ :e {
 
             info-message("$!meta-data<name> found on disk elsewhere, must have been moved, updated");
 
-# What if query returns more of the same, is that possible?
+# TODO What if query returns more of the same, is that possible?
+# $query replace by data from $d
+# $!meta-data replaces all data!?
             # Update the record to reflect current situation
             $doc = self.update: [ (
                 q => $query,
@@ -88,6 +93,10 @@ class Metadata::Object::File does Library::Metadata::Object {
 
             self!log-update-message($doc);
             last;
+          }
+
+# TODO when file not exists on disk .... what then?
+          else {
           }
         }
       }
@@ -105,8 +114,8 @@ class Metadata::Object::File does Library::Metadata::Object {
 
         # Check first if file from this search has an existing file
         for self.find(:criteria($query)) -> $d {
-note "Found ", $d.perl;
-          if "$d<path>/$!meta-data<name>".IO ~~ :e {
+#note "Found ", $d.perl;
+          if "$d<path>/$d<name>".IO ~~ :e {
 #!!!!!!
             info-message("$!meta-data<name> found on disk elsewhere, must have been renamed, updated");
 
