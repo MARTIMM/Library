@@ -78,8 +78,9 @@ subtest 'Moving files around', {
   diag "rename $filename to 't/ghi.xyz'";
   $filename.IO.rename('t/ghi.xyz');
   $filename = 't/ghi.xyz';
+# init-meta is not good because it also saves the new data
   $lmo.init-meta(:object($filename));
-  diag $lmo.meta.perl;
+  diag "Meta data of 't/ghi.xyz': " ~ $lmo.meta.perl;
 #  diag $lmo.find( :criteria(:name<ghi.xyz>,)).perl;
   for $lmo.find( :criteria(:name<ghi.xyz>,)) -> $doc {
 #note "Doc 0: ", $doc.perl;
