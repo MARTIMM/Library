@@ -6,7 +6,6 @@ unit package Library:auth<github:MARTIMM>;
 use Library;
 use Library::Metadata::Database;
 
-use OpenSSL::Digest;
 use MongoDB;
 use BSON::Document;
 
@@ -86,33 +85,15 @@ role Metadata::Object {
   }
 
   #----------------------------------------------------------------------------
-  method !sha1 ( Str $s --> Str ) {
-
-    (sha1( $s.encode)>>.fmt('%02x')).join('')
-  }
-
-  #----------------------------------------------------------------------------
   method !sha1-content ( Str $object --> Str ) {
 
     return '' unless $object.IO !~~ :d and $object.IO ~~ :r;
 
     my Str $sha-content = '';
 
-    # If larger than 10 Mb do not suck it up but let another program work on it
-    if $object.IO.s > 10_485_760 {
-
-      my Proc $p;
-      if $object.IO ~~ :r {
-        $p = run 'sha1sum', $object, :out;
-        $sha-content = [~] $p.out.lines;
-        $sha-content ~~ s/ \s+ .* $//;
-      }
-    }
-
-    else {
-
-      $sha-content = (sha1(slurp($object).encode)>>.fmt('%02x')).join('');
-    }
+    my Proc $p = run 'sha1sum', $object, :out;
+    $sha-content = [~] $p.out.lines;
+    $sha-content ~~ s/ \s+ .* $//;
 
     $sha-content
   }
