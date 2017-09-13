@@ -94,7 +94,7 @@ sub MAIN (
       info-message("process directory '$directory'");
 
       $mod .= new(:object($directory));
-      set-user-meta-data( $mod, $directory, :$et, :$arg-tags, :$drop-tags);
+      $mod.set-metadata-tags( $directory, :$et, :$arg-tags, :$drop-tags);
 
       if $recursive {
 
@@ -116,7 +116,7 @@ sub MAIN (
       info-message("process file $file");
 
       $mof .= new(:object($file));
-      set-user-meta-data( $mof, $file, :$et, :$arg-tags, :$drop-tags);
+      $mof.set-metadata-tags( $file, :$et, :$arg-tags, :$drop-tags);
     }
 
     # Ignore other type of files
@@ -125,51 +125,4 @@ sub MAIN (
       warn-message("File $file is ignored, it is a special type of file");
     }
   }
-}
-
-#------------------------------------------------------------------------------
-sub set-user-meta-data (
-  Library::Metadata::Object:D $object, Str:D $object-name,
-  Bool :$et = False, Array :$arg-tags = [], Array :$drop-tags = [],
-) {
-
-  my Array $tags = [];
-
-  # get user meta data
-  my BSON::Document $udata = $object.get-user-metadata;
-  my Array $prev-tags = $udata<tags> // [];
-
-  # check if to extract tags from object name
-  if $et {
-    my Str $tagstr = $object-name;
-    $tagstr ~~ s:s:i/ the || also || are || all || and || him || his ||
-            hers? || mine || ours? || was || following || some || various ||
-            see || most || much || many || about || you
-            //;
-
-    $tags = [ $arg-tags.Slip,
-              $tagstr.split(/ [\s || <punct> || \d]+ /).List.Slip,
-              $prev-tags.Slip
-            ];
-  }
-
-  else {
-    $tags = [ $arg-tags.Slip, $prev-tags.Slip];
-  }
-
-  # Filter tags shorter than 3 chars, lowercase convert, remove
-  # doubles then sort
-  my @tlist = $tags.grep(/^...+/)>>.lc.unique.sort.List;
-  $tags = [$tags.grep(/^...+/)>>.lc.unique.sort.List.Slip];
-
-  # remove any tags
-  for @$drop-tags -> $t {
-    if my $index = $tags.first( $t, :k) {
-      $tags.splice( $index, 1);
-    }
-  }
-
-  # save new set of tags
-  $udata<tags> = $tags;
-  $object.set-user-metadata($udata);
 }

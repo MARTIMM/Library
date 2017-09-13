@@ -6,11 +6,8 @@
   "license":                              "Artistic-2.0",
   "perl":                                 "6",
   "depends": [
-    "IO::Notification::Recursive",
-    "Config::TOML",
-    "BSON",
-    "MongoDB",
-    "OpenSSL"
+    "IO::Notification::Recursive", "Config::TOML", "BSON",
+    "MongoDB"
   ],
   "test-depends": [ "Test::META"],
   "build-depends": [ ],

@@ -17,12 +17,19 @@ role Metadata::Object {
     insert update delete count find drop-collection drop-database
   >;
 
+  has Array $!filter-list;
+
   #----------------------------------------------------------------------------
   method specific-init-meta ( Str :$object ) { ... }
   method update-meta ( ) { ... }
 
   #----------------------------------------------------------------------------
   submethod BUILD ( Str :$object ) {
+
+    $!filter-list = [<
+      the they their also are all and him his her hers mine our mine our ours was
+      following some various see most much many about you yours none
+    >];
 
     $!dbo .= new;
     if ?$object {
@@ -82,6 +89,54 @@ role Metadata::Object {
         upsert => False,
       ),
     ]
+  }
+
+  #----------------------------------------------------------------------------
+  # update tags stored in the field 'tags' of a meta data subdocument. The
+  # subdocument is by default 'user-meta'.
+  method set-metadata-tags (
+    Str:D $object-name, Bool :$et = False, Str :$subdoc = 'user-meta',
+    Array :$arg-tags = [], Array :$drop-tags = [],
+  ) {
+
+    my Array $tags = [];
+
+    # get user meta data
+    my BSON::Document $udata = $object.get-user-metadata;
+    my Array $prev-tags = $udata<tags> // [];
+
+    # check if to extract tags from object name
+    if $et {
+      $tags = [
+        $arg-tags.Slip,
+        $object-name.split(/ [\s || <punct> || \d]+ /).List.Slip,
+        $prev-tags.Slip
+      ];
+    }
+
+    else {
+      $tags = [ $arg-tags.Slip, $prev-tags.Slip];
+    }
+
+    # Filter tags shorter than 3 chars, lowercase convert, remove
+    # doubles then sort
+    $tags = [$tags.grep(/^...+/)>>.lc.unique.sort.List.Slip];
+
+note "FL: ", $filter-list, $drop-tags;
+    # remove any tags
+    for |@$!filter-list, |@$drop-tags -> $t is copy {
+      $t .= lc;
+      if (my $index = $tags.first( $t, :k)).defined {
+note "Filter $t: $index";
+        $tags.splice( $index, 1);
+      }
+    }
+
+note "TL: ", $tags;
+
+    # save new set of tags
+    $udata<tags> = $tags;
+    $object.set-user-metadata($udata);
   }
 
   #----------------------------------------------------------------------------
