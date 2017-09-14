@@ -94,7 +94,7 @@ sub MAIN (
       info-message("process directory '$directory'");
 
       $mod .= new(:object($directory));
-      $mod.set-metadata-tags( $directory, :$et, :$arg-tags, :$drop-tags);
+      $mod.set-metameta-tags( $directory, :$et, :$arg-tags, :$drop-tags);
 
       if $recursive {
 
@@ -116,7 +116,7 @@ sub MAIN (
       info-message("process file $file");
 
       $mof .= new(:object($file));
-      $mof.set-metadata-tags( $file, :$et, :$arg-tags, :$drop-tags);
+      $mof.set-metameta-tags( $file, :$et, :$arg-tags, :$drop-tags);
     }
 
     # Ignore other type of files
