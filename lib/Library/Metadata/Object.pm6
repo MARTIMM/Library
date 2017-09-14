@@ -58,58 +58,85 @@ role Metadata::Object {
   }
 
   #----------------------------------------------------------------------------
-  method get-user-metadata ( --> BSON::Document ) {
+  method get-metameta ( Str :$subdoc = 'user-meta' --> BSON::Document ) {
 
-    $!meta-data<user-meta> // BSON::Document.new
+    $!meta-data{$subdoc} // BSON::Document.new
   }
 
   #----------------------------------------------------------------------------
-  method set-user-metadata (
-    $data where (? $_ and $_ ~~ any(List|BSON::Document))
+  method set-metameta (
+    $data where (? $_ and $_ ~~ any(List|BSON::Document)),
+    Str :$subdoc = 'user-meta'
     --> BSON::Document
   ) {
 
     # modify user metadata and update document
-    $!meta-data<user-meta> = $data;
-    self!update-usermeta
+    $!meta-data{$subdoc} = $data;
+    self!update-metameta(:$subdoc)
   }
 
   #----------------------------------------------------------------------------
-  method !update-usermeta ( --> BSON::Document ) {
+  # update fields of a meta data subdocument. The subdocument is by default
+  # at meta field 'user-meta'.
+  method !update-metameta ( Str :$subdoc = 'user-meta' --> BSON::Document ) {
 
     # store in database only if record is found
-    $!dbo.update: [ (
+    my BSON::Document $doc = $!dbo.update: [ (
         q => (
           name => $!meta-data<name>,
           path => $!meta-data<path>,
-          content-sha1 => $!meta-data<content-sha1>,
+#          content-sha1 => $!meta-data<content-sha1>,
         ),
 
-        u => ( '$set' => ( user-meta => $!meta-data<user-meta>,),),
+        u => ( '$set' => ( $subdoc => $!meta-data{$subdoc},),),
         upsert => False,
       ),
-    ]
+    ];
+
+    if $doc<ok> {
+      my $selected = $doc<n>;
+      my $modified = $doc<nModified>;
+      info-message("metameta $subdoc update: selected = $selected, modified = $modified");
+    }
+
+    else {
+      if $doc<writeErrors> {
+        for $doc<writeErrors> -> $we {
+          warn-message("metameta $subdoc update: " ~ $we<errmsg>);
+        }
+      }
+
+      elsif $doc<errmsg> {
+        warn-message("metameta $subdoc update: ", $doc<errmsg>);
+      }
+
+      else {
+        warn-message("metameta $subdoc update: unknown error");
+      }
+    }
+
+    $doc
   }
 
   #----------------------------------------------------------------------------
   # update tags stored in the field 'tags' of a meta data subdocument. The
   # subdocument is by default 'user-meta'.
-  method set-metadata-tags (
-    Str:D $object-name, Bool :$et = False, Str :$subdoc = 'user-meta',
+  method set-metameta-tags (
+    Str:D $object, Bool :$et = False, Str :$subdoc = 'user-meta',
     Array :$arg-tags = [], Array :$drop-tags = [],
   ) {
 
     my Array $tags = [];
 
     # get user meta data
-    my BSON::Document $udata = $object.get-user-metadata;
+    my BSON::Document $udata = self.get-metameta(:$subdoc);
     my Array $prev-tags = $udata<tags> // [];
 
     # check if to extract tags from object name
     if $et {
       $tags = [
         $arg-tags.Slip,
-        $object-name.split(/ [\s || <punct> || \d]+ /).List.Slip,
+        $object.split(/ [\s || <punct> || \d]+ /).List.Slip,
         $prev-tags.Slip
       ];
     }
@@ -122,7 +149,7 @@ role Metadata::Object {
     # doubles then sort
     $tags = [$tags.grep(/^...+/)>>.lc.unique.sort.List.Slip];
 
-note "FL: ", $filter-list, $drop-tags;
+note "FL: ", $!filter-list, $drop-tags;
     # remove any tags
     for |@$!filter-list, |@$drop-tags -> $t is copy {
       $t .= lc;
@@ -136,7 +163,7 @@ note "TL: ", $tags;
 
     # save new set of tags
     $udata<tags> = $tags;
-    $object.set-user-metadata($udata);
+    self.set-metameta( $udata, :$subdoc);
   }
 
   #----------------------------------------------------------------------------
