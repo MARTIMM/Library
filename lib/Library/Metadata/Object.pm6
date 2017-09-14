@@ -4,6 +4,7 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
+use Library::Database;
 use Library::Metadata::Database;
 
 use MongoDB;
@@ -55,6 +56,40 @@ role Metadata::Object {
   method meta ( --> BSON::Document ) {
 
     $!meta-data
+  }
+
+  #----------------------------------------------------------------------------
+  method set-tag-filter ( @filter-list ) {
+
+    # use role as a class. initialize with database and collection
+    my Library::Database $d .= new;
+    $d.init( :database-key<database>, :collection-key<meta-config>);
+
+    # find the config doc
+    my $c = $d.find( BSON::Document.new(
+       :criteria(:config-type<tag-filter>,),
+        :number-to-return(1)
+      )
+    );
+
+    my BSON::Document $doc;
+    if ?$c {
+      $doc = $c.fetch;
+    }
+
+    # init if there isn't a document
+    $doc //= BSON::Document.new;
+
+    my Array $array = [(($doc<tags> // []).Slip, |@filter-list).unique];
+    $doc = $d.update: [ (
+        q => (
+          :config-type<tag-filter>,
+        ),
+
+        u => ( '$set' => ( :tags($array),),),
+        upsert => False,
+      ),
+    ];
   }
 
   #----------------------------------------------------------------------------

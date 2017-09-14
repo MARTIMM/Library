@@ -55,19 +55,28 @@ initialize-library();
 @*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
 #say "MArgs: ", @*ARGS;
 
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Store a list of tags in the configuration collection
+multi sub MAIN ( 'tag-filter', *@filter-list, ) {
+
+  # use role as a class
+  my Library::Metadata::Object $o .= new;
+  $o.set-tag-filter(@filter-list);
+}
+
 #-------------------------------------------------------------------------------
-# Program to store metadata about files.
+# Store metadata about files.
 #
-# --*   Help info
 # --t   supply tags. Separated by commas or repetition of option
 # --et  extract tags from filename
 # --dt  remove tags when there are any
 # --r   Recursive search through directories
 #
-sub MAIN (
+multi sub MAIN (
   *@files, Bool :$r = False,
-  Str :$t = '', Bool :$et = False, Str :$dt = ''
+  Str :$t = '', Bool :$et = False, Str :$dt = '',
 ) {
+
 
   my Library::Metadata::Object::File $mof;
   my Library::Metadata::Object::Directory $mod;
