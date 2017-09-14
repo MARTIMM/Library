@@ -380,14 +380,29 @@ ProgramMeta 1--? UserMeta
 WebMeta 1--? UserMeta
 ```
 
-## Implementation
+## Database and collections
+
+The database is by default called **Library** and the meta data of each object in documents stored in a collection called **Metadata**. These names can be defined differently using a configuration file which is explained later.
+
+An extra collection is used to find some control documents. By default called **Metaconfig**. The following documents can be found there;
+* To skip objects a single document is specified with the fields;
+  * **config-type**. Type field with value **skip-object**.
+  * **skip**. Array of values to check on filename. These can be perl6 regular expressions.
+* To filter tag fields also a single doc is used;
+  * **config-type**. Type field with value **tag-filter**.
+  * **tags**. Array of values to filter the tags with.
+
+## Configuration
+
+
+# Implementation
 
 This software package should come with several modules and programs to
 suit several ways of accessing the data. There is also an issue of
 making the software platform independent so everyone can be happy with
 it.
 
-### The programming language
+## The programming language
 
 The first item to think about is the choice of programming
 language. A scripting language would be a proper choice because
@@ -401,13 +416,13 @@ language by doing this project.
 The second approach is to use a browser to do the work. There we can
 use html5, css3 and javascript and libraries. There is also a server side scripting which can be any of perl6, perl 5 or javascript by means of nodejs. There are also a great many javascript modules which can be used.
 
-### The storage method
+## The storage method
 
 Because the information items on one object can be different than on
 the other a hiërargycal database would be the choice. MongoDB is a
 dayabase for which there is support from javascript as well as perl6.
 
-### Storage
+## Storage
 
 The name of the database and the names of the collections
 
@@ -418,7 +433,7 @@ is  only logical because we do not want to reinvent the wheel(s) again
 do we? We only try not to select those software which will bind it to
 some platform as explained above.
 
-### Perl6
+## Perl6
 
 The followup version of perl 5.*. The program
 is not yet completely finished but will be soon (2015-01). This
@@ -427,7 +442,7 @@ intermediary
 
 
 
-## State of affairs
+# State of affairs
 
 A list of programs and web pages created and made available for use. While
 the project is still in a pristene state there presumable are several bugs
@@ -446,7 +461,7 @@ store-file-metadata.pl6 is a program to insert or modify metadata of
 files and directories in the database.
 
 
-## Priorities
+# Priorities
 
 # Design
 
@@ -473,7 +488,7 @@ package library #FFFFFF {
   class LC as "Library::Configuration"
   class LD as "Library::Database" << (R,#FFFF00) role >>
   class LMD as "Library::Metadata::Database"
-  class Obj as "Library::Metadata::Object"
+  class Obj as "Library::Metadata::Object" << (R,#FFFF00) role >>
   class OTF as "Library::Metadata::Object::File"
   class OTD as "Library::Metadata::Object::Directory"
 
