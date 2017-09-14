@@ -40,9 +40,7 @@ class Configuration {
     # create directory
     else {
       mkdir $config-dir, 0o750;
-      my Str $file = $config-dir ~ '/config.toml';
-      $!config-filename = $file;
-      $config-dir ~= '/config.toml';
+      $!config-filename = $config-dir ~ '/config.toml';
       $!config = {};
     }
 
@@ -58,7 +56,12 @@ class Configuration {
   #----------------------------------------------------------------------------
   method !check-config ( ) {
 
-    $!config<uri> = 'mongodb://' unless ? $!config<uri>;
+    $!config<uri> //= 'mongodb://';
+    $!config<database> = "Library";
+    $!config<recursive-scan-dirs> = [];
+    $!config<collection><meta-data> = "Metadata";
+    $!config<collection><meta-config> = "Metaconfig";
+
     self.save;
   }
 }
