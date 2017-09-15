@@ -4,8 +4,8 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
-use Library::Database;
 use Library::Metadata::Database;
+use Library::ConfigTags;
 
 use MongoDB;
 use BSON::Document;
@@ -27,10 +27,8 @@ role Metadata::Object {
   #----------------------------------------------------------------------------
   submethod BUILD ( Str :$object ) {
 
-    $!filter-list = [<
-      the they their also are all and him his her hers mine our mine our ours was
-      following some various see most much many about you yours none
-    >];
+    my Library::ConfigTags $c .= new;
+    $!filter-list = $c.get-tag-filter;
 
     $!dbo .= new;
     if ?$object {
@@ -56,40 +54,6 @@ role Metadata::Object {
   method meta ( --> BSON::Document ) {
 
     $!meta-data
-  }
-
-  #----------------------------------------------------------------------------
-  method set-tag-filter ( @filter-list ) {
-
-    # use role as a class. initialize with database and collection
-    my Library::Database $d .= new;
-    $d.init( :database-key<database>, :collection-key<meta-config>);
-
-    # find the config doc
-    my $c = $d.find( BSON::Document.new(
-       :criteria(:config-type<tag-filter>,),
-        :number-to-return(1)
-      )
-    );
-
-    my BSON::Document $doc;
-    if ?$c {
-      $doc = $c.fetch;
-    }
-
-    # init if there isn't a document
-    $doc //= BSON::Document.new;
-
-    my Array $array = [(($doc<tags> // []).Slip, |@filter-list).unique];
-    $doc = $d.update: [ (
-        q => (
-          :config-type<tag-filter>,
-        ),
-
-        u => ( '$set' => ( :tags($array),),),
-        upsert => False,
-      ),
-    ];
   }
 
   #----------------------------------------------------------------------------
@@ -161,6 +125,7 @@ role Metadata::Object {
     Array :$arg-tags = [], Array :$drop-tags = [],
   ) {
 
+    my Library::ConfigTags $ct .= new;
     my Array $tags = [];
 
     # get user meta data
@@ -169,32 +134,21 @@ role Metadata::Object {
 
     # check if to extract tags from object name
     if $et {
-      $tags = [
-        $arg-tags.Slip,
-        $object.split(/ [\s || <punct> || \d]+ /).List.Slip,
-        $prev-tags.Slip
-      ];
+      $tags = $ct.filter-tags( [
+          $arg-tags.Slip,
+          $object.split(/ [\s || <punct>]+ /).List.Slip,
+          $prev-tags.Slip
+        ],
+        $drop-tags
+      );
     }
 
     else {
-      $tags = [ $arg-tags.Slip, $prev-tags.Slip];
+      $tags = $ct.filter-tags(
+        [ $arg-tags.Slip, $prev-tags.Slip],
+        $drop-tags
+      );
     }
-
-    # Filter tags shorter than 3 chars, lowercase convert, remove
-    # doubles then sort
-    $tags = [$tags.grep(/^...+/)>>.lc.unique.sort.List.Slip];
-
-note "FL: ", $!filter-list, $drop-tags;
-    # remove any tags
-    for |@$!filter-list, |@$drop-tags -> $t is copy {
-      $t .= lc;
-      if (my $index = $tags.first( $t, :k)).defined {
-note "Filter $t: $index";
-        $tags.splice( $index, 1);
-      }
-    }
-
-note "TL: ", $tags;
 
     # save new set of tags
     $udata<tags> = $tags;
