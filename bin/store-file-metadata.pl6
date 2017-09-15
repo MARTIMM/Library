@@ -4,7 +4,7 @@ use v6;
 
 use Library;
 use Library::Metadata::Database;
-use Library::Metadata::Object;
+use Library::ConfigTags;
 use Library::Metadata::Object::File;
 use Library::Metadata::Object::Directory;
 
@@ -55,16 +55,18 @@ initialize-library();
 @*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
 #say "MArgs: ", @*ARGS;
 
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#-------------------------------------------------------------------------------
 # Store a list of tags in the configuration collection
-multi sub MAIN ( 'tag-filter', *@filter-list, ) {
+multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
 
-  # use role as a class
-  my Library::Metadata::Object $o .= new;
-  $o.set-tag-filter(@filter-list);
+  my Array $drop-tags = [$dt.split(/ \s* <punct>+ \s* /)];
+
+  # access config collection
+  my Library::ConfigTags $c .= new;
+  $c.set-tag-filter( @filter-list, :$drop-tags);
 }
 
-#-------------------------------------------------------------------------------
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Store metadata about files.
 #
 # --t   supply tags. Separated by commas or repetition of option
@@ -73,7 +75,7 @@ multi sub MAIN ( 'tag-filter', *@filter-list, ) {
 # --r   Recursive search through directories
 #
 multi sub MAIN (
-  *@files, Bool :$r = False,
+  'fs', *@files, Bool :$r = False,
   Str :$t = '', Bool :$et = False, Str :$dt = '',
 ) {
 
