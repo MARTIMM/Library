@@ -5,23 +5,13 @@ unit package Library:auth<github:MARTIMM>;
 
 use Library;
 use Library::Database;
-#use Library::Metadata::Object;
+use Library::Config;
 
 use MongoDB;
 use BSON::Document;
 
 #------------------------------------------------------------------------------
-class ConfigTags {
-
-  has Library::Database $!dbcfg;
-
-  #----------------------------------------------------------------------------
-  submethod BUILD ( ) {
-
-    # use role as a class. initialize with database and collection
-    $!dbcfg .= new;
-    $!dbcfg.init( :database-key<database>, :collection-key<meta-config>);
-  }
+class Config::TagsList does Library::Config {
 
   #----------------------------------------------------------------------------
   method set-tag-filter ( @filter-list, Array :$drop-tags --> BSON::Document ) {
@@ -41,7 +31,7 @@ note "C: ", ($c // 'no cursor').perl;
     my Bool $found = $doc.defined;
     $doc //= BSON::Document.new;
 
-    # Filter tags shorter than 3 chars, lowercase convert, remove
+    # filter tags shorter than 3 chars, lowercase convert, remove
     # doubles then sort
     my Array $tags = [
       (($doc<tags> // []).Slip, |@filter-list).grep(/^...+/)>>.lc.unique.sort
