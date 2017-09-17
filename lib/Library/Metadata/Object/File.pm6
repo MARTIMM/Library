@@ -4,6 +4,7 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
+use Library::Config::SkipList;
 use Library::Metadata::Object;
 
 use MongoDB;
@@ -14,7 +15,7 @@ class Metadata::Object::File does Library::Metadata::Object {
 
   #----------------------------------------------------------------------------
   # Set the default informaton for a file in the meta structure
-  method specific-init-meta ( Str :$object ) {
+  method specific-init-meta ( Str :$object --> Bool ) {
 
     my Str $path = $object.IO.absolute;
     my Str $file = $object.IO.basename;
@@ -30,6 +31,8 @@ class Metadata::Object::File does Library::Metadata::Object {
 
     info-message("metadata set for $object");
     debug-message($!meta-data.perl);
+
+    return True;
   }
 
   #----------------------------------------------------------------------------

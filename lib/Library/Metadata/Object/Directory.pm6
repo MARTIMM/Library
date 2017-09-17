@@ -4,6 +4,7 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
+use Library::Config::SkipList;
 use Library::Metadata::Object;
 
 use MongoDB;
@@ -14,7 +15,7 @@ class Metadata::Object::Directory does Library::Metadata::Object {
 
   #----------------------------------------------------------------------------
   # Set the default informaton for a directory in the meta structure
-  method specific-init-meta ( Str :$object ) {
+  method specific-init-meta ( Str :$object --> Bool ) {
 
     my Str $path = $object.IO.absolute;
     my Str $dir = $object.IO.basename;
@@ -24,6 +25,8 @@ class Metadata::Object::Directory does Library::Metadata::Object {
     $!meta-data<path> = $path;
     $!meta-data<meta-type> = OT-Directory.Str;
     $!meta-data<exists> = $object.IO ~~ :r;
+
+    return True;
   }
 
   #----------------------------------------------------------------------------

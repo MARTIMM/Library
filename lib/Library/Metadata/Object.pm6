@@ -5,7 +5,7 @@ unit package Library:auth<github:MARTIMM>;
 
 use Library;
 use Library::Metadata::Database;
-use Library::ConfigTags;
+use Library::Config::TagsList;
 
 use MongoDB;
 use BSON::Document;
@@ -21,13 +21,13 @@ role Metadata::Object {
   has Array $!filter-list;
 
   #----------------------------------------------------------------------------
-  method specific-init-meta ( Str :$object ) { ... }
+  method specific-init-meta ( Str :$object --> Bool ) { ... }
   method update-meta ( ) { ... }
 
   #----------------------------------------------------------------------------
   submethod BUILD ( Str :$object ) {
 
-    my Library::ConfigTags $c .= new;
+    my Library::Config::TagsList $c .= new;
     $!filter-list = $c.get-tag-filter;
 
     $!dbo .= new;
@@ -43,11 +43,16 @@ role Metadata::Object {
   #----------------------------------------------------------------------------
   method init-meta ( Str :$object --> BSON::Document ) {
 
+    BSON::Document $doc .= new;
+
     # modify database if needed
     $!meta-data .= new;
-    self.specific-init-meta(:$object);
-    self!add-global-meta;
-    self.update-meta
+    if self.specific-init-meta(:$object) {
+      self!add-global-meta;
+      $doc = self.update-meta;
+    }
+
+    $doc;
   }
 
   #----------------------------------------------------------------------------
@@ -125,7 +130,7 @@ role Metadata::Object {
     Array :$arg-tags = [], Array :$drop-tags = [],
   ) {
 
-    my Library::ConfigTags $ct .= new;
+    my Library::Config::TagsList $ct .= new;
     my Array $tags = [];
 
     # get user meta data
