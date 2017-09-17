@@ -1,5 +1,8 @@
 ## Release notes
 
+* 0.7.0
+  * Create class Library::Config::SkipList to manage filters for files and directories. Maybe also for other type of objects.
+  * Renamed Library::ConfigTags to Library::Config::Tags
 * 0.6.0
   * store-file-metadata.pl6 can now add tags in the user meta sub document of a given entry. Bsides adding it can also remove tags and filter against a list. This list is maintained by Library::ConfigTags. The program can deliver this information. The interface is now;
   ```
@@ -7,7 +10,7 @@
     store-file-metadata.pl6 [--dt=<Str>] tag-filter '[<filter-list> ...]'
     store-file-metadata.pl6 [-r] [-t=<Str>] [--et] [--dt=<Str>] fs '[<files> ...]'
   ```
-  Tags are filtered against a list from the config collection. 
+  Tags are filtered against a list from the config collection.
 * 0.5.3
   * Many modules rewritten and bugs fixed
   * Program store-file-metadata.pl6 is now functional
