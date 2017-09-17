@@ -4,7 +4,8 @@ use v6;
 
 use Library;
 use Library::Metadata::Database;
-use Library::ConfigTags;
+use Library::Config::TagsList;
+use Library::Config::SkipList;
 use Library::Metadata::Object::File;
 use Library::Metadata::Object::Directory;
 
@@ -62,8 +63,26 @@ multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
   my Array $drop-tags = [$dt.split(/ \s* <punct>+ \s* /)];
 
   # access config collection
-  my Library::ConfigTags $c .= new;
+  my Library::Config::TagsList $c .= new;
   $c.set-tag-filter( @filter-list, :$drop-tags);
+}
+
+#-------------------------------------------------------------------------------
+# Store a list of regexes to filter on files and directories
+# in the configuration collection
+multi sub MAIN (
+  'skip-filter', *@filter-list, Str :$ds = '', Bool :$dir = False
+) {
+
+  # drop skip from list. comma separated list of regexes. a comma in a
+  # regex can be escaped with a '\' character.
+  my Array $drop-skip = [
+    $ds.split(/ \s* <!after '\\'> ',' \s* /)>>.subst(/\\/,'')
+  ];
+
+  # access config collection
+  my Library::Config::SkipList $c .= new;
+  $c.set-skip-filter( @filter-list, :$drop-skip, :$dir);
 }
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
