@@ -22,8 +22,6 @@ class Config::TagsList does Library::Config {
       :number-to-return(1)
     );
 
-note "C: ", ($c // 'no cursor').perl;
-
     my BSON::Document $doc;
     $doc = $c.fetch;
 
@@ -41,11 +39,9 @@ note "C: ", ($c // 'no cursor').perl;
     for @$drop-tags -> $t is copy {
       $t .= lc;
       if (my $index = $tags.first( $t, :k)).defined {
-note "Filter $t: $index";
         $tags.splice( $index, 1);
       }
     }
-note "A: $found, ", $tags;
 
     if $found {
       $doc = $!dbcfg.update: [ (
@@ -67,7 +63,6 @@ note "A: $found, ", $tags;
       ];
     }
 
-note $doc.perl;
     if $doc<ok> {
       my $selected = $doc<n>;
 
@@ -108,8 +103,6 @@ note $doc.perl;
       :number-to-return(1)
     );
 
-note "C: ", ($c // 'no cursor').perl;
-
     my BSON::Document $doc;
     $doc = $c.fetch;
 
@@ -117,7 +110,6 @@ note "C: ", ($c // 'no cursor').perl;
 #    my Bool $found = $doc.defined;
     $doc //= BSON::Document.new;
 
-note "Doc: ", $doc.perl;
     $doc<tags> // []
   }
 
@@ -130,17 +122,13 @@ note "Doc: ", $doc.perl;
     # doubles then sort
     $tags = [$tags.grep(/^...+/)>>.lc.unique.sort.List.Slip];
 
-note "FL: ", $filter-list, $drop-tags;
     # remove any tags
     for |@$filter-list, |@$drop-tags -> $t is copy {
       $t .= lc;
       if (my $index = $tags.first( $t, :k)).defined {
-note "Filter $t: $index";
         $tags.splice( $index, 1);
       }
     }
-
-note "TL: ", $tags;
 
     $tags
   }
