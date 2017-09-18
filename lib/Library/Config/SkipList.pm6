@@ -23,7 +23,7 @@ class Config::SkipList does Library::Config {
 
     # find the config doc
     my $c = $!dbcfg.find(
-      :criteria( (:config-type<skip-object>, )),
+      :criteria( (:config-type<skip-filter>, )),
       :number-to-return(1)
     );
 
@@ -43,16 +43,16 @@ class Config::SkipList does Library::Config {
     for @$drop-skip -> $t is copy {
       $t .= lc;
       if (my $index = $skip.first( $t, :k)).defined {
-note "Skip $t: $index";
+#note "Skip $t: $index";
         $skip.splice( $index, 1);
       }
     }
-note "A: $found, ", $skip;
+#note "A: $found, ", $skip;
 
     if $found {
       $doc = $!dbcfg.update: [ (
           q => (
-            :config-type<skip-object>,
+            :config-type<skip-filter>,
           ),
 
           u => ( '$set' => ( $skip-field => $skip,),),
@@ -63,13 +63,13 @@ note "A: $found, ", $skip;
 
     else {
       $doc = $!dbcfg.insert: [ (
-          :config-type<skip-object>,
+          :config-type<skip-filter>,
           $skip-field => $skip,
         ),
       ];
     }
 
-note $doc.perl;
+#note $doc.perl;
     if $doc<ok> {
       my $selected = $doc<n>;
 
@@ -102,15 +102,15 @@ note $doc.perl;
   }
 
   #----------------------------------------------------------------------------
-  method get-skip-filter ( --> Array ) {
+  method get-skip-filter ( Bool :$dir = False --> Array ) {
+
+    my Str $skip-field = $dir ?? 'dirskip' !! 'fileskip';
 
     # find the config doc
     my $c = $!dbcfg.find(
-      :criteria( (:config-type<tag-filter>, )),
+      :criteria( (:config-type<skip-filter>, )),
       :number-to-return(1)
     );
-
-note "C: ", ($c // 'no cursor').perl;
 
     my BSON::Document $doc;
     $doc = $c.fetch;
@@ -119,31 +119,7 @@ note "C: ", ($c // 'no cursor').perl;
 #    my Bool $found = $doc.defined;
     $doc //= BSON::Document.new;
 
-note "Doc: ", $doc.perl;
-    $doc<tags> // []
-  }
-
-  #----------------------------------------------------------------------------
-  method filter-tags ( Array:D $tags is copy, Array $drop-tags = [] --> Array ) {
-
-    my $filter-list = self.get-tag-filter;
-
-    # Filter tags shorter than 3 chars, lowercase convert, remove
-    # doubles then sort
-    $tags = [$tags.grep(/^...+/)>>.lc.unique.sort.List.Slip];
-
-note "FL: ", $filter-list, $drop-tags;
-    # remove any tags
-    for |@$filter-list, |@$drop-tags -> $t is copy {
-      $t .= lc;
-      if (my $index = $tags.first( $t, :k)).defined {
-note "Filter $t: $index";
-        $tags.splice( $index, 1);
-      }
-    }
-
-note "TL: ", $tags;
-
-    $tags
+#note "Doc skip: ", $doc.perl;
+    $doc{$skip-field} // []
   }
 }
