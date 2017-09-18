@@ -20,12 +20,17 @@ role Metadata::Object {
 
   has Array $!filter-list;
 
+  # ignore the object when an object is filtered out
+  has Bool $!ignore-object;
+
   #----------------------------------------------------------------------------
   method specific-init-meta ( Str :$object --> Bool ) { ... }
   method update-meta ( ) { ... }
 
   #----------------------------------------------------------------------------
   submethod BUILD ( Str :$object ) {
+
+    $!ignore-object = False;
 
     my Library::Config::TagsList $c .= new;
     $!filter-list = $c.get-tag-filter;
@@ -43,13 +48,17 @@ role Metadata::Object {
   #----------------------------------------------------------------------------
   method init-meta ( Str :$object --> BSON::Document ) {
 
-    BSON::Document $doc .= new;
+    my BSON::Document $doc .= new;
 
     # modify database if needed
     $!meta-data .= new;
     if self.specific-init-meta(:$object) {
       self!add-global-meta;
       $doc = self.update-meta;
+    }
+
+    else {
+      $!ignore-object = True;
     }
 
     $doc;
@@ -74,15 +83,26 @@ role Metadata::Object {
     --> BSON::Document
   ) {
 
-    # modify user metadata and update document
-    $!meta-data{$subdoc} = $data;
-    self!update-metameta(:$subdoc)
+    my BSON::Document $doc .= new;
+
+    unless $!ignore-object {
+      # modify user metadata and update document
+      $!meta-data{$subdoc} = $data;
+      $doc = self!update-metameta(:$subdoc);
+    }
+
+    $doc
   }
 
   #----------------------------------------------------------------------------
   # update fields of a meta data subdocument. The subdocument is by default
   # at meta field 'user-meta'.
-  method !update-metameta ( Str :$subdoc = 'user-meta' --> BSON::Document ) {
+  method !update-metameta (
+    Str :$subdoc = 'user-meta'
+    --> BSON::Document
+  ) {
+
+    return BSON::Document.new if $!ignore-object;
 
     # store in database only if record is found
     my BSON::Document $doc = $!dbo.update: [ (
@@ -129,6 +149,8 @@ role Metadata::Object {
     Str:D $object, Bool :$et = False, Str :$subdoc = 'user-meta',
     Array :$arg-tags = [], Array :$drop-tags = [],
   ) {
+
+    return BSON::Document.new if $!ignore-object;
 
     my Library::Config::TagsList $ct .= new;
     my Array $tags = [];
