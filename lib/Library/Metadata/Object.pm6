@@ -147,7 +147,7 @@ role Metadata::Object {
   # subdocument is by default 'user-meta'.
   method set-metameta-tags (
     Str:D $object, Bool :$et = False, Str :$subdoc = 'user-meta',
-    Array :$arg-tags = [], Array :$drop-tags = [],
+    Array :$arg-tags = [], Array :$drop-tags is copy = [],
   ) {
 
     return BSON::Document.new if $!ignore-object;
@@ -158,6 +158,10 @@ role Metadata::Object {
     # get user meta data
     my BSON::Document $udata = self.get-metameta(:$subdoc);
     my Array $prev-tags = $udata<tags> // [];
+
+    # filter out type tags
+    my Str $e = $object.IO.extension;
+    $drop-tags.push($e) if ?$e;
 
     # check if to extract tags from object name
     if $et {
@@ -178,6 +182,8 @@ role Metadata::Object {
     }
 
     # save new set of tags
+note "T: ", $tags;
+note "S: ", $subdoc.perl;
     $udata<tags> = $tags;
     self.set-metameta( $udata, :$subdoc);
   }
