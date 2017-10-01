@@ -1,7 +1,10 @@
 #!/usr/bin/env perl6
 #-------------------------------------------------------------------------------
-# Get a mimtype info from http://www.freeformatter.com/mime-types-list.html
+# Get a mime type info from http://www.freeformatter.com/mime-types-list.html
 # and store them in MongoDB database Library and collection mimetypes.
+#
+# complete list from https://www.iana.org/assignments/media-types/media-types.xhtml
+# List link: https://www.iana.org/assignments/media-types/application.csv
 #-------------------------------------------------------------------------------
 use v6;
 #use HTTP::Client;
@@ -10,8 +13,7 @@ use Library;
 #use Grammar::Tracer;
 
 #-------------------------------------------------------------------------------
-# Define a grammer to read a html table
-#
+# define a grammer to read a html table
 grammar Table-Grammar {
   token TOP { (<-[\<]>* ( <table> || \< <-[\<]>* ) )+ }
 
@@ -48,7 +50,6 @@ grammar Table-Grammar {
 
   # In the data field there can be other tags, so be not-greedy and look for
   # the proper end tags
-  #
   token data { .*? ( <?th-end> || <?td-end> ) }
 
   token attribute { \s* <attr-name> '=' <attr-value> \s* }
@@ -57,7 +58,6 @@ grammar Table-Grammar {
 }
 
 # The actions to perform when tokens are found
-#
 class Table-Actions {
   has Array $.tables = [];
   has Int $.table-count = 0;
@@ -109,8 +109,7 @@ if 'mime-types-list.html'.IO ~~ :e {
   $content = slurp( 'mime-types-list.html', :!bin);
 }
 
-# If not found, get data from server
-#
+# if not found, get data from server
 else {
 #  if 0 {
 #  my HTTP::Client $client .= new;
@@ -128,23 +127,20 @@ else {
   my $r = shell('wget http://www.freeformatter.com/mime-types-list.html');
 }
 
-# Test for content
-#
+# test for content
 if !?$content {
   say "No content on server found";
   exit(1);
 }
 
 #------------------------------------------------------------------------------
-# Get data from table
-#
+# get data from table
 my Table-Actions $actions-object .= new();
 Table-Grammar.subparse( $content, :actions($actions-object));
 
 #------------------------------------------------------------------------------
 # Store the data in MongoDB Library. First get connection, database and
 # collection. Drop the old collection before filling.
-#
 my $cfg = $Library::cfg;
 my MongoDB::Database $lib-db = $Library::connection.database($cfg.get('database'));
 my MongoDB::Collection $mime-cl = $lib-db.collection($cfg.get('collections')<mimetypes>);
@@ -154,9 +150,7 @@ if any($lib-db.collection_names) ~~ $mime-cl.name {
   $mime-cl.drop();
 }
 
-
 # headers. F1 must be translated into F1a and F1b
-#
 my Hash $headers = {
   F0    => 'name',
   F1a   => 'type',
@@ -166,15 +160,12 @@ my Hash $headers = {
 };
 
 # Go through all tables
-#
 for $actions-object.tables.list -> $table {
 
   # Go through all rows
-  #
   for $table.keys -> $row {
 
     # Go through all fields
-    #
     my Hash $mime-data = {};
     for $table{$row}.keys -> $field {
       given $field {
@@ -183,7 +174,7 @@ for $actions-object.tables.list -> $table {
           $mime-data{ $headers<F1a> } = @type[0];
           $mime-data{ $headers<F1b> } = @type[1];
         }
-        
+
         when 'F2' {
           my Array $extensions = [$table{$row}{$field}.split( / \s* ',' \s* / )];
           $mime-data{ $headers{$field} } = $extensions;
@@ -196,10 +187,8 @@ for $actions-object.tables.list -> $table {
     }
 
     # Look it up first
-    #
     my Hash $doc = $mime-cl.find_one({name => $mime-data<name>});
     $mime-cl.insert($mime-data);# unless ?$doc;
     say '[', (?$doc ?? '-' !! 'x' ), "] $mime-data<fileext type subtype>";
   }
 }
-
