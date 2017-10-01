@@ -36,17 +36,29 @@ role Database {
     $!database.run-command: (
       insert => $!collection.name,
       documents => $documents
-    );
+    )
   }
 
   #-----------------------------------------------------------------------------
   method update ( Array $updates --> BSON::Document ) {
 
+#    my BSON::Document $req .= new: (
+#      update => $!collection.name,
+#      updates => $updates,
+#      ordered => True,
+#    );
+
+#note "Req: ", $req.perl;
+#    my BSON::Document $doc = $!database.run-command($req);
     $!database.run-command: (
       update => $!collection.name,
       updates => $updates,
       ordered => True,
-    );
+    )
+
+
+#note "Doc: ", $doc.perl;
+#    $doc
   }
 
   #-----------------------------------------------------------------------------
@@ -55,7 +67,7 @@ role Database {
     $!database.run-command: (
       delete => $!collection.name,
       deletes => $deletes
-    );
+    )
   }
 
   #-----------------------------------------------------------------------------
@@ -80,9 +92,10 @@ role Database {
     $req<count> = $!collection.name;
     $req<query> = $query if ?$query;
 #note "B req: ", $req.perl;
-    my $d = $!database.run-command($req);
+#    my $d = $!database.run-command($req);
+    $!database.run-command($req)
 #note "B: count: ", $d.perl;
-    $d;
+#    $d
   }
 
   #-----------------------------------------------------------------------------
