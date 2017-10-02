@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkApplicationWindow" id="app">
+    <property name="name">main-window</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkFrame" id="frame">
+        <property name="name">frame</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label_xalign">0</property>
+        <property name="shadow_type">none</property>
+        <child>
+          <object class="GtkAlignment">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="left_padding">12</property>
+            <child>
+              <object class="GtkButton" id="bttn">
+                <property name="label" translatable="yes">my-bttn</property>
+                <property name="name">button</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="bttn-clicked" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child type="label">
+          <object class="GtkLabel" id="frame-lbl">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Frame label</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
