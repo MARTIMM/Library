@@ -26,6 +26,7 @@ class Gui {
   has GTK::Simple::MenuItem $!file-menu-item;
   has GTK::Simple::MenuItem $!quit-menu-item;
   has GTK::Simple::Menu $!command-menu;
+  has GTK::Simple::MenuItem $!command-menu-item;
   has GTK::Simple::MenuItem $!select-menu-item;
   has GTK::Simple::Menu $!help-menu;
   has GTK::Simple::MenuItem $!help-menu-item;
@@ -38,32 +39,48 @@ class Gui {
   has GTK::Simple::MenuToolButton $!save-tb-bttn;
   has GTK::Simple::MenuToolButton $!exit-tb-bttn;
 
+
+  has GTK::Simple::FileChooserButton $!file-cb;
+
   #----------------------------------------------------------------------------
   submethod BUILD ( ) {
 
     $!app .=  new( :title("Meta Data Library"), :height(100), :width(200));
 
 
+    $!file-cb .= new(:title("Select file or directory"));
+    $!file-cb.file-set.tap: {
+      note $!file-cb.file-name;
+    }
+
+
     $!file-menu-item .= new(:label("File"));
-    $!file-menu-item.set-sub-menu( $!file-menu .= new );
 
     $!quit-menu-item .= new(:label("Quit"));
     $!quit-menu-item.activate.tap: -> $widget {
       self.exit-app(:$widget);
     }
 
+    $!file-menu .= new;
+    $!file-menu-item.set-sub-menu($!file-menu);
     $!file-menu.append($!quit-menu-item);
 
 
+    $!command-menu-item .= new(:label("Command"));
+
     $!select-menu-item .= new(:label("Select"));
-    $!select-menu-item.set-sub-menu( $!command-menu .= new );
     $!select-menu-item.activate.tap: -> $widget {
       note "F: ", self.select-file();
     }
 
+    $!command-menu .= new;
+    $!command-menu-item.set-sub-menu($!command-menu);
+    $!command-menu.append($!select-menu-item);
+
+
     $!menu-bar .= new;
     $!menu-bar.append($!file-menu-item);
-    $!menu-bar.append($!select-menu-item);
+    $!menu-bar.append($!command-menu-item);
 
 
 
@@ -104,9 +121,15 @@ class Gui {
       [ $menu-bar-vbox,
         { :widget($toolbar-vbox),
           :expand(False)
+        },
+        { :widget($!file-cb),
+          :expand(False)
         }
       ]
     );
+
+
+
 
     $!app.set-content($vbox);
     $!app.show-all;
