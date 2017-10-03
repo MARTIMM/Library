@@ -1,5 +1,7 @@
 ## Release notes
 
+* 0.8.0
+  * Creating a gui based on GTK::Simple
 * 0.7.0
   * Create class Library::Config::SkipList to manage filters for files and directories. Maybe also for other type of objects.
   * Renamed Library::ConfigTags to Library::Config::Tags

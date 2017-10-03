@@ -299,6 +299,7 @@ This is meant to make relationships between the meta data documents. The questio
 * datetime: Date and time of retrieval, date and time of modification or current date and time.
 * object-type: Type of object such as document, directory or url.
 * keys: A list of keywords under which the object can be categorized.
+* uri: Every object must have a uri which can be used to compare things
 
 ### Document meta data fields derived from files and directories
 
@@ -313,7 +314,6 @@ This is meant to make relationships between the meta data documents. The questio
 
 ### Web meta information to store.
 
-* uri: Url, uri or iri
 * protocol: Name of used protocol
 * server: Name of server
 * path: Path of document
