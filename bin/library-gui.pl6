@@ -7,17 +7,22 @@ use GTK::Simple::Raw :ALL;
 
 use GTK::Simple::App;
 use GTK::Simple::Button;
-use GTK::Simple::Frame;
-use GTK::Simple::HBox;
-use GTK::Simple::VBox;
-use GTK::Simple::FileChooserButton;
 use GTK::Simple::CheckButton;
-use GTK::Simple::Toolbar;
-use GTK::Simple::MenuToolButton;
-use GTK::Simple::MenuBar;
+use GTK::Simple::Frame;
+use GTK::Simple::Grid;
+use GTK::Simple::HBox;
+use GTK::Simple::Label;
+use GTK::Simple::FileChooserButton;
 use GTK::Simple::Menu;
+use GTK::Simple::MenuBar;
 use GTK::Simple::MenuItem;
+use GTK::Simple::MenuToolButton;
+use GTK::Simple::TextView;
+use GTK::Simple::Toolbar;
+use GTK::Simple::VBox;
 use GTK::Simple::Window;
+
+use Library::Image;
 
 #------------------------------------------------------------------------------
 class Gui { ... }
@@ -28,30 +33,25 @@ class Gui {
 
   has GTK::Simple::App $!app;
   has GTK::Simple::Window $!collect-dialog;
+  has GTK::Simple::Window $!metadata-dialog;
 
   #----------------------------------------------------------------------------
   submethod BUILD ( ) {
 
-    $!app .= new( :title("Meta Data Library"), :height(100), :width(200));
+    $!app .= new( :title("Meta Data Library"), :height(50), :width(180));
 
     my GTK::Simple::VBox $menu-bar-vbox = self.create-menu;
     my GTK::Simple::VBox $toolbar-vbox = self.create-toolbar;
 
     self.create-collect-dialog;
+    self.create-edit-metadata-dialog;
 
-    my GTK::Simple::VBox $vbox .= new(
-      [ $menu-bar-vbox,
-        { :widget($toolbar-vbox),
-          :expand(False)
-        },
-#        { :widget($file-cb),
-#          :expand(False)
-#        }
-      ]
+    my GTK::Simple::Grid $main-grid .= new(
+      [ 0, 0, 5, 1 ] => $menu-bar-vbox,
+      [ 0, 1, 5, 1 ] => $toolbar-vbox,
     );
 
-
-    $!app.set-content($vbox);
+    $!app.set-content($main-grid);
     $!app.show-all;
     $!app.run;
   }
@@ -79,7 +79,6 @@ class Gui {
     $file-menu-item.set-sub-menu($file-menu);
     $file-menu.append($collect-menu-item);
     $file-menu.append($quit-menu-item);
-
 
     # 'Help' menu
     my GTK::Simple::MenuItem $help-menu-item .= new(:label("Help"));
@@ -109,12 +108,12 @@ class Gui {
     # See for icon https://developer.gnome.org/gtk3/stable/gtk3-Stock-Items.html
     my GTK::Simple::MenuToolButton $new-tb-bttn .= new(:icon(GTK_STOCK_NEW));
     $new-tb-bttn.clicked.tap: {
-      "New toolbar button clicked".say;
+      $!collect-dialog.show;
     }
 
     my GTK::Simple::MenuToolButton $open-tb-bttn .= new(:icon(GTK_STOCK_OPEN));
     $open-tb-bttn.clicked.tap: {
-      "Open toolbar button clicked".say;
+      $!metadata-dialog.show;
     }
 
     my GTK::Simple::MenuToolButton $save-tb-bttn .= new(:icon(GTK_STOCK_SAVE));
@@ -133,6 +132,7 @@ class Gui {
     $toolbar.add-menu-item($save-tb-bttn);
     $toolbar.add-separator;
     $toolbar.add-menu-item($exit-tb-bttn);
+    $toolbar.add-separator;
 
     $toolbar.pack
   }
@@ -140,52 +140,87 @@ class Gui {
   #----------------------------------------------------------------------------
   method create-collect-dialog ( ) {
 
+    #==[ file chooser button set to select a folder ]==
     my GTK::Simple::FileChooserButton $file-cb .= new:
       :title("Select file or directory"),
-      :action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER)
-      ;
-#    $file-cb.file-set.tap: {
-#      note $file-cb.file-name;
-#    };
+      :action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
 
+    #==[ checkbuttons for options ]==
     my GTK::Simple::CheckButton $recursive-cbttn .= new: :label("Recurse down tree");
     my GTK::Simple::CheckButton $tagsfname-cbttn .= new: :label("Tags from names");
 
-    my GTK::Simple::VBox $vbox-cbttns .= new;
-    $vbox-cbttns.spacing(2);
-    $vbox-cbttns.pack-start( $recursive-cbttn, False, False, 2);
-    $vbox-cbttns.pack-start( $tagsfname-cbttn, False, False, 2);
+    my GTK::Simple::TextView $tags-insert .= new;
+    my GTK::Simple::TextView $tags-remove .= new;
 
-    my GTK::Simple::Frame $frame-cbttns .= new(:label("Options"));
-    $frame-cbttns.set-content($vbox-cbttns);
-
-
-
+    #==[ start collection button ]==
     my GTK::Simple::Button $collect-bttn .= new(:label<Collect>);
     $collect-bttn.clicked.tap: {
-      note "Collect data from $file-cb.file-name()";
+      note "Collect data from $file-cb.file-name() with;\n",
+           "  recursive: $recursive-cbttn.status()\n",
+           "  tag names: $tagsfname-cbttn.status()\n",
+           "  insert tags: $tags-insert.text()\n",
+           "  remove tags: $tags-remove.text()\n ";
     };
 
+    #==[ close dialog button ]==
     my GTK::Simple::Button $done-bttn .= new(:label<Done>);
     $done-bttn.clicked.tap: { $!collect-dialog.hide; };
 
-    my GTK::Simple::HBox $hbox .= new;
-    $hbox.spacing(2);
-    $hbox.pack-start( $collect-bttn, False, False, 2);
-    $hbox.pack-start( $done-bttn, False, False, 2);
+    my GTK::Simple::Grid $dialog-grid .= new(
+      [ 0, 0, 4, 1] => GTK::Simple::Label.new(:text('Collect Control Options')),
 
-    my GTK::Simple::VBox $vbox .= new;
-    $vbox.pack-start( $frame-cbttns, False, False, 2);
-    $vbox.pack-start( $file-cb, False, False, 2);
-    $vbox.pack-start( $hbox, False, False, 2);
+      [ 2, 1, 1, 1] => $recursive-cbttn,
+      [ 2, 2, 1, 1] => $tagsfname-cbttn,
 
-    my GTK::Simple::Frame $frame .= new(:label("Collect control settings"));
-    $frame.set-content($vbox);
+      [ 1, 3, 1, 1] => GTK::Simple::Label.new(:text('Insert tags')),
+      [ 2, 3, 2, 2] => $tags-insert,
+      [ 1, 4, 1, 1] => GTK::Simple::Label.new(:text(' ')),
+
+      [ 1, 5, 1, 1] => GTK::Simple::Label.new(:text('Remove tags')),
+      [ 2, 5, 2, 2] => $tags-remove,
+      [ 1, 6, 1, 1] => GTK::Simple::Label.new(:text(' ')),
+
+      [ 1, 8, 2, 1] => $file-cb,
+      [ 3, 8, 1, 1] => $collect-bttn,
+      [ 4, 8, 1, 1] => $done-bttn,
+    );
 
     $!collect-dialog .= new(:title("Collect dialog"));
-    $!collect-dialog.set-content($frame);
+    $!collect-dialog.set-content($dialog-grid);
 
     gtk_window_set_position( $!collect-dialog.WIDGET, GTK_WIN_POS_MOUSE);
+  }
+
+  #----------------------------------------------------------------------------
+  method create-edit-metadata-dialog ( ) {
+
+#    my Library::Image $image1 .= new(
+#      :file("")
+#    );
+
+#    my Library::Image $image2 .= new;
+#    $image2.set-image(
+#      :file("")
+#    );
+
+    # icon names https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+    my Library::Image $image3 .= new(
+      :icon-name<help-browser>, :icon-size(GTK_ICON_SIZE_LARGE_TOOLBAR)
+    );
+
+    self.create-collect-dialog;
+
+    my GTK::Simple::Grid $metadata-grid .= new(
+#      [ 0, 0, 1, 1 ] => $image1,
+#      [ 0, 1, 1, 1 ] => $image2,
+      [ 0, 2, 1, 1 ] => $image3,
+    );
+
+
+    $!metadata-dialog .= new(:title("Meta Data Edit Ddialog"));
+    $!metadata-dialog.set-content($metadata-grid);
+
+    gtk_window_set_position( $!metadata-dialog.WIDGET, GTK_WIN_POS_MOUSE);
   }
 
   #----------------------------------------------------------------------------
@@ -195,7 +230,7 @@ class Gui {
     $fcb.file-name;
   }
 
-  #------------------------------------------------------------------------------
+  #----------------------------------------------------------------------------
   method exit-app( :$widget ) {
     note $widget.perl;
     $!app.exit;
