@@ -11,7 +11,7 @@ use Library::Metadata::Object::Directory;
 
 use MongoDB;
 use BSON::Document;
-use IO::Notification::Recursive;
+#use IO::Notification::Recursive;
 
 #-------------------------------------------------------------------------------
 # setup logging
@@ -33,7 +33,7 @@ else {
 mkdir $cfg-dir, 0o700 unless $cfg-dir.IO ~~ :d;
 modify-send-to( 'mongodb', :pipe("sort > $cfg-dir/store-file-metadata.log"));
 
-# set config file if needed
+# set config file if it does not exist
 my Str $cfg-file = "$cfg-dir/config.toml";
 spurt( $cfg-file, Q:qq:to/EOCFG/) unless $cfg-file.IO ~~ :r;
 

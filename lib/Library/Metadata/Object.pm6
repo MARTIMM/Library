@@ -146,7 +146,7 @@ role Metadata::Object {
   # update tags stored in the field 'tags' of a meta data subdocument. The
   # subdocument is by default 'user-meta'.
   method set-metameta-tags (
-    Str:D $object, Bool :$et = False, Str :$subdoc = 'user-meta',
+    Str:D $object, Bool :$extract-tags = False, Str :$subdoc = 'user-meta',
     Array :$arg-tags = [], Array :$drop-tags is copy = [],
   ) {
 
@@ -164,7 +164,7 @@ role Metadata::Object {
     $drop-tags.push($e) if ?$e;
 
     # check if to extract tags from object name
-    if $et {
+    if $extract-tags {
       $tags = $ct.filter-tags( [
           $arg-tags.Slip,
           $object.split(/ [\s || <punct>]+ /).List.Slip,

@@ -24,6 +24,53 @@ use GTK::Simple::Window;
 
 use Library::Image;
 
+use Library;
+use Library::Metadata::Database;
+use Library::Config::TagsList;
+use Library::Config::SkipList;
+use Library::Metadata::Object::File;
+use Library::Metadata::Object::Directory;
+
+use MongoDB;
+use BSON::Document;
+use IO::Notification::Recursive;
+
+#-------------------------------------------------------------------------------
+# setup logging
+#drop-send-to('mongodb');
+#drop-send-to('screen');
+modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
+
+# setup config directory
+my $cfg-dir;
+if %*ENV<LIBRARY-CONFIG>:exists and %*ENV<LIBRARY-CONFIG>.IO ~~ :d {
+  $cfg-dir = %*ENV<LIBRARY-CONFIG>;
+}
+
+else {
+  $cfg-dir = "$*HOME/.library";
+  %*ENV<LIBRARY-CONFIG> = $cfg-dir;
+}
+
+mkdir $cfg-dir, 0o700 unless $cfg-dir.IO ~~ :d;
+modify-send-to( 'mongodb', :pipe("sort > $cfg-dir/store-file-metadata.log"));
+
+# set config file if it does not exist
+my Str $cfg-file = "$cfg-dir/config.toml";
+spurt( $cfg-file, Q:qq:to/EOCFG/) unless $cfg-file.IO ~~ :r;
+
+  # MongoDB server connection
+  uri         = "mongodb://"
+  database    = 'Library'
+  recursive-scan-dirs = []
+
+  [ collection ]
+    meta-data = 'Metadata'
+
+  EOCFG
+
+initialize-library();
+
 #------------------------------------------------------------------------------
 class Gui { ... }
 my Gui $gui .= new;
@@ -143,11 +190,12 @@ class Gui {
     #==[ file chooser button set to select a folder ]==
     my GTK::Simple::FileChooserButton $file-cb .= new:
       :title("Select file or directory"),
-      :action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+      :action(GTK_FILE_CHOOSER_ACTION_OPEN);
+#      :action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
 
     #==[ checkbuttons for options ]==
     my GTK::Simple::CheckButton $recursive-cbttn .= new: :label("Recurse down tree");
-    my GTK::Simple::CheckButton $tagsfname-cbttn .= new: :label("Tags from names");
+    my GTK::Simple::CheckButton $tag-extract-cbttn .= new: :label("Tags from names");
 
     my GTK::Simple::TextView $tags-insert .= new;
     my GTK::Simple::TextView $tags-remove .= new;
@@ -155,11 +203,25 @@ class Gui {
     #==[ start collection button ]==
     my GTK::Simple::Button $collect-bttn .= new(:label<Collect>);
     $collect-bttn.clicked.tap: {
-      note "Collect data from $file-cb.file-name() with;\n",
+      my Str $file = $file-cb.file-name();
+      note "Collect data from {$file // '-'} with;\n",
            "  recursive: $recursive-cbttn.status()\n",
-           "  tag names: $tagsfname-cbttn.status()\n",
+           "  tag names: $tag-extract-cbttn.status()\n",
            "  insert tags: $tags-insert.text()\n",
            "  remove tags: $tags-remove.text()\n ";
+
+      if ? $file {
+        my Bool $recurse = $recursive-cbttn.status;
+        $file = $file.IO.dirname if $recurse and $file.IO !~~ :d;
+
+        self.collect-metadata(
+          $file,
+          :tags([$tags-insert.text.split(/[\s || <punct>]+/).List]),
+          :drop-tags([$tags-remove.text.split(/[\s || <punct>]+/).List]),
+          :$recurse,
+          :extract-tags($tag-extract-cbttn.status()),
+        );
+      }
     };
 
     #==[ close dialog button ]==
@@ -167,10 +229,10 @@ class Gui {
     $done-bttn.clicked.tap: { $!collect-dialog.hide; };
 
     my GTK::Simple::Grid $dialog-grid .= new(
-      [ 0, 0, 4, 1] => GTK::Simple::Label.new(:text('Collect Control Options')),
+#      [ 0, 0, 4, 1] => GTK::Simple::Label.new(:text('Collect Control Options')),
 
       [ 2, 1, 1, 1] => $recursive-cbttn,
-      [ 2, 2, 1, 1] => $tagsfname-cbttn,
+      [ 2, 2, 1, 1] => $tag-extract-cbttn,
 
       [ 1, 3, 1, 1] => GTK::Simple::Label.new(:text('Insert tags')),
       [ 2, 3, 2, 2] => $tags-insert,
@@ -185,8 +247,11 @@ class Gui {
       [ 4, 8, 1, 1] => $done-bttn,
     );
 
+    my GTK::Simple::Frame $dialog-frame .= new(:title('Collect Control Options'));
+    $dialog-frame.set-content($dialog-grid);
+
     $!collect-dialog .= new(:title("Collect dialog"));
-    $!collect-dialog.set-content($dialog-grid);
+    $!collect-dialog.set-content($dialog-frame);
 
     gtk_window_set_position( $!collect-dialog.WIDGET, GTK_WIN_POS_MOUSE);
   }
@@ -203,17 +268,17 @@ class Gui {
 #      :file("")
 #    );
 
-    # icon names https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
-    my Library::Image $image3 .= new(
-      :icon-name<help-browser>, :icon-size(GTK_ICON_SIZE_LARGE_TOOLBAR)
-    );
+#    # icon names https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+#    my Library::Image $image3 .= new(
+#      :icon-name<go-down>, :icon-size(GTK_ICON_SIZE_BUTTON)
+#    );
 
     self.create-collect-dialog;
 
     my GTK::Simple::Grid $metadata-grid .= new(
 #      [ 0, 0, 1, 1 ] => $image1,
 #      [ 0, 1, 1, 1 ] => $image2,
-      [ 0, 2, 1, 1 ] => $image3,
+#      [ 0, 2, 1, 1 ] => $image3,
     );
 
 
@@ -234,5 +299,76 @@ class Gui {
   method exit-app( :$widget ) {
     note $widget.perl;
     $!app.exit;
+  }
+
+
+  #----------------------------------------------------------------------------
+  # collect and store metadata about files and directories.
+  method collect-metadata (
+    Str:D $object,                # file or directory name
+    Array :$tags = [],            # tags list to set
+    Array :$drop-tags = [],       # tags list to remove
+    Bool :$recurse = False,       # collect recursively
+    Bool :$extract-tags = False,  # get tags from absolute path and filename
+  ) {
+
+    my Library::Metadata::Object::File $file-meta-object;
+    my Library::Metadata::Object::Directory $dir-meta-object;
+
+    # Copy to rw-able array.
+    my @files-to-process = $object,;
+    if !@files-to-process {
+
+      info-message("No files to process");
+      exit(0);
+    }
+
+    while shift @files-to-process -> $file {
+
+      # Process directories
+      if $file.IO ~~ :d {
+
+        # Alias to proper name if dir
+        my $directory := $file;
+
+        info-message("process directory '$directory'");
+
+        $dir-meta-object .= new(:object($directory));
+        $dir-meta-object.set-metameta-tags(
+          $directory, :$extract-tags, :$tags, :$drop-tags
+        );
+
+        # recurse deeper in to this directory
+        if $recurse {
+
+          # only 'content' files no '.' or '..'
+          my @new-files = dir( $directory).List>>.absolute;
+
+          @files-to-process.push(|@new-files);
+        }
+
+        else {
+
+          info-message("Skip directory $directory");
+        }
+      }
+
+      # Process plain files
+      elsif $file.IO ~~ :f {
+
+        info-message("process file $file");
+
+        $file-meta-object .= new(:object($file));
+        $file-meta-object.set-metameta-tags(
+          $file, :$extract-tags, :$tags, :$drop-tags
+        );
+      }
+
+      # Ignore other type of files
+      else {
+
+        warn-message("File $file is ignored, it is a special type of file");
+      }
+    }
   }
 }
