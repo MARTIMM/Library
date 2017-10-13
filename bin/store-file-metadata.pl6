@@ -99,8 +99,8 @@ multi sub MAIN (
 ) {
 
 
-  my Library::Metadata::Object::File $mof;
-  my Library::Metadata::Object::Directory $mod;
+#  my Library::Metadata::Object::File $mof;
+#  my Library::Metadata::Object::Directory $mod;
 
   my Bool $recursive := $r;                     # Aliases to longer name
   my Array $arg-tags = [$t.split(/:s \s* <punct>+ \s* /)];
@@ -113,6 +113,49 @@ multi sub MAIN (
     exit(0);
   }
 
+  # recursively gather objects from this object if directory.
+  # must run within a gather block.
+  # take returns Library::Metadata::Object objects
+  sub rec-dir ( Str $o ) {
+    if $o.IO.d {
+      # first take this directory
+      take Library::Metadata::Object::Directory.new(:object($o));
+
+      # then check if the contents of dir must be sought
+      if $recursive {
+        for dir($o) -> $object {
+          if $object.d {
+            take Library::Metadata::Object::Directory.new(:$object);
+            rec-dir($object.Str);
+          }
+
+          else {
+            take Library::Metadata::Object::File.new(:$object);
+          }
+        }
+      }
+    }
+
+    elsif $o.IO.f {
+      # take this file
+      take Library::Metadata::Object::File.new(:object($o));
+    }
+
+    else {
+      warn-message("Special file $o ignored");
+    }
+  }
+
+  my Seq $fp := gather for @files-to-process -> $object {
+    rec-dir($object);
+  }
+
+  for $fp -> $meta-object {
+    say $meta-object.perl;
+    $meta-object.set-metameta-tags( :$et, :$arg-tags, :$drop-tags);
+  }
+
+#`{{
   while shift @files-to-process -> $file {
 
     # Process directories
@@ -155,4 +198,5 @@ multi sub MAIN (
       warn-message("File $file is ignored, it is a special type of file");
     }
   }
+}}
 }
