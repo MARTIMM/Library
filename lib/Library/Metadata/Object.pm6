@@ -23,21 +23,33 @@ role Metadata::Object {
   # ignore the object when an object is filtered out
   has Bool $!ignore-object;
 
+  has Str $!object;
+
   #----------------------------------------------------------------------------
   method specific-init-meta ( Str :$object --> Bool ) { ... }
   method update-meta ( ) { ... }
 
   #----------------------------------------------------------------------------
-  submethod BUILD ( Str :$object ) {
+  multi submethod BUILD ( IO::Path:D :$object ) {
+    self!take-object($object.Str);
+  }
 
+  #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  multi submethod BUILD ( Str:D :$object ) {
+    self!take-object($object);
+  }
+
+  #----------------------------------------------------------------------------
+  method !take-object( Str:D $object ) {
     $!ignore-object = False;
+    $!object = $object;
 
     my Library::Config::TagsList $c .= new;
     $!filter-list = $c.get-tag-filter;
 
     $!dbo .= new;
-    if ?$object {
-      self.init-meta(:$object);
+    if ?$!object {
+      self.init-meta;
     }
 
     else {
@@ -46,13 +58,13 @@ role Metadata::Object {
   }
 
   #----------------------------------------------------------------------------
-  method init-meta ( Str :$object --> BSON::Document ) {
+  method init-meta ( --> BSON::Document ) {
 
     my BSON::Document $doc .= new;
 
     # modify database if needed
     $!meta-data .= new;
-    if self.specific-init-meta(:$object) {
+    if self.specific-init-meta {
       self!add-global-meta;
       $doc = self.update-meta;
     }
@@ -61,7 +73,7 @@ role Metadata::Object {
       $!ignore-object = True;
     }
 
-    $doc;
+    $doc
   }
 
   #----------------------------------------------------------------------------
@@ -146,7 +158,7 @@ role Metadata::Object {
   # update tags stored in the field 'tags' of a meta data subdocument. The
   # subdocument is by default 'user-meta'.
   method set-metameta-tags (
-    Str:D $object, Bool :$extract-tags = False, Str :$subdoc = 'user-meta',
+    Bool :$extract-tags = False, Str :$subdoc = 'user-meta',
     Array :$arg-tags = [], Array :$drop-tags is copy = [],
   ) {
 
@@ -160,14 +172,14 @@ role Metadata::Object {
     my Array $prev-tags = $udata<tags> // [];
 
     # filter out type tags
-    my Str $e = $object.IO.extension;
+    my Str $e = $!object.IO.extension;
     $drop-tags.push($e) if ?$e;
 
     # check if to extract tags from object name
     if $extract-tags {
       $tags = $ct.filter-tags( [
           $arg-tags.Slip,
-          $object.split(/ [\s || <punct>]+ /).List.Slip,
+          $!object.split(/ [\s || <punct>]+ /).List.Slip,
           $prev-tags.Slip
         ],
         $drop-tags

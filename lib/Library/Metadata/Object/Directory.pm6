@@ -15,16 +15,16 @@ class Metadata::Object::Directory does Library::Metadata::Object {
 
   #----------------------------------------------------------------------------
   # Set the default informaton for a directory in the meta structure
-  method specific-init-meta ( Str :$object --> Bool ) {
+  method specific-init-meta ( --> Bool ) {
 
-    my Str $path = $object.IO.absolute;
-    my Str $dir = $object.IO.basename;
+    my Str $path = $!object.IO.absolute;
+    my Str $dir = $!object.IO.basename;
     $path ~~ s/ '/'? $dir $//;
 
     $!meta-data<name> = $dir;
     $!meta-data<path> = $path;
     $!meta-data<meta-type> = OT-Directory.Str;
-    $!meta-data<exists> = $object.IO ~~ :r;
+    $!meta-data<exists> = $!object.IO ~~ :r;
 
     return True;
   }

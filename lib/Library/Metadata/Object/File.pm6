@@ -15,14 +15,14 @@ class Metadata::Object::File does Library::Metadata::Object {
 
   #----------------------------------------------------------------------------
   # Set the default informaton for a file in the meta structure
-  method specific-init-meta ( Str :$object --> Bool ) {
+  method specific-init-meta ( --> Bool ) {
 
     my Bool $process-file = True;
     my Library::Config::SkipList $sl .= new;
 
     # check for file to be skipped
     my Array $skip-list = $sl.get-skip-filter;
-    my Str $path = $object.IO.absolute;
+    my Str $path = $!object.IO.absolute;
 #note "Sl file: ", $skip-list;
     for @$skip-list -> $sle {
       if $path ~~ /<$sle>/ {
@@ -35,7 +35,7 @@ class Metadata::Object::File does Library::Metadata::Object {
     if $process-file {
       # is it in a directory which must be skipped
       $skip-list = $sl.get-skip-filter(:dir);
-      my Str $path = $object.IO.absolute;
+      my Str $path = $!object.IO.absolute;
 #note "Sl dir: ", $skip-list;
       for @$skip-list -> $sle {
         if $path ~~ /<$sle>/ {
@@ -48,18 +48,18 @@ class Metadata::Object::File does Library::Metadata::Object {
 
     # file accepted, set other meta data
     if $process-file {
-      my Str $file = $object.IO.basename;
-      my Str $extension = $object.IO.extension;
+      my Str $file = $!object.IO.basename;
+      my Str $extension = $!object.IO.extension;
       $path ~~ s/ '/'? $file $//;
 
       $!meta-data<name> = $file;
       $!meta-data<content-type> = $extension;
       $!meta-data<path> = $path;
       $!meta-data<meta-type> = OT-File.Str;
-      $!meta-data<exists> = $object.IO ~~ :r;
-      $!meta-data<content-sha1> = self!sha1-content($object);
+      $!meta-data<exists> = $!object.IO ~~ :r;
+      $!meta-data<content-sha1> = self!sha1-content($!object);
 
-      info-message("metadata set for $object");
+      info-message("metadata set for $!object");
       debug-message($!meta-data.perl);
     }
 
