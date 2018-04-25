@@ -11,7 +11,7 @@
   ],
   "test-depends": [ "Test::META"],
   "build-depends": [ ],
-  "tags": [ "meta", "library", "mongodb"],
+  "tags": [ "metadata", "library", "mongodb", "database"],
   "provides": {
     "Library":                            "lib/Library.pm6",
     "Library::Configuration":             "lib/Library/Configuration.pm6",
