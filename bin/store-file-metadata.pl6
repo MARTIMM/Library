@@ -13,7 +13,7 @@ use MongoDB;
 use BSON::Document;
 #use IO::Notification::Recursive;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # setup logging
 #drop-send-to('mongodb');
 #drop-send-to('screen');
@@ -56,7 +56,7 @@ initialize-library();
 @*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
 #say "MArgs: ", @*ARGS;
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Store a list of tags in the configuration collection
 multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
 
@@ -67,7 +67,7 @@ multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
   $c.set-tag-filter( @filter-list, :$drop-tags);
 }
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Store a list of regexes to filter on files and directories
 # in the configuration collection
 multi sub MAIN (
@@ -85,7 +85,7 @@ multi sub MAIN (
   $c.set-skip-filter( @filter-list, :$drop-skip, :$dir);
 }
 
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Store metadata about files.
 #
 # --t   supply tags. Separated by commas or repetition of option
