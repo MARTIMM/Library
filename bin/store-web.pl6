@@ -51,8 +51,8 @@ spurt( $cfg-file, Q:qq:to/EOCFG/) unless $cfg-file.IO ~~ :r;
 initialize-library();
 
 
-# Allow switches after positionals. Pinched from the old panda program. Now it is
-# possible to make the script files executable with the path of this program.
+# Allow switches after positionals. Pinched from the old panda program. Now it
+# is possible to make the script files executable with the path of this program.
 #say "Args: ", @*ARGS;
 @*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
 #say "MArgs: ", @*ARGS;
