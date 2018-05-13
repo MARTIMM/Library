@@ -13,50 +13,17 @@ use MongoDB;
 use BSON::Document;
 #use IO::Notification::Recursive;
 
-#------------------------------------------------------------------------------
-# setup logging
-#drop-send-to('mongodb');
-#drop-send-to('screen');
-modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
-
-# setup config directory
-my $cfg-dir;
-if %*ENV<LIBRARY-CONFIG>:exists and %*ENV<LIBRARY-CONFIG>.IO ~~ :d {
-  $cfg-dir = %*ENV<LIBRARY-CONFIG>;
-}
-
-else {
-  $cfg-dir = "$*HOME/.library";
-  %*ENV<LIBRARY-CONFIG> = $cfg-dir;
-}
-
-mkdir $cfg-dir, 0o700 unless $cfg-dir.IO ~~ :d;
-modify-send-to( 'mongodb', :pipe("sort > $cfg-dir/store-file-metadata.log"));
-
-# set config file if it does not exist
-my Str $cfg-file = "$cfg-dir/config.toml";
-spurt( $cfg-file, Q:qq:to/EOCFG/) unless $cfg-file.IO ~~ :r;
-
-  # MongoDB server connection
-  uri         = "mongodb://"
-  database    = 'Library'
-  recursive-scan-dirs = []
-
-  [ collection ]
-    meta-data = 'Metadata'
-
-  EOCFG
-
+#-------------------------------------------------------------------------------
 initialize-library();
 
-
+#-------------------------------------------------------------------------------
 # Allow switches after positionals. Pinched from the old panda program. Now it is
 # possible to make the script files executable with the path of this program.
 #say "Args: ", @*ARGS;
 @*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
 #say "MArgs: ", @*ARGS;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Store a list of tags in the configuration collection
 multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
 
@@ -67,7 +34,7 @@ multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
   $c.set-tag-filter( @filter-list, :$drop-tags);
 }
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Store a list of regexes to filter on files and directories
 # in the configuration collection
 multi sub MAIN (

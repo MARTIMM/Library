@@ -34,7 +34,7 @@ subtest 'configuration load and save', {
 #-------------------------------------------------------------------------------
 subtest 'configuration load', {
 
-  %*ENV<LIBRARY-CONFIG> = 't/Lib2';
+  %*ENV<LIBRARY_CONFIG> = 't/Lib2';
   my Library::Configuration $cfg .= new;
   is $cfg.config<my-data>, 'test 1', 'found setting "test 1"';
 }
@@ -42,7 +42,7 @@ subtest 'configuration load', {
 #-------------------------------------------------------------------------------
 subtest 'library module init', {
 
-  %*ENV<LIBRARY-CONFIG> = 't/Lib3';
+  %*ENV<LIBRARY_CONFIG> = 't/Lib3';
   initialize-library();
 
   is $Library::lib-cfg.config<uri>, 'mongodb://', 'found lib uri';

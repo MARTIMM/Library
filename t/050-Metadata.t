@@ -24,19 +24,21 @@ my Int $p1 = $ts.server-control.get-port-number('s1');
 
 # setup config directory
 mkdir 't/Lib4', 0o700 unless 't/Lib4'.IO ~~ :d;
-%*ENV<LIBRARY-CONFIG> = 't/Lib4';
+%*ENV<LIBRARY_CONFIG> = 't/Lib4';
 my Str $filename = 't/Lib4/config.toml';
 spurt( $filename, Q:qq:to/EOCFG/);
 
-  # MongoDB server connection
-  uri         = "mongodb://localhost:$p1"
+    # MongoDB server connection
+    hostname    = "localhost"
+    port        = "$p1"
 
-  database    = 'test'
+    [ library.database ]
+    library             = "test"
 
-  [ collection ]
-    meta-data = 'meta050'
+    [ library.collection ]
+    meta-data           = "meta50"
 
-  EOCFG
+    EOCFG
 
 initialize-library();
 

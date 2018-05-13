@@ -24,12 +24,13 @@ subtest 'Database', {
 
   # setup config directory
   mkdir 't/Lib4', 0o700 unless 't/Lib4'.IO ~~ :d;
-  %*ENV<LIBRARY-CONFIG> = 't/Lib4';
+  %*ENV<LIBRARY_CONFIG> = 't/Lib4';
   my Str $filename = 't/Lib4/config.toml';
   spurt( $filename, Q:qq:to/EOCFG/);
 
     # MongoDB server connection
-    uri         = "mongodb://localhost:$p1"
+    hostname    = "localhost"
+    port        = "$p1"
 
     EOCFG
 
@@ -79,7 +80,8 @@ subtest 'Database', {
   spurt( $filename, Q:qq:to/EOCFG/);
 
     # MongoDB server connection
-    uri         = "mongodb://localhost:$p1"
+    hostname    = "localhost"
+    port        = "$p1"
 
     EOCFG
 
