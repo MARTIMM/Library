@@ -7,10 +7,18 @@ use Library::Configuration;
 #-------------------------------------------------------------------------------
 subtest 'automatic configuration', {
 
-  my Library::Configuration $cfg .= new(:library-config<t/Lib1>);
-  isa-ok $cfg, 'Library::Configuration';
+  throws-like( {
+      my Library::Configuration $cfg .= new(:library-config<t/Lib1>);
+    }, Exception, 'Missing config file',
+    :message(/:s Failed to open file/)
+  );
 
-  is $cfg.config<uri>, 'mongodb://', 'uri from automatic config';
+
+  my Library::Configuration $cfg .= new(
+    :library-config<t/Lib1/config.toml>, :generate
+  );
+  isa-ok $cfg, 'Library::Configuration';
+  is $cfg.config<connection><uri>, 'mongodb://localhost:27017/Library', 'uri from automatic config';
 }
 
 #-------------------------------------------------------------------------------
@@ -20,17 +28,22 @@ subtest 'configuration load and save', {
   my Str $filename = 't/Lib2/config.toml';
   spurt( $filename, Q:to/EOCFG/);
 
-    # MongoDB server connection
-    uri             = 'mongodb://localhost:27017'
+    #[ connection ]
+      # MongoDB server connection
+      #uri             = 'mongodb://marcel@[::1]:27000/Library'
+      server  = '::1'
+      port    = 27000
+      user    = 'marcel'
 
     EOCFG
 
-  my Library::Configuration $cfg .= new(:library-config<t/Lib2>);
-  is $cfg.config<uri>, 'mongodb://localhost:27017', 'uri from config';
+  my Library::Configuration $cfg .= new(:library-config($filename));
+  is $cfg.config<connection><uri>, 'mongodb://marcel@[::1]:27000/Library',
+     'uri from config';
   $cfg.config<my-data> = 'test 1';
-  $cfg.save;
 }
 
+#`{{
 #-------------------------------------------------------------------------------
 subtest 'configuration load', {
 
@@ -38,6 +51,7 @@ subtest 'configuration load', {
   my Library::Configuration $cfg .= new;
   is $cfg.config<my-data>, 'test 1', 'found setting "test 1"';
 }
+}}
 
 #-------------------------------------------------------------------------------
 subtest 'library module init', {
@@ -45,7 +59,8 @@ subtest 'library module init', {
   %*ENV<LIBRARY_CONFIG> = 't/Lib3';
   initialize-library();
 
-  is $Library::lib-cfg.config<uri>, 'mongodb://', 'found lib uri';
+  is $Library::lib-cfg.config<connection><uri>,
+     'mongodb://localhost:27017/Library', 'found lib uri';
   isa-ok $Library::client, 'MongoDB::Client';
 }
 
