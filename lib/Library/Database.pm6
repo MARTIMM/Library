@@ -56,7 +56,6 @@ role Database {
       ordered => True,
     )
 
-
 #note "Doc: ", $doc.perl;
 #    $doc
   }

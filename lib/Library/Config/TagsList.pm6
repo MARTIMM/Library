@@ -14,7 +14,9 @@ use BSON::Document;
 class Config::TagsList does Library::Config {
 
   #----------------------------------------------------------------------------
-  method set-tag-filter ( @filter-list, Array :$drop-tags --> BSON::Document ) {
+  method set-tag-filter (
+    @filter-list, Array :$drop-tags --> BSON::Document
+  ) {
 
     # find the config doc
     my $c = $!dbcfg.find(
