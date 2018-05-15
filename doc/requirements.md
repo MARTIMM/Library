@@ -61,7 +61,7 @@ The following list is a series of protocols which might be supported.
 First some specifications to define the environment and products needed to
 run the programs.
 
-* LIBRARY-CONFIG. Environment variable holding the root directory location on disk where the library program data is stored. Here the program can store pid info of background programs and log files. Also the configuration files are stored here. If the database server is local, its data should come here too.
+* LIBRARY_CONFIG. Environment variable holding the root directory location on disk where the library program data is stored. Here the program can store pid info of background programs and log files. Also the configuration files are stored here. If the database server is local, its data should come here too.
 
 * Configuration file. This file holds information on how to connect to the mongodb database server and what database and collections to use amongst others.
 
@@ -92,19 +92,22 @@ component imeta as "meta\ninfo"
 
 database mdb as "MongoDB"
 node mdbs as "db\nserver"
-mdbs -- mdb
+mdbs - mdb
 
+cloud " " as internet1
 
 user --> cfg
-user -> mmeta
+user --> mmeta
 
 cfg -> gather
 gather -> dmeta
-mmeta <--> mdbs
-dmeta <-> mdbs
+mmeta <--> internet1
+dmeta <-> internet1
 
-imeta <-- mdbs
+imeta <-- internet1
 user <-- imeta
+
+internet1 <-> mdbs
 
 ```
 
