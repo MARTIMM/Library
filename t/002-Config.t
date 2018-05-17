@@ -79,6 +79,7 @@ unlink 't/Lib2/config.toml';
 rmdir 't/Lib2';
 
 unlink 't/Lib3/client-configuration.toml';
+unlink 't/Lib3/store-file-metadata.log';
 rmdir 't/Lib3';
 
 exit(0);
