@@ -19,8 +19,6 @@ class Configuration {
   # We only have to load it once
   submethod BUILD ( Str:D :library-config($file), Bool :$generate = False ) {
 
-
-
     if $generate {
       $!config = $file.IO ~~ :r ?? from-toml(:$file) !! {};
     }
@@ -47,7 +45,7 @@ class Configuration {
       <library collection meta-config>, :default<Metaconfig>
     );
 
-note "\nConfig:\n", $!config.perl;
+#note "\nConfig:\n", $!config.perl;
 
     # create uri from config data
     $!config<connection><uri> = 'mongodb://';
@@ -87,16 +85,24 @@ note "\nConfig:\n", $!config.perl;
     my Hash $c := $!config;
     my Hash $p;
 
+    # descent using field names into the configuration
     for @fields -> $field {
+
+      # when field is missing or empty set the Bool and init with empty Hash
       unless ? $c{$field} {
         $missing-key = True;
         $c{$field} = {};
       }
 
+      # keep current config to set the default when we are ready
       $p := $c;
-      $c := $c{$field};
+
+      # descent forther down if possible
+      $c := $c{$field} if $c{$field} ~~ Hash;
     }
 
+    # if any of the keys were missing, set the field to its default
+    # which overwrites the previously set empty Hash
     if $missing-key {
       $p{@fields[*-1]} = $default;
       warn-message(

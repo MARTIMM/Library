@@ -28,7 +28,7 @@ subtest 'configuration load and save', {
   my Str $filename = 't/Lib2/config.toml';
   spurt( $filename, Q:to/EOCFG/);
 
-    #[ connection ]
+    [ connection ]
       # MongoDB server connection
       #uri             = 'mongodb://marcel@[::1]:27000/Library'
       server  = '::1'
@@ -56,7 +56,11 @@ subtest 'configuration load', {
 #-------------------------------------------------------------------------------
 subtest 'library module init', {
 
-  %*ENV<LIBRARY_CONFIG> = 't/Lib3';
+  # config file is fixed by library init
+  my Str $dir = 't/Lib3';
+  my Str $filename = "$dir/client-configuration.toml";
+  %*ENV<LIBRARY_CONFIG> = $dir;
+  spurt( $filename, '[ configuration ]');
   initialize-library();
 
   is $Library::lib-cfg.config<connection><uri>,
@@ -74,7 +78,7 @@ rmdir 't/Lib1';
 unlink 't/Lib2/config.toml';
 rmdir 't/Lib2';
 
-unlink 't/Lib3/config.toml';
+unlink 't/Lib3/client-configuration.toml';
 rmdir 't/Lib3';
 
 exit(0);
