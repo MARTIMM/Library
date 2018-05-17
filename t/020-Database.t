@@ -25,7 +25,7 @@ subtest 'Database', {
   # setup config directory
   mkdir 't/Lib4', 0o700 unless 't/Lib4'.IO ~~ :d;
   %*ENV<LIBRARY_CONFIG> = 't/Lib4';
-  my Str $filename = 't/Lib4/config.toml';
+  my Str $filename = 't/Lib4/client-configuration.toml';
   spurt( $filename, Q:qq:to/EOCFG/);
 
     # MongoDB server connection
@@ -47,7 +47,6 @@ subtest 'Database', {
 
       $lcg.config<database> = 'xyz' unless ?$lcg.config<database>;
       $lcg.config<collection><meta-data> = 'abc' unless ?$lcg.config<meta-data>;
-      $lcg.save;
 
       self.init( :database-key<database>, :collection-key<meta-data>);
     }
@@ -151,7 +150,7 @@ subtest 'Database', {
 # cleanup
 done-testing;
 
-unlink 't/Lib4/config.toml';
+unlink 't/Lib4/client-configuration.toml';
 rmdir 't/Lib4';
 
 exit(0);
