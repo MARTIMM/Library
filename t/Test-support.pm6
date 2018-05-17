@@ -10,14 +10,12 @@ use MongoDB::Server::Control;
 use MongoDB::Client;
 
 #------------------------------------------------------------------------------
-#drop-send-to('mongodb');
-#drop-send-to('screen');
-#modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Debug));
-
-#------------------------------------------------------------------------------
 class Test-support {
 
   has MongoDB::Server::Control $.server-control;
+
+  # Environment variable SERVERKEYS holds a list of server keys. This is set by
+  # xt/wrapper.pl6
 
   submethod BUILD ( ) {
 
@@ -138,6 +136,9 @@ class Test-support {
   #----------------------------------------------------------------------------
   method create-sandbox ( ) {
 
+    my Bool $is-win = $*KERNEL.name eq 'win32';
+    my Str $path-delim = ($is-win ?? '\\' !! '/');
+
     # if we are under the scrutany of TRAVIS then adjust the path where to find the
     # mongod/mongos binaries
 #    if ? %*ENV<TRAVIS> {
@@ -148,18 +149,22 @@ class Test-support {
     my Int $start-portnbr = 65010;
     my Str $config-text = Q:qq:to/EOCONFIG/;
 
+    [ locations ]
+      mongod = '$*CWD/t/Travis-ci/3.2.9/mongod'
+      mongos = '$*CWD/t/Travis-ci/3.2.9/mongos'
+      server-path = '$*CWD/Sandbox'
+      logpath = 'm.log'
+      pidfilepath = 'm.pid'
+      dbpath = 'm.data'
+
     # Configuration file for the servers in the Sandbox
     # Settings are specifically for test situations and not for deployment
     # situations!
-    [ account ]
-      user = 'test_user'
-      pwd = 'T3st-Us3r'
+    #[ account ]
+    #  user = 'test_user'
+    #  pwd = 'T3st-Us3r'
 
-    [ binaries ]
-      mongod = '$*CWD/t/Travis-ci/3.2.9/mongod'
-      mongos = '$*CWD/t/Travis-ci/3.2.9/mongos'
-
-    [ mongod ]
+    [ server ]
       nojournal = true
       fork = true
       smallfiles = true
@@ -178,11 +183,11 @@ class Test-support {
       # methods can be set to 's1'. Furthermore, keep server keys simple because
       # of sorting in some of the test programs. E.g. s1, s2, s3 etc.
       s1 => {
-        authenticate => True,
-        account => {
-          user => 'Dondersteen',
-          pwd => 'w@tD8jeDan',
-        },
+      #  authenticate => True,
+      #  account => {
+      #    user => 'Dondersteen',
+      #    pwd => 'w@tD8jeDan',
+      #  },
       },
     };
 
@@ -198,10 +203,13 @@ class Test-support {
       $config-text ~= Q:qq:to/EOCONFIG/;
 
       # Configuration for Server $skey
-      [ mongod.$skey ]
-        logpath = '$server-dir/m.log'
-        pidfilepath = '$server-dir/m.pid'
-        dbpath = '$server-dir/m.data'
+      [ locations.$skey ]
+        server-subdir = 'Server-$skey'
+      #  logpath = '$server-dir/m.log'
+      #  pidfilepath = '$server-dir/m.pid'
+      #  dbpath = '$server-dir/m.data'
+
+      [ server.$skey ]
         port = $port-number
       EOCONFIG
 
@@ -209,7 +217,7 @@ class Test-support {
       for $server-setup{$skey}<replicas>.keys -> $rkey {
         $config-text ~= Q:qq:to/EOCONFIG/;
 
-        [ mongod.$skey.$rkey ]
+        [ server.$skey.$rkey ]
           replSet = '$server-setup{$skey}<replicas>{$rkey}'
         EOCONFIG
       }
@@ -217,28 +225,28 @@ class Test-support {
       if $server-setup{$skey}<authenticate> {
         $config-text ~= Q:qq:to/EOCONFIG/;
 
-        [ mongod.$skey.authenticate ]
+        [ server.$skey.authenticate ]
           auth = true
         EOCONFIG
       }
 
-      if $server-setup{$skey}<account>:exists {
-        $config-text ~= Q:qq:to/EOCONFIG/;
+      #if $server-setup{$skey}<account>:exists {
+      #  $config-text ~= Q:qq:to/EOCONFIG/;
 
-        [ account.$skey ]
-          user = '$server-setup{$skey}<account><user>'
-          pwd = '$server-setup{$skey}<account><pwd>'
-        EOCONFIG
-      }
+      #  [ account.$skey ]
+      #    user = '$server-setup{$skey}<account><user>'
+      #    pwd = '$server-setup{$skey}<account><pwd>'
+      #  EOCONFIG
+      #}
 
-      if $server-setup{$skey}<server-version> {
-        $config-text ~= Q:qq:to/EOCONFIG/;
+      #if $server-setup{$skey}<server-version> {
+      #  $config-text ~= Q:qq:to/EOCONFIG/;
 
-        [ binaries.$skey ]
-          mongod = '$*CWD/t/Travis-ci/{$server-setup{$skey}<server-version>}/mongod'
-          mongos = '$*CWD/t/Travis-ci/{$server-setup{$skey}<server-version>}/mongos'
-        EOCONFIG
-      }
+      #  [ binaries.$skey ]
+      #    mongod = '$*CWD/t/Travis-ci/{$server-setup{$skey}<server-version>}/mongod'
+      #    mongos = '$*CWD/t/Travis-ci/{$server-setup{$skey}<server-version>}/mongos'
+      #  EOCONFIG
+      #}
     } # for $server-setup.keys -> Str $skey
 
     my Str $file = 'Sandbox/config.toml';
