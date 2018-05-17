@@ -42,20 +42,26 @@ sub initialize-library ( ) is export {
       #server                 = ::1
 
       port                = 27017
+
+      #[ connection.user.u1 ]
       #user                = "marcel"
       #password            = "Dans3r3s"
+      #database            = "Library"
 
-      [ connection.options ]
-      replicaSet          = MetaLibrary
-
+      #[ connection.options ]
+      #replicaSet          = MetaLibrary
+      #connectTimeoutMS    = 30000
+      #...
 
       [ library ]
       recursive-scan-dirs = [  ]
 
-      [ library.database ]
-      library             = "Library"
+      # can be used when no users are specified
+      database            = "Library"
 
-      [ library.collection ]
+      #[ library.database ]
+
+      [ library.collections ]
       meta-config         = "Metaconfig"
       meta-data           = "Metadata"
 

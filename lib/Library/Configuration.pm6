@@ -14,10 +14,13 @@ use MongoDB::Collection;
 class Configuration {
 
   has Hash $.config;
+  has Str $!user-key;
 
   #-----------------------------------------------------------------------------
   # We only have to load it once
-  submethod BUILD ( Str:D :library-config($file), Bool :$generate = False ) {
+  submethod BUILD (
+    Str:D :library-config($file), Bool :$generate = False, Str :$!user-key
+  ) {
 
     if $generate {
       $!config = $file.IO ~~ :r ?? from-toml(:$file) !! {};
@@ -37,32 +40,44 @@ class Configuration {
     self!check-config-field( <connection server>, :default<localhost>);
     self!check-config-field( <connection port>, :default(27017));
     self!check-config-field( <library recursive-scan-dirs>, :default([]));
-    self!check-config-field( <library database library>, :default<Library>);
+
+    self!check-config-field( <library database>, :default<Library>);
     self!check-config-field(
-      <library collection meta-data>, :default<Metadata>
+      <library collections meta-data>, :default<Metadata>
     );
     self!check-config-field(
-      <library collection meta-config>, :default<Metaconfig>
+      <library collections meta-config>, :default<Metaconfig>
     );
 
 #note "\nConfig:\n", $!config.perl;
 
+
     # create uri from config data
     $!config<connection><uri> = 'mongodb://';
-    if ? $!config<connection><user> {
-      $!config<connection><uri> ~= $!config<connection><user>;
-      $!config<connection><uri> ~= ":$!config<connection><password>"
-        if ? $!config<connection><password>;
 
-      $!config<connection><uri> ~= '@';
+    # add user spec to rti
+    if $!user-key {
+#TODO modify
+#[ connection.authentication.u1 ]
+#user                = "marcel"
+#password            = "Dans3r3s"
+
+      if ? (my $user-hash = $!config<connection><user>{$!user-key}) {
+        $!config<connection><uri> ~= $user-hash<user>;
+        $!config<connection><uri> ~= ":$user-hash<password>"
+          if ? $user-hash<password>;
+
+        $!config<connection><uri> ~= '@';
+      }
     }
 
-    # server check for ip6 address. must be enclose in []
+    # add hostname. can be name.domain, ip4 or ip6 address.
+    # server field must be checked for ip6 address. must be enclosed in [].
     my Str $server = $!config<connection><server>;
     $server = "[$server]" if $server ~~ /\:/;
     $!config<connection><uri> ~=
       $server ~ ':' ~ $!config<connection><port> ~ '/' ~
-      $!config<library><database><library>;
+      $!config<library><database>;
 
     # add options
     if $!config<connection><options>:exists {

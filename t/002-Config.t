@@ -31,16 +31,31 @@ subtest 'configuration load and save', {
     [ connection ]
       # MongoDB server connection
       #uri             = 'mongodb://marcel@[::1]:27000/Library'
-      server  = '::1'
-      port    = 27000
-      user    = 'marcel'
+      server    = '::1'
+      port      = 27000
+
+    [ connection.user.u1 ]
+      user      = 'marcel'
+
+    [ connection.user.u2 ]
+      user      = 'piet'
+      password  = 'puk'
+      database  = 'my-data'
 
     EOCFG
 
-  my Library::Configuration $cfg .= new(:library-config($filename));
+  my Library::Configuration $cfg .= new(
+    :library-config($filename), :user-key<u1>
+  );
   is $cfg.config<connection><uri>, 'mongodb://marcel@[::1]:27000/Library',
-     'uri from config';
-  $cfg.config<my-data> = 'test 1';
+     'uri: ' ~ $cfg.config<connection><uri>;
+#  $cfg.config<my-data> = 'test 1';
+
+  $cfg .= new(
+    :library-config($filename), :user-key<u2>
+  );
+  is $cfg.config<connection><uri>, 'mongodb://piet:puk@[::1]:27000/Library',
+     'uri: ' ~ $cfg.config<connection><uri>;
 }
 
 #`{{
@@ -58,6 +73,7 @@ subtest 'library module init', {
 
   # config file is fixed by library init
   my Str $dir = 't/Lib3';
+  mkdir $dir, 0o700 unless $dir.IO ~~ :d;
   my Str $filename = "$dir/client-configuration.toml";
   %*ENV<LIBRARY_CONFIG> = $dir;
   spurt( $filename, '[ configuration ]');
