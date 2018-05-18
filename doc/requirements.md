@@ -437,15 +437,6 @@ is  only logical because we do not want to reinvent the wheel(s) again
 do we? We only try not to select those software which will bind it to
 some platform as explained above.
 
-## Perl6
-
-The followup version of perl 5.*. The program
-is not yet completely finished but will be soon (2015-01). This
-program is a interpreter/compiler which can compile the script into some
-intermediary
-
-
-
 # State of affairs
 
 A list of programs and web pages created and made available for use. While
@@ -491,7 +482,7 @@ package library #FFFFFF {
   class L as "Library" << (P,#FF8800) package >>
   class LC as "Library::Configuration"
   class LD as "Library::Database" << (R,#FFFF00) role >>
-  class LMD as "Library::Metadata::Database"
+  class LMD as "Library::Metadata::MainStore"
   class Obj as "Library::Metadata::Object" << (R,#FFFF00) role >>
   class OTF as "Library::Metadata::Object::File"
   class OTD as "Library::Metadata::Object::Directory"

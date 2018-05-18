@@ -1,5 +1,8 @@
 ## Release notes
 
+* 0.8.1
+  * Configuration rewrite and rename from config.toml into client-confguration.toml.
+  * Rename Library::Metadata::Database into Library::Metadata::MainStore. Now it is better set for future storages.
 * 0.8.0
   * Creating a gui based on GTK::Simple
 * 0.7.0
@@ -26,7 +29,7 @@
   * Rewrite of Library::Configuration.
   * Rewrite of Library.
   * Add Library::Database role. Does the common operations like insert, update, delete and drop.
-  * Rewrite of Library::Metadata::Database. It is class which does the role Library::Database. Controls a specific database and collection for the operations and adds fields to documents depending on object type.
+  * Rewrite of Library::Metadata::Database. It is a class which does the role Library::Database. Controls a specific database and collection for the operations and adds fields to documents depending on object type.
   * tests
 * 0.3.0
   * Added keyword processing to store-file-metadata.pl6 and

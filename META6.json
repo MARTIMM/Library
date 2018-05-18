@@ -2,7 +2,7 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.8.0",
+  "version":                              "0.8.1",
   "license":                              "Artistic-2.0",
   "perl":                                 "6",
   "depends": [
@@ -22,7 +22,7 @@
 
     "Library::Database":                  "lib/Library/Database.pm6",
 
-    "Library::Metadata::Database":        "lib/Library/Metadata/Database.pm6",
+    "Library::Metadata::MainStore":        "lib/Library/Metadata/MainStore.pm6",
     "Library::Metadata::Object":          "lib/Library/Metadata/Object.pm6",
     "Library::Metadata::Object::Directory":    "lib/Library/Metadata/Object/Directory.pm6",
     "Library::Metadata::Object::File":    "lib/Library/Metadata/Object/File.pm6"
