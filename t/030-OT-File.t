@@ -67,7 +67,7 @@ subtest 'OT File', {
 # cleanup
 done-testing;
 
-unlink 't/Lib4/config.toml';
+unlink 't/Lib4/client-configuration.toml';
 rmdir 't/Lib4';
 
 exit(0);

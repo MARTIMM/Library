@@ -23,18 +23,19 @@ my Int $p1 = $ts.server-control.get-port-number('s1');
 # setup config directory
 mkdir 't/Lib4', 0o700 unless 't/Lib4'.IO ~~ :d;
 %*ENV<LIBRARY_CONFIG> = 't/Lib4';
-my Str $filename = 't/Lib4/config.toml';
+my Str $filename = 't/Lib4/client-configuration.toml';
 spurt( $filename, Q:qq:to/EOCFG/);
 
-    # MongoDB server connection
-    hostname    = "localhost"
-    port        = "$p1"
+    [ connection ]
+      # MongoDB server connection
+      server      = "localhost"
+      port        = "$p1"
 
-    [ library.database ]
-    library             = "test"
+    [ library ]
+      database    = "test"
 
-    [ library.collection ]
-    meta-data           = "meta31"
+    [ library.collections ]
+      meta-data   = "meta031"
 
     EOCFG
 
@@ -66,7 +67,7 @@ subtest 'OT File', {
 # cleanup
 done-testing;
 
-unlink 't/Lib4/config.toml';
+unlink 't/Lib4/client-configuration.toml';
 rmdir 't/Lib4';
 
 exit(0);
