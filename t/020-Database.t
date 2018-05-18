@@ -28,9 +28,11 @@ subtest 'Database', {
   my Str $filename = 't/Lib4/client-configuration.toml';
   spurt( $filename, Q:qq:to/EOCFG/);
 
-    # MongoDB server connection
-    hostname    = "localhost"
-    port        = "$p1"
+    [ connection ]
+
+      # MongoDB server connection
+      server      = "localhost"
+      port        = "$p1"
 
     EOCFG
 
@@ -60,7 +62,7 @@ subtest 'Database', {
   my BSON::Document $doc = $mdb.insert: [ (
       object-name => 'Library',
       object-type => 'Project',
-      location => '/home/marcel/Languages/Perl6/Projects/Library'
+      location => ~$*CWD
     ),
   ];
 
@@ -78,9 +80,10 @@ subtest 'Database', {
   # setup another config
   spurt( $filename, Q:qq:to/EOCFG/);
 
-    # MongoDB server connection
-    hostname    = "localhost"
-    port        = "$p1"
+    [ connection ]
+      # MongoDB server connection
+      server      = "localhost"
+      port        = "$p1"
 
     EOCFG
 
