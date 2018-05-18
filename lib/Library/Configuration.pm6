@@ -52,22 +52,14 @@ class Configuration {
 
 #note "\nConfig:\n", $!config.perl;
 
-
     # create uri from config data
     $!config<connection><uri> = 'mongodb://';
 
     # add user spec to rti
     if $!user-key {
-#TODO modify
-#[ connection.authentication.u1 ]
-#user                = "marcel"
-#password            = "Dans3r3s"
-
       if ? (my $user-hash = $!config<connection><user>{$!user-key}) {
         $!config<connection><uri> ~= $user-hash<user>;
-        $!config<connection><uri> ~= ":$user-hash<password>"
-          if ? $user-hash<password>;
-
+        $!config<connection><uri> ~= ":$user-hash<password>";
         $!config<connection><uri> ~= '@';
       }
     }
