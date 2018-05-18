@@ -22,12 +22,31 @@ role Database {
   has MongoDB::Collection $!collection handles <find>;
 
   #-----------------------------------------------------------------------------
+  # the database-key will be most of the time 'database' but the collectio-key
+  # may vary. made this way for future flexibility. Mostly called from a
+  # Library::Metadata::* class to set a specific database and collection
   method init ( Str:D :$database-key!, Str:D :$collection-key! ) {
 
-    my Library::Configuration $lcg := $Library::lib-cfg;
+    my Hash $lcg := $Library::lib-cfg.config;
+    my $user-key = $Library::user-key;
+    my Str $db-name;
+    my Str $col-name;
 
-    $!database = $Library::client.database($lcg.config{$database-key});
-    $!collection = $!database.collection($lcg.config<collection>{$collection-key});
+    if ?$user-key {
+      $db-name = $lcg<connection><user>{$user-key}{$database-key};
+    }
+
+    else {
+      $db-name = $lcg<library>{$database-key};
+    }
+
+    $col-name = $lcg<library><collections>{$collection-key};
+note "DB/Col: $db-name, $col-name";
+note "C: ", $Library::client.perl;
+
+    $!database = $Library::client.database($db-name);
+
+    $!collection = $!database.collection($col-name);
   }
 
   #-----------------------------------------------------------------------------
