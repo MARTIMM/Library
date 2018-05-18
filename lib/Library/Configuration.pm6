@@ -36,6 +36,7 @@ class Configuration {
   #-----------------------------------------------------------------------------
   method !check-config ( ) {
 
+#note "\nConfig:\n", $!config.perl;
     # set defaults if needed
     self!check-config-field( <connection server>, :default<localhost>);
     self!check-config-field( <connection port>, :default(27017));
