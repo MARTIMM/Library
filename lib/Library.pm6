@@ -21,6 +21,8 @@ our $user-key is export;
 #-------------------------------------------------------------------------------
 sub initialize-library ( Str :$user-key ) is export {
 
+  $Library::user-key = $user-key;
+
   # check for config directory
   my Str $config-dir = check-config-dir();
 
@@ -73,10 +75,12 @@ sub initialize-library ( Str :$user-key ) is export {
     exit(1);
   }
 
+note "UK: $user-key";
+
   # clean configuration and set to new
   $lib-cfg = Nil if $lib-cfg.defined;
   $lib-cfg = Library::Configuration.new(
-    :library-config("$config-dir/client-configuration.toml")
+    :library-config("$config-dir/client-configuration.toml"),
     :$user-key
   );
 
