@@ -58,6 +58,7 @@ class Metadata::Object::File does Library::Metadata::Object {
       $!meta-data<meta-type> = OT-File.Str;
       $!meta-data<exists> = $!object.IO ~~ :r;
       $!meta-data<content-sha1> = self!sha1-content($!object);
+      $!meta-data<hostname> = qx[hostname].chomp;
 
       info-message("metadata set for $!object");
       debug-message($!meta-data.perl);

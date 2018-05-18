@@ -25,6 +25,7 @@ class Metadata::Object::Directory does Library::Metadata::Object {
     $!meta-data<path> = $path;
     $!meta-data<meta-type> = OT-Directory.Str;
     $!meta-data<exists> = $!object.IO ~~ :r;
+    $!meta-data<hostname> = qx[hostname].chomp;
 
     return True;
   }
