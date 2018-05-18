@@ -41,8 +41,8 @@ role Database {
     }
 
     $col-name = $lcg<library><collections>{$collection-key};
-note "DB/Col: $db-name, $col-name";
-note "C: ", $Library::client.perl;
+#note "DB/Col: $db-name, $col-name";
+#note "C: ", $Library::client.perl;
 
     $!database = $Library::client.database($db-name);
 
