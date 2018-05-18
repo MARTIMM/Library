@@ -11,7 +11,7 @@ use MongoDB;
 use BSON::Document;
 
 #------------------------------------------------------------------------------
-drop-send-to('mongodb');
+#drop-send-to('mongodb');
 #drop-send-to('screen');
 modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
 info-message("Test $?FILE start");
