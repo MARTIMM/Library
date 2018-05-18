@@ -1,20 +1,20 @@
 use v6;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
-use Library::Metadata::Database;
+use Library::Metadata::MainStore;
 use Library::Config::TagsList;
 
 use MongoDB;
 use BSON::Document;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 role Metadata::Object {
 
   has BSON::Document $!meta-data;
-  has Library::Metadata::Database $!dbo handles <
+  has Library::Metadata::MainStore $!dbo handles <
     insert update delete count find drop-collection drop-database
   >;
 
@@ -25,70 +25,42 @@ role Metadata::Object {
 
   has Str $!object;
 
-  #----------------------------------------------------------------------------
-  method specific-init-meta ( Str :$object --> Bool ) { ... }
+  #-----------------------------------------------------------------------------
+  method specific-init-meta ( --> Bool ) { ... }
   method update-meta ( ) { ... }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   multi submethod BUILD ( IO::Path:D :$object ) {
-    self!take-object($object.Str);
+
+    fatal-message('empty path objects are not handled') unless
+      $object.Str.chars > 0;
+
+    $!object = $object;
+    self!take-object;
   }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   multi submethod BUILD ( Str:D :$object ) {
-    self!take-object($object);
-  }
+    fatal-message('empty path objects are not handled') unless
+      $object.chars > 0;
 
-  #----------------------------------------------------------------------------
-  method !take-object( Str:D $object ) {
-    $!ignore-object = False;
     $!object = $object;
-
-    my Library::Config::TagsList $c .= new;
-    $!filter-list = $c.get-tag-filter;
-
-    $!dbo .= new;
-    if ?$!object {
-      self.init-meta;
-    }
-
-    else {
-      $!meta-data .= new;
-    }
+    self!take-object;
   }
 
-  #----------------------------------------------------------------------------
-  method init-meta ( --> BSON::Document ) {
-
-    my BSON::Document $doc .= new;
-
-    # modify database if needed
-    $!meta-data .= new;
-    if self.specific-init-meta {
-      self!add-global-meta;
-      $doc = self.update-meta;
-    }
-
-    else {
-      $!ignore-object = True;
-    }
-
-    $doc
-  }
-
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method meta ( --> BSON::Document ) {
 
     $!meta-data
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method get-metameta ( Str :$subdoc = 'user-meta' --> BSON::Document ) {
 
     $!meta-data{$subdoc} // BSON::Document.new
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method set-metameta (
     $data where (? $_ and $_ ~~ any(List|BSON::Document)),
     Str :$subdoc = 'user-meta'
@@ -106,7 +78,67 @@ role Metadata::Object {
     $doc
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
+  # update tags stored in the field 'tags' of a meta data subdocument. The
+  # subdocument is by default 'user-meta'.
+  method set-metameta-tags (
+    Bool :$extract-tags = False, Str :$subdoc = 'user-meta',
+    Array :$arg-tags = [], Array :$drop-tags is copy = [],
+  ) {
+
+    return BSON::Document.new if $!ignore-object;
+
+    my Library::Config::TagsList $ct .= new;
+    my Array $tags = [];
+
+    # get user meta data
+    my BSON::Document $udata = self.get-metameta(:$subdoc);
+    my Array $prev-tags = $udata<tags> // [];
+
+    # filter out type tags
+    my Str $e = $!object.IO.extension;
+    $drop-tags.push($e) if ?$e;
+
+    # check if to extract tags from object name
+    if $extract-tags {
+      $tags = $ct.filter-tags( [
+          $arg-tags.Slip,
+          $!object.split(/ [\s || <punct>]+ /).List.Slip,
+          $prev-tags.Slip
+        ],
+        $drop-tags
+      );
+    }
+
+    else {
+      $tags = $ct.filter-tags(
+        [ $arg-tags.Slip, $prev-tags.Slip],
+        $drop-tags
+      );
+    }
+
+    # save new set of tags
+note "T: ", $tags;
+note "S: ", $subdoc.perl;
+    $udata<tags> = $tags;
+    self.set-metameta( $udata, :$subdoc);
+  }
+
+  #-----------------------------------------------------------------------------
+  multi method is-in-db ( List:D $query --> Bool ) {
+
+    # use n to see the number of found records. 0 coerces to False, True otherwise
+    ? ( $!dbo.count: ( $query ) )<n>
+  }
+
+  multi method is-in-db ( BSON::Document:D $query --> Bool ) {
+
+    # use n to see the number of found records. 0 coerces to False, True otherwise
+    ? ( $!dbo.count: ( $query ) )<n>
+  }
+
+  # ==[ Private stuff ]=========================================================
+  #-----------------------------------------------------------------------------
   # update fields of a meta data subdocument. The subdocument is by default
   # at meta field 'user-meta'.
   method !update-metameta (
@@ -154,53 +186,7 @@ role Metadata::Object {
     $doc
   }
 
-  #----------------------------------------------------------------------------
-  # update tags stored in the field 'tags' of a meta data subdocument. The
-  # subdocument is by default 'user-meta'.
-  method set-metameta-tags (
-    Bool :$extract-tags = False, Str :$subdoc = 'user-meta',
-    Array :$arg-tags = [], Array :$drop-tags is copy = [],
-  ) {
-
-    return BSON::Document.new if $!ignore-object;
-
-    my Library::Config::TagsList $ct .= new;
-    my Array $tags = [];
-
-    # get user meta data
-    my BSON::Document $udata = self.get-metameta(:$subdoc);
-    my Array $prev-tags = $udata<tags> // [];
-
-    # filter out type tags
-    my Str $e = $!object.IO.extension;
-    $drop-tags.push($e) if ?$e;
-
-    # check if to extract tags from object name
-    if $extract-tags {
-      $tags = $ct.filter-tags( [
-          $arg-tags.Slip,
-          $!object.split(/ [\s || <punct>]+ /).List.Slip,
-          $prev-tags.Slip
-        ],
-        $drop-tags
-      );
-    }
-
-    else {
-      $tags = $ct.filter-tags(
-        [ $arg-tags.Slip, $prev-tags.Slip],
-        $drop-tags
-      );
-    }
-
-    # save new set of tags
-note "T: ", $tags;
-note "S: ", $subdoc.perl;
-    $udata<tags> = $tags;
-    self.set-metameta( $udata, :$subdoc);
-  }
-
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method !sha1-content ( Str $object --> Str ) {
 
     return '' unless $object.IO !~~ :d and $object.IO ~~ :r;
@@ -214,27 +200,36 @@ note "S: ", $subdoc.perl;
     $sha-content
   }
 
-  #----------------------------------------------------------------------------
-  multi method is-in-db ( List:D $query --> Bool ) {
+  #-----------------------------------------------------------------------------
+  method !take-object( ) {
+    $!ignore-object = False;
 
-    # use n to see the number of found records. 0 coerces to False, True otherwise
-    ? ( $!dbo.count: ( $query ) )<n>
+    my Library::Config::TagsList $c .= new;
+    $!filter-list = $c.get-tag-filter;
+
+    $!dbo .= new;
+    self!init-meta;
   }
 
-  multi method is-in-db ( BSON::Document:D $query --> Bool ) {
+  #-----------------------------------------------------------------------------
+  method !init-meta ( --> BSON::Document ) {
 
-    # use n to see the number of found records. 0 coerces to False, True otherwise
-    ? ( $!dbo.count: ( $query ) )<n>
+    my BSON::Document $doc .= new;
+
+    # modify database if needed
+    $!meta-data .= new;
+    if self.specific-init-meta {
+      $doc = self.update-meta;
+    }
+
+    else {
+      $!ignore-object = True;
+    }
+
+    $doc
   }
 
-  #----------------------------------------------------------------------------
-  # Add global defaults to the meta structure
-  method !add-global-meta ( ) {
-
-    $!meta-data<hostname> = qx[hostname].chomp;
-  }
-
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method !log-update-message ( BSON::Document:D $doc ) {
 
     if $doc<ok> == 1 {
