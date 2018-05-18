@@ -16,9 +16,10 @@ enum ObjectType is export <<
 
 our $lib-cfg is export;
 our $client is export;
+our $user-key is export;
 
 #-------------------------------------------------------------------------------
-sub initialize-library ( ) is export {
+sub initialize-library ( Str :$user-key ) is export {
 
   # check for config directory
   my Str $config-dir = check-config-dir();
@@ -36,34 +37,32 @@ sub initialize-library ( ) is export {
     spurt( $cfg-file, Q:qq:to/EOCFG/);
       [ connection ]
 
-      # one of three possible ways to describe a servername
-      server              = "localhost.localdomain"
-      #server                 = 127.0.0.1
-      #server                 = ::1
+        # one of three possible ways to describe a servername
+        server              = "localhost.localdomain"
+        #server                 = 127.0.0.1
+        #server                 = ::1
 
-      port                = 27017
+        port                = 27017
 
       #[ connection.user.u1 ]
-      #user                = "marcel"
-      #password            = "Dans3r3s"
-      #database            = "Library"
+      #  user                = "marcel"
+      #  password            = "Dans3r3s"
+      #  database            = "Library"
 
       #[ connection.options ]
-      #replicaSet          = MetaLibrary
-      #connectTimeoutMS    = 30000
+      #  replicaSet          = MetaLibrary
+      #  connectTimeoutMS    = 30000
       #...
 
       [ library ]
-      recursive-scan-dirs = [  ]
+        recursive-scan-dirs = [  ]
 
-      # can be used when no users are specified
-      database            = "Library"
-
-      #[ library.database ]
+        # can be used when no users are specified
+        database            = "Library"
 
       [ library.collections ]
-      meta-config         = "Metaconfig"
-      meta-data           = "Metadata"
+        meta-config         = "Metaconfig"
+        meta-data           = "Metadata"
 
       EOCFG
 
@@ -78,6 +77,7 @@ sub initialize-library ( ) is export {
   $lib-cfg = Nil if $lib-cfg.defined;
   $lib-cfg = Library::Configuration.new(
     :library-config("$config-dir/client-configuration.toml")
+    :$user-key
   );
 
   # throw old client object and get a new one.
