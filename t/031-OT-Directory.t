@@ -5,7 +5,7 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Metadata::Database;
+use Library::Metadata::MainStore;
 use Library::Metadata::Object::Directory;
 use MongoDB;
 use BSON::Document;
@@ -43,7 +43,7 @@ initialize-library;
 #------------------------------------------------------------------------------
 subtest 'OT File', {
 
-  my Library::Metadata::Database $dbo .= new;
+  my Library::Metadata::MainStore $dbo .= new;
   my Library::Metadata::Object::Directory $dir;
 
   $dir .= new( :$dbo, :object<t/Lib4>, :type(OT-Directory));

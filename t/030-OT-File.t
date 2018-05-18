@@ -5,7 +5,7 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Metadata::Database;
+use Library::Metadata::MainStore;
 use Library::Metadata::Object::File;
 use MongoDB;
 use BSON::Document;
@@ -23,20 +23,20 @@ my Int $p1 = $ts.server-control.get-port-number('s1');
 # setup config directory
 mkdir 't/Lib4', 0o700 unless 't/Lib4'.IO ~~ :d;
 %*ENV<LIBRARY_CONFIG> = 't/Lib4';
-my Str $filename = 't/Lib4/config.toml';
+my Str $filename = 't/Lib4/client-configuration.toml';
 spurt( $filename, Q:qq:to/EOCFG/);
 
-    # MongoDB server connection
-    hostname    = "localhost"
-    port        = "$p1"
+    [ connection ]
 
-    database    = 'test'
+      # MongoDB server connection
+      server      = "localhost"
+      port        = "$p1"
 
-    [ library.database ]
-    library             = "test"
+    [ library ]
+      database    = 'test'
 
-    [ library.collection ]
-    meta-data           = "meta030"
+    [ library.collections ]
+      meta-data   = "meta030"
 
     EOCFG
 
@@ -45,8 +45,7 @@ initialize-library;
 #------------------------------------------------------------------------------
 subtest 'OT File', {
 
-  my Library::Metadata::Object::File $f .= new;
-  diag "Init meta: " ~ $f.init-meta( :object<t/030-OT-File.t>, :type(OT-File)).perl;
+  my Library::Metadata::Object::File $f .= new(:object<t/030-OT-File.t>);
 
   my BSON::Document $d = $f.meta;
   diag "Meta data: $d.perl()";

@@ -25,7 +25,7 @@ use GTK::Simple::Window;
 use Library::Image;
 
 use Library;
-use Library::Metadata::Database;
+use Library::Metadata::MainStore;
 use Library::Config::TagsList;
 use Library::Config::SkipList;
 use Library::Metadata::Object::File;

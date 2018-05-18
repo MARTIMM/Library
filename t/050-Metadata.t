@@ -5,7 +5,7 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Metadata::Database;
+use Library::Metadata::MainStore;
 use Library::Metadata::Object;
 use Library::Metadata::Object::File;
 
