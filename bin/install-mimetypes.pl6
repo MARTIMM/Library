@@ -1,106 +1,50 @@
 #!/usr/bin/env perl6
-#-------------------------------------------------------------------------------
-# Get a mime type info from http://www.freeformatter.com/mime-types-list.html
-# and store them in MongoDB database Library and collection mimetypes.
-#
-# complete list from https://www.iana.org/assignments/media-types/media-types.xhtml
-# List link: https://www.iana.org/assignments/media-types/application.csv
-#-------------------------------------------------------------------------------
+
 use v6;
-#use HTTP::Client;
-use MongoDB;
-use Library;
-#use Grammar::Tracer;
 
 #-------------------------------------------------------------------------------
-# define a grammer to read a html table
-grammar Table-Grammar {
-  token TOP { (<-[\<]>* ( <table> || \< <-[\<]>* ) )+ }
+# Read a list of file extensions amd their mimetype and store in database
+# lines like
+#   .mid audio/midi
+#   .midi audio/midi
+#   .kar audio/midi
+# must be converted into documents like
+#   _id => audio_midi
+#   type => audio
+#   subtype => midi
+#   ext => [
+#     .mid, .midi, .kar
+#   ]
 
-  # Table can have a header and body or plain records. Col specs are ignored
-  # for the moment
-  #
-  token table { <table-start> \s* ( <table-head> \s* <table-body> || <trd-entry>+ ) \s* <table-end> }
-  token table-start { \<table <attribute>* \> }
-  token table-end { \<\/table\> }
+use MongoDB;
+use MongoDB::Client;
+use MongoDB::Database;
 
-  token table-head { <table-hstart> <trh-entry>* <table-hend> }
-  token table-hstart { \<thead\> }
-  token table-hend { \<\/thead\> }
+use Library;
+use Library::Configuration;
 
-  token trh-entry { \s* <trh-start> <trh-data>* <trh-end> \s* }
-  token trh-start { \<tr\> }
-  token trh-end { \<\/tr\> }
 
-  token trh-data { \s* <th-start> <data> <th-end> \s* }
-  token th-start { \<th <attribute>* \> }
-  token th-end { \<\/th\> }
+#-------------------------------------------------------------------------------
+# Store the data in MongoDB Library. First get connection, database and
+# collection. Drop the old collection before filling.
 
-  token table-body { <table-bstart> <trd-entry>* <table-bend> }
-  token table-bstart { \<tbody\> }
-  token table-bend { \<\/tbody\> }
+my Str $lib-dir = %*ENV<LIBRARY_CONFIG> // $*HOME.Str ~ "/.library';
+initialize-library;
 
-  token trd-entry { \s* <trd-start> <trd-data>* <trd-end> \s* }
-  token trd-start { \<tr\> }
-  token trd-end { \<\/tr\> }
+my Library::Configuration $cfg := $Library::lib-cfg;
+my Str $client := $Library::client;
 
-  token trd-data { \s* <td-start> <data> <td-end> \s* }
-  token td-start { \<td <attribute>* \> }
-  token td-end { \<\/td\> }
+my Str $db-name = $cfg.database;
+my Str $col-name = $cfg.config<library><collections><mimetypes>;
+my MongoDB::Database $database = $client.database($db-name);
+my MongoDB::Collection $collection = $database.collection($col-name);
 
-  # In the data field there can be other tags, so be not-greedy and look for
-  # the proper end tags
-  token data { .*? ( <?th-end> || <?td-end> ) }
+#-------------------------------------------------------------------------------
+sub MAIN ( ) {
 
-  token attribute { \s* <attr-name> '=' <attr-value> \s* }
-  token attr-name { <[A..Za..z0..9\:\_\-]>+ }
-  token attr-value { <[']> <-[']>* <[']> || <["]> <-["]>* <["]> }
 }
 
-# The actions to perform when tokens are found
-class Table-Actions {
-  has Array $.tables = [];
-  has Int $.table-count = 0;
-
-  has Hash $.table-content;
-  has Int $.row-count;
-  has Int $.field-count;
-  has Bool $.in-body;
-
-  method table-start ( $match ) {
-    $!table-content = {};
-    $!row-count = 0;
-    $!field-count = 0;
-    $!in-body = True;
-  }
-
-  method table-end ( $match ) {
-    $!tables.push($!table-content);
-    $!table-count++;
-  }
-
-  method table-hstart ( $match ) {
-    $!in-body = False;
-  }
-
-  method table-bstart ( $match ) {
-    $!in-body = True;
-  }
-
-  method data ( $match ) {
-    if $!in-body {
-      $!table-content{'R' ~ $!row-count}{'F' ~ $!field-count} = $match.Str;
-      $!field-count++;
-    }
-  }
-
-  method trd-end ( $match ) {
-    $!row-count++;
-    $!field-count = 0;
-  }
-}
-
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Get the html content. The content is saved on disk so test first
 # if file exists.
 #
@@ -133,21 +77,9 @@ if !?$content {
   exit(1);
 }
 
-#------------------------------------------------------------------------------
-# get data from table
-my Table-Actions $actions-object .= new();
-Table-Grammar.subparse( $content, :actions($actions-object));
-
-#------------------------------------------------------------------------------
-# Store the data in MongoDB Library. First get connection, database and
-# collection. Drop the old collection before filling.
-my $cfg = $Library::cfg;
-my MongoDB::Database $lib-db = $Library::connection.database($cfg.get('database'));
-my MongoDB::Collection $mime-cl = $lib-db.collection($cfg.get('collections')<mimetypes>);
-
-if any($lib-db.collection_names) ~~ $mime-cl.name {
-  say 'Drop collection {$mime-cl.name}';
-  $mime-cl.drop();
+if any($database.collection_names) ~~ $collection.name {
+  say 'Drop collection {$collection.name}';
+  $collection.drop();
 }
 
 # headers. F1 must be translated into F1a and F1b
@@ -187,8 +119,8 @@ for $actions-object.tables.list -> $table {
     }
 
     # Look it up first
-    my Hash $doc = $mime-cl.find_one({name => $mime-data<name>});
-    $mime-cl.insert($mime-data);# unless ?$doc;
+    my Hash $doc = $collection.find_one({name => $mime-data<name>});
+    $collection.insert($mime-data);# unless ?$doc;
     say '[', (?$doc ?? '-' !! 'x' ), "] $mime-data<fileext type subtype>";
   }
 }
