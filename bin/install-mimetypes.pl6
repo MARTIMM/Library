@@ -45,37 +45,10 @@ sub MAIN ( ) {
 }
 
 #-------------------------------------------------------------------------------
-# Get the html content. The content is saved on disk so test first
-# if file exists.
+# Get the list from mimetypes.txt
 #
-my $content;
-if 'mime-types-list.html'.IO ~~ :e {
-  $content = slurp( 'mime-types-list.html', :!bin);
-}
+my $content = 'doc/Mimetypes/mimetypes.txt'.IO.slurp;
 
-# if not found, get data from server
-else {
-#  if 0 {
-#  my HTTP::Client $client .= new;
-#  my $response = $client.get('http://www.freeformatter.com/mime-types-list.html');
-#  if $response.success {
-#    $content = $response.content;
-#    my $mt = open( 'mime-types-list.html', :rw, :!bin);
-#    $mt.print($content);
-#    $mt.close;
-#    spurt( 'mime-types-list.html', $content);
-#  }
-#  }
-
-#  unlink 'mime-types-list.html';
-  my $r = shell('wget http://www.freeformatter.com/mime-types-list.html');
-}
-
-# test for content
-if !?$content {
-  say "No content on server found";
-  exit(1);
-}
 
 if any($database.collection_names) ~~ $collection.name {
   say 'Drop collection {$collection.name}';
