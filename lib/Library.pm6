@@ -65,6 +65,14 @@ sub initialize-library ( Str :$user-key ) is export {
       [ library.collections ]
         meta-config         = "Metaconfig"
         meta-data           = "Metadata"
+        mimetypes           = "Mimetypes"
+
+      #TODO thoughts
+      [ library.mimetypes ]
+        image/jpeg          = "/usr/bin/gwenview %u"
+        image/*             = "/usr/bin/gwenview %u"
+
+      [ library.programs ]
 
       EOCFG
 
