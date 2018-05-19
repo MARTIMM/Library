@@ -166,7 +166,7 @@ ge <--> store
 Objects found anywhere are only described by system. Its content will never be saved in the database nor changed. External objects may be copied to the local system. Every object should always have a type. Some can be automatically assigned e.g. for files and directories. Others need help from the user of the system. E.g. a project description is not an object found on disk but is mostly a group of files together with other objects such as a server, websites or devices.
 
 * There are three types of information to be stored
-  * Automatically found data such as ownership, path to document and volume name in case of documents
+  * Automatically found data such as ownership, path to document and volume name in case of documents.
   * Sha1 generated numbers based on the content of the object for searching and comparing. This can help to find e.g. a renamed file and attach the meta information already in the database. Only the general info need to be modified. Actions which could take place are
     * Move a file from one place to another on the file system.
     * Rename a file
@@ -177,68 +177,43 @@ Objects found anywhere are only described by system. Its content will never be s
     * Modify URI
   * Explicitly provided information like keywords, name and address of owner, project name etcetera.
 
-* Store, update or delete meta information in the database. This is
-for automatically retrieved or explicitly provided information.
+* Store, update or delete meta information in the database. This is for automatically retrieved or explicitly provided information.
 
-* Search meta information using exact match or regular expressions on
-any part of the meta information.
+* Search meta information using exact match or regular expressions on any part of the meta information.
 
-* Displaying output from searches by commandline program or by webpage
-in a browser.
+* Displaying output from searches by commandline program or by webpage in a browser.
 
 * Actions can be started using mimetypes also stored as metadata.
 
-* Mimetypes are an important type of description method to show
-what can be done with the document. The list can also be used
-to start native applications to process a particular document.
-According to their mimetype of the document it mostly has also
-a proper suffix such as `.txt` or `.html`. See
-also [MIMETYPES]. A few examples are:
+* Mimetypes are an important type of description method to show what can be done with the document. The list can also be used to start native applications to process a particular document. According to their mimetype of the document it mostly has also a proper suffix such as `.txt` or `.html`. See also [MIMETYPES]. A few examples are:
   * **text/plain**: This is simple text format mostly created with simple text editors.
   * **audio/mpeg3**: A type of audio file with document suffix of `mp3`.
 * General meta information to store. Besides the list below, users must be capable to add new metadata attributes.
 
 ### Document objects
 
-* This system will not manage documents. It will manage information
-about the documents. Location of the document is stored as part
-of this information. It is however nice when it can detect
-duplicates when another document is entered by the user. This
-duplication can be caused by backups or archives.
+* This system will not manage documents. It will manage information about the documents. Location of the document is stored as part of this information. It is however nice when it can detect duplicates when another document is entered by the user. This duplication can be caused by backups or archives.
 
-* A document can be found on the local disk, externally connected
-disk, other computers and network devices such as network attached
-storage (**NAS**), media stores or on web servers.
+* A document can be found on the local disk, externally connected disk, other computers and network devices such as network attached storage (**NAS**), media stores or on web servers.
 
-* As a side effect of locating documents on e.g. external servers,
-these documents can be stored on disk for offline use.
+* As a side effect of locating documents on e.g. external servers, these documents can be stored on disk for offline use.
 
 ### URL Website information
 
-A file on a disk is pointed to by a name and path and a alse a drive when
-working on windows. There are other ways to get to a document like
-using a unified resource locator (**URL**).
+A file on a disk is pointed to by a name and path and a also a drive when working on windows. There are other ways to get to a document like using a unified resource locator (**URL**).
 
-Protocols are used to get to the document before processing it.
-E.g. the **http** protocol is used to get a web page from a
-site on the network and **file** is used often to get a
-document from the local file system. See also [MIMETYPES].
-The following list is a series of protocols which might be supported.
+Protocols are used to get to the document before processing it. E.g. the **http** protocol is used to get a web page from a site on the network and **file** is used often to get a document from the local file system. See also [MIMETYPES]. The following list is a series of protocols which might be supported.
 * file: Protocol to get documents from a filesystem.
 * http and https: Protocols to get web page documents from a web server.
 * ftp: File transfer protocol.
 
-Also here, as a side effect of locating documents on external servers,
-these documents can be stored on disk for offline use.
+Also here, as a side effect of locating documents on external servers, these documents can be stored on disk for offline use.
 
 ### Other information
-Other information besides meta information can be imported such as
-agendas and contact information.
+Other information besides meta information can be imported such as agendas and contact information.
 
-* Contact information can be imported from vcard files. This data can
-also be linked to other meta items.
-* Relations between objects are stored in the database using directions
-of Topic Maps ($abbrev[TM]). Import and export are done via
+* Contact information can be imported from vcard files. This data can also be linked to other meta items.
+* Relations between objects are stored in the database using directions of Topic Maps ($abbrev[TM]). Import and export are done via
 * XML as XTM or encapsulated in RDF.
 * Web Ontology Language OWL. Relations defined above with TM can be tested using a reasoner reading this ontology information. The rules for this language can be imported and exported as OWL/XML documents or as RDF.
 
@@ -401,30 +376,18 @@ An extra collection is used to find some control documents. By default called **
 
 # Implementation
 
-This software package should come with several modules and programs to
-suit several ways of accessing the data. There is also an issue of
-making the software platform independent so everyone can be happy with
-it.
+This software package should come with several modules and programs to suit several ways of accessing the data. There is also an issue of making the software platform independent so everyone can be happy with it.
 
 ## The programming language
 
-The first item to think about is the choice of programming
-language. A scripting language would be a proper choice because
-these languages have a higher level of coding and will access
-the underlaying system in a platform independent way. The
-language I want to choose is perl6. Yes, the still unfinished
-perl version. I am very confident that the language gets its
-first release this year(2015) and wanted to learn about the
-language by doing this project.
+The first item to think about is the choice of programming language. A scripting language would be a proper choice because these languages have a higher level of coding and will access the underlaying system in a platform independent way. The language I want to choose is perl6. Yes, the still unfinished perl version. I am very confident that the language gets its first release this year(2015) and wanted to learn about the language by doing this project.
 
 The second approach is to use a browser to do the work. There we can
 use html5, css3 and javascript and libraries. There is also a server side scripting which can be any of perl6, perl 5 or javascript by means of nodejs. There are also a great many javascript modules which can be used.
 
 ## The storage method
 
-Because the information items on one object can be different than on
-the other a hiërargycal database would be the choice. MongoDB is a
-dayabase for which there is support from javascript as well as perl6.
+Because the information items on one object can be different than on the other a hiërargycal database would be the choice. MongoDB is a dayabase for which there is support from javascript as well as perl6.
 
 ## Storage
 
@@ -432,28 +395,19 @@ The name of the database and the names of the collections
 
 ## Dependencies
 
-The program will be depending on several modules and programs. That
-is  only logical because we do not want to reinvent the wheel(s) again
-do we? We only try not to select those software which will bind it to
-some platform as explained above.
+The program will be depending on several modules and programs. That is  only logical because we do not want to reinvent the wheel(s) again do we? We only try not to select those software which will bind it to some platform as explained above.
 
 # State of affairs
 
-A list of programs and web pages created and made available for use. While
-the project is still in a pristene state there presumable are several bugs
-left behind. Also things in the database and programs might change when
-other ideas arrive. Below there is a list of what has been made. For
-documentation.
+A list of programs and web pages created and made available for use. While the project is still in a pristene state there presumable are several bugs left behind. Also things in the database and programs might change when other ideas arrive. Below there is a list of what has been made. For documentation.
 
 The mongo database is Library with several collections.
 * object_metadata: Collection to store meta information of any object found.
 * mimetypes: Collection to store mimetype information. This can be connected to the object-type.
 
-install-mimetypes.pl6 is program to install mimetype information from
-http://www.freeformatter.com/mime-types-list.html
+install-mimetypes.pl6 is program to install mimetype information from http://www.freeformatter.com/mime-types-list.html
 
-store-file-metadata.pl6 is a program to insert or modify metadata of
-files and directories in the database.
+store-file-metadata.pl6 is a program to insert or modify metadata of files and directories in the database.
 
 
 # Priorities
@@ -504,3 +458,8 @@ package library #FFFFFF {
 }
 
 ```
+
+<!-- references ------------------------------------------------------------ -->
+[MDNmime]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+[FFmime]: https://www.freeformatter.com/mime-types-list.html
+[GHmime]: https://gist.github.com/electerious/3d5a31a73cfd6423f835c074ab25fc06
