@@ -34,6 +34,22 @@ class Configuration {
   }
 
   #-----------------------------------------------------------------------------
+  method database-name ( --> Str ) {
+
+    my Str $db-name;
+    if $!user-key {
+      $db-name = $!config<connection><user>{$user-key}<database>;
+    }
+
+    else {
+      $db-name = $!config<library><database>;
+    }
+
+    $db-name;
+  }
+
+  # ==[ Private Stuff ]=========================================================
+  #-----------------------------------------------------------------------------
   method !check-config ( ) {
 
 #note "\nConfig:\n", $!config.perl;
@@ -70,7 +86,7 @@ class Configuration {
     $server = "[$server]" if $server ~~ /\:/;
     $!config<connection><uri> ~=
       $server ~ ':' ~ $!config<connection><port> ~ '/' ~
-      $!config<library><database>;
+      self.database-name;
 
     # add options
     if $!config<connection><options>:exists {
