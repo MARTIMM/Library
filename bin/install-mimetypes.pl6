@@ -9,7 +9,7 @@ use v6;
 #   .midi audio/midi
 #   .kar audio/midi
 # must be converted into documents like
-#   _id => audio_midi
+#   _id => audio-midi
 #   type => audio
 #   subtype => midi
 #   ext => [
@@ -20,35 +20,83 @@ use MongoDB;
 use MongoDB::Client;
 use MongoDB::Database;
 
+use BSON::Document;
+
 use Library;
 use Library::Configuration;
 
-
 #-------------------------------------------------------------------------------
-# Store the data in MongoDB Library. First get connection, database and
-# collection. Drop the old collection before filling.
-
-my Str $lib-dir = %*ENV<LIBRARY_CONFIG> // $*HOME.Str ~ "/.library';
-initialize-library;
-
-my Library::Configuration $cfg := $Library::lib-cfg;
-my Str $client := $Library::client;
-
-my Str $db-name = $cfg.database;
-my Str $col-name = $cfg.config<library><collections><mimetypes>;
-my MongoDB::Database $database = $client.database($db-name);
-my MongoDB::Collection $collection = $database.collection($col-name);
-
+# Program to store the data in MongoDB Library. First get connection,
+# database and collection. Drop the old collection before filling.
 #-------------------------------------------------------------------------------
 sub MAIN ( ) {
 
+  my Str $lib-dir = %*ENV<LIBRARY_CONFIG> // $*HOME.Str ~ '/.library';
+  initialize-library;
+
+  my Library::Configuration $cfg = $Library::lib-cfg;
+  my MongoDB::Client $client = $Library::client;
+
+  my Str $db-name = $cfg.database-name;
+  my Str $col-name = $cfg.config<library><collections><mimetypes>;
+  my MongoDB::Database $database = $client.database($db-name);
+  my MongoDB::Collection $collection = $database.collection($col-name);
+
+  # gather data into hash
+  my Hash $mt-hash = {};
+  # Get the list from mimetypes.txt
+  my Str $content = 'doc/Mimetypes/mimetypes.txt'.IO.slurp;
+  for $content.lines -> $line {
+
+    my Str $ext;
+    my Str $mimetype;
+    my Str $mt-type;
+    my Str $mt-subtype;
+    ( $ext, $mimetype) = $line.split(/\s/);
+    ( $mt-type, $mt-subtype) = $mimetype.split(/\//);
+note "$ext, $mimetype, $mt-type, $mt-subtype";
+
+    my Str $id = $mt-type ~ '-' ~ $mt-subtype;
+    if $mt-hash{$id}:exists {
+      $mt-hash{$id}<ext>.push: $ext;
+    }
+
+    else {
+      $mt-hash{$id} = {};
+      $mt-hash{$id}<type> = $mt-type;
+      $mt-hash{$id}<subtype> = $mt-subtype;
+      $mt-hash{$id}<ext> = [$ext];
+    }
+  }
+
+  for $mt-hash.keys.sort -> $id {
+    my BSON::Document $d .= new: (
+      :_id($id),
+      :type($mt-hash{$id}<type>),
+      :subtype($mt-hash{$id}<subtype>),
+      :ext($mt-hash{$id}<ext>),
+    );
+
+#note "DB: ", $database.perl;
+    my BSON::Document $result-doc = $database.run-command: (
+      :insert($col-name),
+      :documents([ $d ]),
+    );
+
+    if $result-doc<ok> ~~ 1e0 {
+      info-message("mimetype id '$id' stored");
+    }
+
+    else {
+      warn-message("duplicate key, mimetype id '$id' is stored before");
+note "Fail result: ", $result-doc.perl;
+    }
+  }
 }
 
 #-------------------------------------------------------------------------------
-# Get the list from mimetypes.txt
-#
-my $content = 'doc/Mimetypes/mimetypes.txt'.IO.slurp;
 
+#`{{
 
 if any($database.collection_names) ~~ $collection.name {
   say 'Drop collection {$collection.name}';
@@ -97,3 +145,4 @@ for $actions-object.tables.list -> $table {
     say '[', (?$doc ?? '-' !! 'x' ), "] $mime-data<fileext type subtype>";
   }
 }
+}}
