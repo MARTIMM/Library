@@ -22,6 +22,7 @@ class Configuration {
     Str:D :library-config($file), Bool :$generate = False, Str :$!user-key
   ) {
 
+    # when generate is true, we start with an empty hash if no file is found
     if $generate {
       $!config = $file.IO ~~ :r ?? from-toml(:$file) !! {};
     }
@@ -31,6 +32,9 @@ class Configuration {
     }
 
     self!check-config;
+
+    # write to file if generate is true
+    to-toml(:$file) if $generate;
   }
 
   #-----------------------------------------------------------------------------
@@ -38,7 +42,7 @@ class Configuration {
 
     my Str $db-name;
     if $!user-key {
-      $db-name = $!config<connection><user>{$user-key}<database>;
+      $db-name = $!config<connection><user>{$!user-key}<database>;
     }
 
     else {
@@ -129,7 +133,7 @@ class Configuration {
     # which overwrites the previously set empty Hash
     if $missing-key {
       $p{@fields[*-1]} = $default;
-      warn-message(
+      debug-message(
         "Missing keys '{@fields.join('.')}' from config, set to '$default'"
       );
     }
