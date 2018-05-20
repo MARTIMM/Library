@@ -33,8 +33,8 @@ class Configuration {
 
     self!check-config;
 
-    # write to file if generate is true
-    to-toml(:$file) if $generate;
+    # write to file if generate is true and file didn't exist
+    to-toml(:$file) if $generate and $file.IO ~~ :!e;
   }
 
   #-----------------------------------------------------------------------------
