@@ -35,7 +35,7 @@ role Metadata::Object {
     fatal-message('empty path objects are not handled') unless
       $object.Str.chars > 0;
 
-    $!object = $object;
+    $!object = $object.Str;
     self!take-object;
   }
 
