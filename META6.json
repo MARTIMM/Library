@@ -20,9 +20,8 @@
     "Library::Config::TagsList":          "lib/Library/Config/TagsList.pm6",
     "Library::Config::SkipList":          "lib/Library/Config/SkipList.pm6",
 
-    "Library::Database":                  "lib/Library/Database.pm6",
+    "Library::Storage":                   "lib/Library/Storage.pm6",
 
-    "Library::Metadata::MainStore":        "lib/Library/Metadata/MainStore.pm6",
     "Library::Metadata::Object":          "lib/Library/Metadata/Object.pm6",
     "Library::Metadata::Object::Directory":    "lib/Library/Metadata/Object/Directory.pm6",
     "Library::Metadata::Object::File":    "lib/Library/Metadata/Object/File.pm6"

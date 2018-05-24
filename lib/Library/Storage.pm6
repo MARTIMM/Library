@@ -16,7 +16,7 @@ use BSON::Document;
 
 #-------------------------------------------------------------------------------
 # Purpose of this role is to search, insert and update the data in a database
-role Database {
+class Storage {
 
   has MongoDB::Database $!database;
   has MongoDB::Collection $!collection handles <find>;
@@ -25,27 +25,13 @@ role Database {
   # the database-key will be most of the time 'database' but the collectio-key
   # may vary. made this way for future flexibility. Mostly called from a
   # Library::Metadata::* class to set a specific database and collection
-  method init ( Str:D :$database-key!, Str:D :$collection-key! ) {
+  submethod BUILD ( Str:D :$collection-key, Bool :$root = False ) {
 
-    my Hash $lcg := $Library::lib-cfg.config;
-    my $user-key = $Library::user-key;
-    my Str $db-name;
-    my Str $col-name;
-
-    if ?$user-key {
-      $db-name = $lcg<connection><user>{$user-key}{$database-key};
-    }
-
-    else {
-      $db-name = $lcg<library>{$database-key};
-    }
-
-    $col-name = $lcg<library><collections>{$collection-key};
-#note "DB/Col: $db-name, $col-name";
-#note "C: ", $Library::client.perl;
+    my Library::Configuration $lcg := $Library::lib-cfg;
+    my Str $db-name = $lcg.database-name(:$root);
+    my Str $col-name = $lcg.collection-name( $collection-key, :$root);
 
     $!database = $Library::client.database($db-name);
-
     $!collection = $!database.collection($col-name);
   }
 
