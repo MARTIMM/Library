@@ -43,7 +43,7 @@ sub MAIN ( ) {
   my MongoDB::Client $client = $Library::client;
 
   my Str $db-name = $cfg.database-name;
-  my Str $col-name = $cfg.config<library><collections><mimetypes>;
+  my Str $col-name = $cfg.config<library><collections><root><mimetypes>;
   my MongoDB::Database $database = $client.database($db-name);
   my MongoDB::Collection $collection = $database.collection($col-name);
 

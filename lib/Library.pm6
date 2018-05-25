@@ -48,8 +48,8 @@ sub initialize-library ( Str :$user-key ) is export {
 
       #[ connection.user.u1 ]
       #  user                = "marcel"
-      #  password            = "Dans3r3s"
-      #  database            = "Library"
+      #  password            = "some-pw"
+      #  database            = "MyLibrary"
 
       #[ connection.options ]
       #  replicaSet          = MetaLibrary
@@ -57,15 +57,20 @@ sub initialize-library ( Str :$user-key ) is export {
       #...
 
       [ library ]
-        recursive-scan-dirs = [  ]
+        # in other config:
+        #recursive-scan-dirs = [  ]
 
-        # can be used when no users are specified
-        database            = "Library"
+        # user-db can be used when no users are specified. root-db is used
+        # for collections which must be available to all users.
+        root-db             = "Library"
+        user-db             = "MyLibrary"
 
       [ library.collections ]
-        meta-config         = "Metaconfig"
         meta-data           = "Metadata"
+
+      [ library.collections.root ]
         mimetypes           = "Mimetypes"
+        meta-config         = "Metaconfig"
 
       #TODO thoughts
       [ library.mimetypes ]
@@ -83,7 +88,7 @@ sub initialize-library ( Str :$user-key ) is export {
     exit(1);
   }
 
-note "UK: {$user-key // 'no user key'}";
+#note "UK: {$user-key // 'no user key'}";
 
   # clean configuration and set to new
   $lib-cfg = Nil if $lib-cfg.defined;

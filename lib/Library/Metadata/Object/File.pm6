@@ -114,7 +114,10 @@ class Metadata::Object::File does Library::Metadata::Object {
           # modify the record found in the query to set the new .
           if "$d<path>/$d<name>".IO ~~ :e {
 
-            info-message("$!meta-data<name> found on disk elsewhere, must have been moved, updated");
+            info-message(
+              "$!meta-data<name> found on disk elsewhere," ~
+              " must have been moved, updated"
+            );
 
 # TODO What if query returns more of the same, is that possible?
 # $query replace by data from $d
@@ -152,7 +155,10 @@ class Metadata::Object::File does Library::Metadata::Object {
 #note "Found ", $d.perl;
           if "$d<path>/$d<name>".IO ~~ :e {
 #!!!!!!
-            info-message("$!meta-data<name> found on disk elsewhere, must have been renamed, updated");
+            info-message(
+              "$!meta-data<name> found on disk elsewhere," ~
+              " must have been renamed, updated"
+            );
 
             # Update the record to reflect current situation
             $doc = self.update: [ (

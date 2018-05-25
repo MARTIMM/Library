@@ -34,22 +34,49 @@ class Configuration {
     self!check-config;
 
     # write to file if generate is true and file didn't exist
-    to-toml(:$file) if $generate and $file.IO ~~ :!e;
+    spurt( $file, to-toml($!config)) if $generate and !$file.IO.e;
   }
 
   #-----------------------------------------------------------------------------
-  method database-name ( --> Str ) {
+  method database-name ( Bool :$root = False --> Str ) {
 
     my Str $db-name;
-    if $!user-key {
-      $db-name = $!config<connection><user>{$!user-key}<database>;
+
+    if $root {
+      $db-name = $!config<library><root-db>;
     }
 
     else {
-      $db-name = $!config<library><database>;
+      if $!user-key {
+        $db-name = $!config<connection><user>{$!user-key}<database>;
+      }
+
+      else {
+        #$db-name = $!config<library><database>;
+        $db-name = $!config<library><user-db>;
+      }
     }
 
     $db-name;
+  }
+
+  #-----------------------------------------------------------------------------
+  method collection-name (
+    Str:D $collection-key, Bool :$root = False
+    --> Str
+  ) {
+
+    my Str $cl-name;
+
+    if $root {
+      $cl-name = $!config<library><collections><root>{$collection-key};
+    }
+
+    else {
+      $cl-name = $!config<library><collections>{$collection-key};
+    }
+
+    $cl-name;
   }
 
   # ==[ Private Stuff ]=========================================================
@@ -60,14 +87,18 @@ class Configuration {
     # set defaults if needed
     self!check-config-field( <connection server>, :default<localhost>);
     self!check-config-field( <connection port>, :default(27017));
-    self!check-config-field( <library recursive-scan-dirs>, :default([]));
+#    self!check-config-field( <library recursive-scan-dirs>, :default([]));
 
-    self!check-config-field( <library database>, :default<Library>);
+    self!check-config-field( <library root-db>, :default<Library>);
+    self!check-config-field( <library user-db>, :default<MyLibrary>);
     self!check-config-field(
       <library collections meta-data>, :default<Metadata>
     );
     self!check-config-field(
       <library collections meta-config>, :default<Metaconfig>
+    );
+    self!check-config-field(
+      <library collections root mimetypes>, :default<Mimetypes>
     );
 
 #note "\nConfig:\n", $!config.perl;
