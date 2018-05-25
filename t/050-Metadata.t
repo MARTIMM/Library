@@ -31,14 +31,9 @@ spurt( $filename, Q:qq:to/EOCFG/);
       server      = "localhost"
       port        = "$p1"
 
-    #[ connection.user.u1 ]
-    #  user        = "marcel"
-    #  password    = "hoeperdepoep"
-    #  database    = "test-lib"
-
     [ library ]
-      root-db    = "test"
-      user-db    = "meta50"
+      root-db     = "test"
+      user-db     = "meta50"
 
     [ library.collections ]
       meta-data   = "meta50-data"

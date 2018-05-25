@@ -50,6 +50,8 @@ sub initialize-library ( Str :$user-key ) is export {
       #  user                = "marcel"
       #  password            = "some-pw"
       #  database            = "MyLibrary"
+    #TODO thoughts
+        #  logfile             = "Mylibrary.log
 
       #[ connection.options ]
       #  replicaSet          = MetaLibrary
@@ -64,6 +66,8 @@ sub initialize-library ( Str :$user-key ) is export {
         # for collections which must be available to all users.
         root-db             = "Library"
         user-db             = "MyLibrary"
+      #TODO thoughts
+        logfile             = "library.log"
 
       [ library.collections ]
         meta-data           = "Metadata"
