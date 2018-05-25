@@ -5,7 +5,6 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Metadata::MainStore;
 use Library::Metadata::Object;
 use Library::Metadata::Object::File;
 
@@ -38,10 +37,14 @@ spurt( $filename, Q:qq:to/EOCFG/);
     #  database    = "test-lib"
 
     [ library ]
-      database    = "test"
+      root-db    = "test"
+      user-db    = "meta50"
 
     [ library.collections ]
-      meta-data   = "meta50"
+      meta-data   = "meta50-data"
+
+    [ library.collections.root ]
+      meta-config = "meta050-cfg"
 
     EOCFG
 
@@ -176,5 +179,6 @@ unlink 't/ghi.xyz';
 
 unlink 't/ghi.pqr';
 unlink 't/Lib4/client-configuration.toml';
+unlink 't/Lib4/store-file-metadata.log';
 unlink 't/Lib4/ghi.pqr';
 rmdir 't/Lib4';

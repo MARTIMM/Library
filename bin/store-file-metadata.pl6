@@ -3,7 +3,6 @@
 use v6;
 
 use Library;
-use Library::Metadata::MainStore;
 use Library::Config::TagsList;
 use Library::Config::SkipList;
 use Library::Metadata::Object::File;
@@ -64,7 +63,6 @@ multi sub MAIN (
   'fs', *@files, Bool :$r = False,
   Str :$t = '', Bool :$et = False, Str :$dt = '',
 ) {
-
 
 #  my Library::Metadata::Object::File $mof;
 #  my Library::Metadata::Object::Directory $mod;

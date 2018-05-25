@@ -4,7 +4,7 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
-use Library::Metadata::MainStore;
+use Library::Storage;
 use Library::Config::TagsList;
 
 use MongoDB;
@@ -14,9 +14,9 @@ use BSON::Document;
 role Metadata::Object {
 
   has BSON::Document $!meta-data;
-  has Library::Metadata::MainStore $!dbo handles <
-    insert update delete count find drop-collection drop-database
-  >;
+  has Library::Storage $!dbo handles <
+        insert update delete count find drop-collection drop-database
+      >;
 
   has Array $!filter-list;
 
@@ -204,10 +204,11 @@ note "S: ", $subdoc.perl;
   method !take-object( ) {
     $!ignore-object = False;
 
-    my Library::Config::TagsList $c .= new;
+    my Library::Config::TagsList $c .= new(:root);
     $!filter-list = $c.get-tag-filter;
 
-    $!dbo .= new;
+    # always select the meta-data collection in users database
+    $!dbo .= new(:collection-key<meta-data>);
     self!init-meta;
   }
 

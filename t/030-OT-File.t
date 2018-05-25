@@ -5,13 +5,12 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Metadata::MainStore;
 use Library::Metadata::Object::File;
 use MongoDB;
 use BSON::Document;
 
 #------------------------------------------------------------------------------
-drop-send-to('mongodb');
+#drop-send-to('mongodb');
 #drop-send-to('screen');
 modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
 info-message("Test $?FILE start");
@@ -33,10 +32,14 @@ spurt( $filename, Q:qq:to/EOCFG/);
       port        = "$p1"
 
     [ library ]
-      database    = 'test'
+      user-db     = 'test'
+      root-db     = 'meta030'
 
     [ library.collections ]
-      meta-data   = "meta030"
+      meta-data   = "meta030-data"
+
+    [ library.collections.root ]
+      meta-config = "meta030-cfg"
 
     EOCFG
 

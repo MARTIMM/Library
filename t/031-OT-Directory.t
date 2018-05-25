@@ -5,7 +5,7 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Metadata::MainStore;
+use Library::Storage;
 use Library::Metadata::Object::Directory;
 use MongoDB;
 use BSON::Document;
@@ -32,10 +32,14 @@ spurt( $filename, Q:qq:to/EOCFG/);
       port        = "$p1"
 
     [ library ]
-      database    = "test"
+      user-db     = 'test'
+      root-db     = 'meta031'
 
     [ library.collections ]
-      meta-data   = "meta031"
+      meta-data   = "meta031-data"
+
+    [ library.collections.root ]
+      meta-config = "meta031-cfg"
 
     EOCFG
 
@@ -44,7 +48,7 @@ initialize-library;
 #------------------------------------------------------------------------------
 subtest 'OT File', {
 
-  my Library::Metadata::MainStore $dbo .= new;
+  my Library::Storage $dbo .= new(:collection-key<meta-data>);
   my Library::Metadata::Object::Directory $dir;
 
   $dir .= new( :$dbo, :object<t/Lib4>, :type(OT-Directory));
