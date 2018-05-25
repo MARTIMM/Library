@@ -2,7 +2,7 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.8.1",
+  "version":                              "0.8.2",
   "license":                              "Artistic-2.0",
   "perl":                                 "6",
   "depends": [

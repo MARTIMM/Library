@@ -1,5 +1,7 @@
 ## Release notes
 
+* 0.8.2
+  * removal of modules, rename modules and configuration changes
 * 0.8.1
   * Configuration rewrite and rename from config.toml into client-confguration.toml.
   * Rename Library::Metadata::Database into Library::Metadata::MainStore. Now it is better set for future storages.
