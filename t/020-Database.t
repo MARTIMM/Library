@@ -5,12 +5,12 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Database;
+use Library::Storage;
 use MongoDB;
 use BSON::Document;
 
 #------------------------------------------------------------------------------
-drop-send-to('mongodb');
+#drop-send-to('mongodb');
 #drop-send-to('screen');
 modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
 info-message("Test $?FILE start");
@@ -34,29 +34,20 @@ subtest 'Database', {
       server      = "localhost"
       port        = "$p1"
 
+    [ library ]
+      root-db     = "Library"
+      user-db     = "MyLibrary"
+
+    [ library.collections ]
+      meta-data   = "MyData"
+
     EOCFG
 
-  initialize-library();
-
-
-  # Define class doing database work. This class set database to 'xyz' and
-  # collection to 'abc'.
-  class Mdb does Library::Database {
-
-    submethod BUILD ( ) {
-
-      my Library::Configuration $lcg := $Library::lib-cfg;
-
-      $lcg.config<database> = 'xyz' unless ?$lcg.config<database>;
-      $lcg.config<collection><meta-data> = 'abc' unless ?$lcg.config<meta-data>;
-
-      self.init( :database-key<database>, :collection-key<meta-data>);
-    }
-  }
+  initialize-library;
+  my Library::Configuration $lcg := $Library::lib-cfg;
 
   # instantiate
-  my Mdb $mdb .= new;
-  isa-ok $mdb, 'Mdb';
+  my Library::Storage $mdb .= new(:collection-key<meta-data>);
 
   # insert a document
   my BSON::Document $doc = $mdb.insert: [ (
@@ -85,12 +76,19 @@ subtest 'Database', {
       server      = "localhost"
       port        = "$p1"
 
+    [ library ]
+      root-db     = "Library"
+      user-db     = "MyLibrary"
+
+    [ library.collections ]
+      meta-data   = "MyData"
+
     EOCFG
 
   initialize-library();
 
-  # instantiate
-  my Mdb $meta .= new;
+  # instantiate another database
+  my Library::Storage $meta .= new(:collection-key<meta-data>);
 
   # insert a document
   $doc = $meta.insert: [ (

@@ -1,21 +1,19 @@
 use v6;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
 #use Library;
-use Library::Database;
+use Library::Storage;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 role Config {
 
-  has Library::Database $!dbcfg;
+  has Library::Storage $!dbcfg;
 
-  #----------------------------------------------------------------------------
-  submethod BUILD ( ) {
+  #-----------------------------------------------------------------------------
+  submethod BUILD ( Bool :$root = False ) {
 
-    # use role as a class. initialize with database and collection
-    $!dbcfg .= new;
-    $!dbcfg.init( :database-key<database>, :collection-key<meta-config>);
+    $!dbcfg .= new( :collection-key<meta-config>, :$root);
   }
 }

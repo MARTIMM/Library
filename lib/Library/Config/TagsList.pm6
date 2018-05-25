@@ -1,19 +1,19 @@
 use v6;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
-use Library::Database;
+use Library::Storage;
 use Library::Config;
 
 use MongoDB;
 use BSON::Document;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 class Config::TagsList does Library::Config {
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method set-tag-filter (
     @filter-list, Array :$drop-tags --> BSON::Document
   ) {
@@ -96,7 +96,7 @@ class Config::TagsList does Library::Config {
     $doc
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method get-tag-filter ( --> Array ) {
 
     # find the config doc
@@ -115,7 +115,7 @@ class Config::TagsList does Library::Config {
     $doc<tags> // []
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method filter-tags ( Array:D $tags is copy, Array $drop-tags = [] --> Array ) {
 
     my $filter-list = self.get-tag-filter;
