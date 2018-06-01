@@ -50,7 +50,7 @@ sub initialize-library ( Str :$user-key ) is export {
       #  user                = "marcel"
       #  password            = "some-pw"
       #  database            = "MyLibrary"
-    #TODO thoughts
+      #TODO thoughts
         #  logfile             = "Mylibrary.log
 
       #[ connection.options ]
@@ -71,10 +71,10 @@ sub initialize-library ( Str :$user-key ) is export {
 
       [ library.collections ]
         meta-data           = "Metadata"
+        meta-config         = "Metaconfig"
 
       [ library.collections.root ]
         mimetypes           = "Mimetypes"
-        meta-config         = "Metaconfig"
 
       #TODO thoughts
       [ library.mimetypes ]
