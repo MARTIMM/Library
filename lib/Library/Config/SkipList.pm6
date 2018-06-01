@@ -43,11 +43,11 @@ class Config::SkipList does Library::Config {
     for @$drop-skip -> $t is copy {
       $t .= lc;
       if (my $index = $skip.first( $t, :k)).defined {
-#note "Skip $t: $index";
+note "Skip $t: $index";
         $skip.splice( $index, 1);
       }
     }
-#note "A: $found, ", $skip;
+note "A: $found, ", $skip;
 
     if $found {
       $doc = $!dbcfg.update: [ (
