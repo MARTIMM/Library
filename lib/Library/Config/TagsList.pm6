@@ -15,27 +15,57 @@ class Config::TagsList does Library::Config {
 
   #-----------------------------------------------------------------------------
   method set-tag-filter (
-    @filter-list, Array :$drop-tags --> BSON::Document
+#    @filter-list, Array :$drop-tags --> BSON::Document
+    @filter-list, Bool :$drop = False
+    --> BSON::Document
   ) {
 
-    # find the config doc
+    my Array $tags;
+    my BSON::Document $doc;
+
+    # find the config doc for tag filters. If not found, create a new one.
     my $c = $!dbcfg.find(
       :criteria( (:config-type<tag-filter>, )),
       :number-to-return(1)
     );
 
-    my BSON::Document $doc;
     $doc = $c.fetch;
 
     # init if there isn't a document
     my Bool $found = $doc.defined;
-    $doc //= BSON::Document.new;
+    if $found {
 
-    # filter tags shorter than 3 chars, lowercase convert, remove
-    # doubles then sort
-    my Array $tags = [
-      (($doc<tags> // []).Slip, |@filter-list).grep(/^...+/)>>.lc.unique.sort
-    ];
+      # remove tags when drop is True
+      if $drop {
+        for @filter-list -> $t is copy {
+          $t .= lc;
+          if (my $index = $tags.first( $t, :k)).defined {
+            $tags.splice( $index, 1);
+          }
+        }
+      }
+
+      else {
+        # filter tags shorter than 3 chars, lowercase convert, remove
+        # doubles then sort
+        $tags = [
+          (($doc<tags> // []).Slip, |@filter-list).grep(/^...+/)>>.lc.unique.sort
+        ];
+      }
+    }
+
+    else {
+
+      # dropping tags from an empty list is not useful
+      if !$drop {
+        $doc = BSON::Document.new;
+
+        # filter tags shorter than 3 chars, lowercase convert, remove
+        # doubles then sort
+        $tags = [ @filter-list.grep(/^...+/)>>.lc.unique.sort ];
+      }
+    }
+
 
     # remove any tags
     for @$drop-tags -> $t is copy {
