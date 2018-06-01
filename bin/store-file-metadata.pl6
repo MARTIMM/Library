@@ -29,7 +29,7 @@ multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
   my Array $drop-tags = [$dt.split(/ \s* <punct>+ \s* /)];
 
   # access config collection
-  my Library::Config::TagsList $c .= new;
+  my Library::Config::TagsList $c .= new(:root);
   $c.set-tag-filter( @filter-list, :$drop-tags);
 }
 
@@ -42,12 +42,16 @@ multi sub MAIN (
 
   # drop skip from list. comma separated list of regexes. a comma in a
   # regex can be escaped with a '\' character.
+
+note "Ds 0: ", $ds;
   my Array $drop-skip = [
     $ds.split(/ \s* <!after '\\'> ',' \s* /)>>.subst(/\\/,'')
   ];
 
+note "Ds 1: ", $drop-skip;
+
   # access config collection
-  my Library::Config::SkipList $c .= new;
+  my Library::Config::SkipList $c .= new(:root);
   $c.set-skip-filter( @filter-list, :$drop-skip, :$dir);
 }
 
