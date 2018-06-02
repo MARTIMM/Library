@@ -31,12 +31,15 @@ class Config::TagsList does Library::Config {
 
     $doc = $c.fetch;
 
+note "SR: ", $doc.perl;
+
     # init if there isn't a document
     my Bool $found = $doc.defined;
     if $found {
 
       # remove tags when drop is True
       if $drop {
+        $tags = [ ( ($doc<tags> // []).Slip).grep(/^...+/)>>.lc.unique.sort];
         for @filter-list -> $t is copy {
           $t .= lc;
           if (my $index = $tags.first( $t, :k)).defined {
@@ -49,9 +52,20 @@ class Config::TagsList does Library::Config {
         # filter tags shorter than 3 chars, lowercase convert, remove
         # doubles then sort
         $tags = [
-          (($doc<tags> // []).Slip, |@filter-list).grep(/^...+/)>>.lc.unique.sort
+          ( ($doc<tags> // []).Slip,
+            |@filter-list
+          ).grep(/^...+/)>>.lc.unique.sort
         ];
+note "FTags: @filter-list[*]";
+note "Tags: $tags[*]";
       }
+
+      $doc = $!dbcfg.update: [ (
+          q => ( :config-type<tag-filter>, ),
+          u => ( '$set' => ( :$tags,),),
+          upsert => False,
+        ),
+      ];
     }
 
     else {
@@ -63,10 +77,46 @@ class Config::TagsList does Library::Config {
         # filter tags shorter than 3 chars, lowercase convert, remove
         # doubles then sort
         $tags = [ @filter-list.grep(/^...+/)>>.lc.unique.sort ];
+
+        $doc = $!dbcfg.insert: [ (
+            :config-type<tag-filter>,
+            :$tags,
+          ),
+        ];
       }
     }
 
+note "DR: ", $doc.perl;
+    # test result of insert or update
+    if $doc<ok> {
+      my $selected = $doc<n>;
 
+      if (my $modified = $doc<nModified>).defined {
+        info-message("tags config update: modified $modified tags");
+      }
+
+      else {
+        info-message("tags config update: inserted $modified new tags");
+      }
+    }
+
+    else {
+      if $doc<writeErrors> {
+        for $doc<writeErrors> -> $we {
+          warn-message("tags config update: " ~ $we<errmsg>);
+        }
+      }
+
+      elsif $doc<errmsg> {
+        warn-message("tags config update: ", $doc<errmsg>);
+      }
+
+      else {
+        warn-message("tags config update: unknown error");
+      }
+    }
+
+#`{{
     # remove any tags
     for @$drop-tags -> $t is copy {
       $t .= lc;
@@ -122,6 +172,7 @@ class Config::TagsList does Library::Config {
         warn-message("tags config update: unknown error");
       }
     }
+}}
 
     $doc
   }
