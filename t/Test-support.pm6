@@ -139,8 +139,8 @@ class Test-support {
     my Bool $is-win = $*KERNEL.name eq 'win32';
     my Str $path-delim = ($is-win ?? '\\' !! '/');
 
-    # if we are under the scrutany of TRAVIS then adjust the path where to find the
-    # mongod/mongos binaries
+    # if we are under the scrutany of TRAVIS then adjust the path where to find
+    # the mongod/mongos binaries
 #    if ? %*ENV<TRAVIS> {
 #      %*ENV<PATH> = "$*CWD/t/Travis-ci/MongoDB:%*ENV<PATH>";
 #    }
