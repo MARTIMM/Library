@@ -14,9 +14,9 @@ enum ObjectType is export <<
   :OT-Program('Program') :OT-User('User') :OT-Web('Web')
 >>;
 
-our $lib-cfg is export;
-our $client is export;
-our $user-key is export;
+our $lib-cfg;
+our $client;
+our $user-key;
 
 #-------------------------------------------------------------------------------
 sub initialize-library ( Str :$user-key ) is export {
