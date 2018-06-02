@@ -18,10 +18,12 @@ for @($ts.serverkeys) -> $skey {
   ok $ts.server-control.stop-mongod($skey), "Server $skey is stopped";
 }
 
+#`{{
 throws-like
   { $ts.server-control.stop-mongod($ts.serverkeys[0]) },
   X::MongoDB, "Failed to stop server {$ts.serverkeys[0]} a 2nd time",
   :message(/:s exited unsuccessfully/);
+}}
 
 #------------------------------------------------------------------------------
 # Cleanup and close
