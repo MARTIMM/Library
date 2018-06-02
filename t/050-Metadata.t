@@ -33,13 +33,13 @@ spurt( $filename, Q:qq:to/EOCFG/);
 
     [ library ]
       root-db     = "test"
-      user-db     = "meta50"
+      user-db     = "meta050"
 
     [ library.collections ]
-      meta-data   = "meta50-data"
+      meta-data   = "meta050Data"
+      meta-config = "meta050Cfg"
 
-    [ library.collections.root ]
-      meta-config = "meta050-cfg"
+    #[ library.collections.root ]
 
     EOCFG
 
