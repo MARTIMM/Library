@@ -4,14 +4,14 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
-use Library::Config::SkipList;
-use Library::Metadata::Object;
+#use Library::MetaConfig::SkipDataList;
+use Library::MetaData;
 
 use MongoDB;
 use BSON::Document;
 
 #------------------------------------------------------------------------------
-class Metadata::Object::Directory does Library::Metadata::Object {
+class MetaData::Directory does Library::MetaData {
 
   #----------------------------------------------------------------------------
   # Set the default informaton for a directory in the meta structure

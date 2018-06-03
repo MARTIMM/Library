@@ -4,21 +4,21 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
-use Library::Config::SkipList;
-use Library::Metadata::Object;
+use Library::MetaConfig::SkipDataList;
+use Library::MetaData;
 
 use MongoDB;
 use BSON::Document;
 
 #------------------------------------------------------------------------------
-class Metadata::Object::File does Library::Metadata::Object {
+class Metadata::File does Library::MetaData {
 
   #----------------------------------------------------------------------------
   # Set the default informaton for a file in the meta structure
   method specific-init-meta ( --> Bool ) {
 
     my Bool $process-file = True;
-    my Library::Config::SkipList $sl .= new;
+    my Library::MetaConfig::SkipDataList $sl .= new;
 
     # check for file to be skipped
     my Array $skip-list = $sl.get-skip-filter;

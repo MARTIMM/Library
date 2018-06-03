@@ -5,13 +5,13 @@ unit package Library:auth<github:MARTIMM>;
 
 use Library;
 use Library::Storage;
-use Library::Config::TagsList;
+use Library::MetaConfig::TagFilterList;
 
 use MongoDB;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
-role Metadata::Object {
+role MetaData {
 
   has BSON::Document $!meta-data;
   has Library::Storage $!dbo handles <
@@ -88,7 +88,7 @@ role Metadata::Object {
 
     return BSON::Document.new if $!ignore-object;
 
-    my Library::Config::TagsList $ct .= new;
+    my Library::MetaConfig::TagFilterList $ct .= new;
     my Array $tags = [];
 
     # get user meta data
@@ -204,7 +204,7 @@ note "S: ", $subdoc.perl;
   method !take-object( ) {
     $!ignore-object = False;
 
-    my Library::Config::TagsList $c .= new(:root);
+    my Library::MetaConfig::TagFilterList $c .= new(:root);
     $!filter-list = $c.get-tag-filter;
 
     # always select the meta-data collection in users database
