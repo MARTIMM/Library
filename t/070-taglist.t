@@ -17,8 +17,8 @@ use BSON::Document;
 
 #------------------------------------------------------------------------------
 #drop-send-to('mongodb');
-#drop-send-to('screen');
-modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
+drop-send-to('screen');
+#modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
 info-message("Test $?FILE start");
 
 #-------------------------------------------------------------------------------
@@ -55,13 +55,15 @@ initialize-library;
 
 my MongoDB::Client $client := $Library::client;
 my MongoDB::Database $database = $client.database($db-name);
+#$database.run-command: (dropDatabase => 1,);
 my MongoDB::Collection $cl-cfg = $database.collection($cl-name);
 my MongoDB::Cursor $cu;
 
 #-------------------------------------------------------------------------------
 # Store a list of tags in the configuration collection
-subtest 'tags inserts', {
+subtest 'Insert tags', {
 
+  # Try to insert too small tag names
   my Library::MetaConfig::TagsList $c .= new;
   $c.set-tag-filter( <t1 t2 t3>, :!drop);
 
@@ -74,7 +76,9 @@ subtest 'tags inserts', {
 
 
 
-  $c.set-tag-filter( <t1a t2b t3c>, :!drop);
+  # Try to insert mixed tag names. All are converted to lowercase,
+  # sorted and made unique.
+  $c.set-tag-filter( <T2B t3c t1a T3C>, :!drop);
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<tag-filter>, )),
@@ -86,6 +90,62 @@ subtest 'tags inserts', {
 
   $doc = $cu.fetch;
   nok $doc, 'There is only one record';
+
+
+
+  # Try to insert mixed tag names. Now add some overlap with existing tags.
+  $c.set-tag-filter( <T2B T3C Pqr Xyz>, :!drop);
+
+  $cu = $cl-cfg.find(
+    :criteria( (:config-type<tag-filter>, )),
+    :number-to-return(1)
+  );
+
+  $doc = $cu.fetch;
+  is-deeply $doc<tags>, [<pqr t1a t2b t3c xyz>], "tag list is still ok";
+}
+
+#-------------------------------------------------------------------------------
+# Store a list of tags in the configuration collection
+subtest 'Drop tags', {
+
+  # Try to drop non existent tag names
+  my Library::MetaConfig::TagsList $c .= new;
+  $c.set-tag-filter( <abc DeF>, :drop);
+
+  $cu = $cl-cfg.find(
+    :criteria( (:config-type<tag-filter>, )),
+  );
+
+  my BSON::Document $doc = $cu.fetch;
+  is-deeply $doc<tags>, [<pqr t1a t2b t3c xyz>],
+    "No tags dropped. Tags weren't there";
+
+
+
+  # Try to drop mixed tag names. All are converted to lowercase,
+  # sorted and made unique before removal.
+  $c.set-tag-filter( <T2B t2b PQrs>, :drop);
+
+  $cu = $cl-cfg.find(
+    :criteria( (:config-type<tag-filter>, )),
+    :number-to-return(1)
+  );
+
+  $doc = $cu.fetch;
+  is-deeply $doc<tags>, [<pqr t1a t3c xyz>], "dropped one tag from list";
+
+
+  # Try to drop the rest.
+  $c.set-tag-filter( <pqr t1a t3c xyz>, :drop);
+
+  $cu = $cl-cfg.find(
+    :criteria( (:config-type<tag-filter>, )),
+    :number-to-return(1)
+  );
+
+  $doc = $cu.fetch;
+  is-deeply $doc<tags>, [], "tag list now empty";
 }
 
 #-------------------------------------------------------------------------------
