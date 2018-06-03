@@ -11,7 +11,7 @@ use MongoDB;
 use BSON::Document;
 
 #------------------------------------------------------------------------------
-class MetaConfig::SkipList does Library::MetaConfig {
+class MetaConfig::SkipDataList does Library::MetaConfig {
 
   #----------------------------------------------------------------------------
   method set-skip-filter (
