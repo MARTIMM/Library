@@ -64,8 +64,6 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
 
       # dropping tags from an empty list is not useful
       if !$drop {
-        $doc = BSON::Document.new;
-
         # filter tags shorter than 3 chars, lowercase convert, remove
         # doubles then sort
         $tags = [ @filter-list.grep(/^...+/)>>.lc.unique.sort ];
@@ -81,8 +79,6 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
 #note "DR: ", $doc.perl;
     # test result of insert or update
     if $doc<ok> {
-      my $selected = $doc<n>;
-
       if $doc<nModified>.defined {
         info-message("tags config update: modified tags");
       }
