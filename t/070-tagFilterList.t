@@ -171,7 +171,7 @@ subtest 'Drop tags', {
 #-------------------------------------------------------------------------------
 done-testing;
 
-#$database.run-command: (dropDatabase => 1,);
+$database.run-command: (dropDatabase => 1,);
 $client.cleanup;
 
 unlink 't/Lib4/client-configuration.toml';
