@@ -1,7 +1,8 @@
 ## Release notes
 
 * 0.8.4
-  * More files renamed.
+  * MetaConfig:: * files renamed.
+  * Rename MetaData:: * files and change module structure.
 * 0.8.3
   * Refactoring code from store-file-metadata.pl6 to library-tag.pl6
   * Renaming modules

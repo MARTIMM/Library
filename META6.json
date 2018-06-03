@@ -19,14 +19,14 @@
     "Library::MetaConfig":              "lib/Library/MetaConfig.pm6",
     "Library::MetaConfig::TagFilterList":
       "lib/Library/MetaConfig/TagFilterList.pm6",
-    "Library::MetaConfig::SkipList":    "lib/Library/MetaConfig/SkipList.pm6",
+    "Library::MetaConfig::SkipDataList":
+      "lib/Library/MetaConfig/SkipDataList.pm6",
 
-    "Library::Storage":                 "lib/Library/Storage.pm6",
+    "Library::Storage":             "lib/Library/Storage.pm6",
 
-    "Library::Metadata::Object":        "lib/Library/Metadata/Object.pm6",
-    "Library::Metadata::Object::Directory":
-      "lib/Library/Metadata/Object/Directory.pm6",
-    "Library::Metadata::Object::File":  "lib/Library/Metadata/Object/File.pm6"
+    "Library::MetaData":            "lib/Library/MetaData.pm6",
+    "Library::MetaData::Directory": "lib/Library/MetaData/Directory.pm6",
+    "Library::MetaData::File":      "lib/Library/MetaData/File.pm6"
   },
-  "source-url":                         "git://github.com/MARTIMM/Library.git"
+  "source-url":                     "git://github.com/MARTIMM/Library.git"
 }

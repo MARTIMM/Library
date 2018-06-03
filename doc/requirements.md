@@ -436,11 +436,11 @@ package library #FFFFFF {
   class L as "Library" << (P,#FF8800) package >>
   class LC as "Library::Configuration"
   class LS as "Library::Storage"
-  class Obj as "Library::Metadata::Object" << (R,#FFFF00) role >>
-  class OTF as "Library::Metadata::Object::File"
-  class OTD as "Library::Metadata::Object::Directory"
+  class MTD as "Library::MetaData" << (R,#FFFF00) role >>
+  class OTF as "Library::MetaData::File"
+  class OTD as "Library::MetaData::Directory"
 
-  Client *-> Obj
+  Client *-> MTD
 
   MC <--* L
   LC --* L
@@ -451,10 +451,10 @@ package library #FFFFFF {
 
   'LS <|-- LMD
 
-  'LMD <- Obj
-  Obj -> LS
-  Obj <|-- OTF
-  Obj <|-- OTD
+  'LMD <- MTD
+  MTD -> LS
+  MTD <|-- OTF
+  MTD <|-- OTD
 }
 
 ```
