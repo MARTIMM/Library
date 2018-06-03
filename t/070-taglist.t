@@ -5,7 +5,7 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Config::TagsList;
+use Library::MetaConfig::TagsList;
 
 use MongoDB;
 use MongoDB::Client;
@@ -62,16 +62,15 @@ my MongoDB::Cursor $cu;
 # Store a list of tags in the configuration collection
 subtest 'tags inserts', {
 
-  my Library::Config::TagsList $c .= new;
+  my Library::MetaConfig::TagsList $c .= new;
   $c.set-tag-filter( <t1 t2 t3>, :!drop);
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<tag-filter>, )),
-#    :number-to-return(1)
   );
 
   my BSON::Document $doc = $cu.fetch;
-  ok !$doc, "No tags inserted. All tags are too short";
+  is-deeply $doc<tags>, [], "No tags inserted. All tags are too short";
 
 
 
@@ -79,16 +78,22 @@ subtest 'tags inserts', {
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<tag-filter>, )),
-#    :number-to-return(1)
   );
 
   $doc = $cu.fetch;
-#note "DR: ", $doc.perl;
-#  is-deeply $doc<tag-filter><tags>, <t1a t2b t3c>, "tag list is set properly";
+  is $doc<config-type>, 'tag-filter', "Config type is tag-filter";
+  is-deeply $doc<tags>, [<t1a t2b t3c>], "tag list is set properly";
+
+  $doc = $cu.fetch;
+  nok $doc, 'There is only one record';
 }
 
 #-------------------------------------------------------------------------------
 done-testing;
 
+$database.run-command: (dropDatabase => 1,);
+$client.cleanup;
+
 unlink 't/Lib4/client-configuration.toml';
+unlink 't/Lib4/store-file-metadata.log';
 rmdir 't/Lib4';

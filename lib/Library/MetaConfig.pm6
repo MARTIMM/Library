@@ -7,7 +7,7 @@ unit package Library:auth<github:MARTIMM>;
 use Library::Storage;
 
 #-------------------------------------------------------------------------------
-role Config {
+role MetaConfig {
 
   has Library::Storage $!dbcfg;
 

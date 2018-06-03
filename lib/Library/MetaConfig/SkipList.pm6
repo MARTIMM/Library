@@ -5,13 +5,13 @@ unit package Library:auth<github:MARTIMM>;
 
 use Library;
 use Library::Storage;
-use Library::Config;
+use Library::MetaConfig;
 
 use MongoDB;
 use BSON::Document;
 
 #------------------------------------------------------------------------------
-class Config::SkipList does Library::Config {
+class MetaConfig::SkipList does Library::MetaConfig {
 
   #----------------------------------------------------------------------------
   method set-skip-filter (

@@ -3,8 +3,8 @@
 use v6;
 
 use Library;
-use Library::Config::TagsList;
-use Library::Config::SkipList;
+#use Library::MetaConfig::TagsList;
+#use Library::MetaConfig::SkipList;
 use Library::Metadata::Object::File;
 use Library::Metadata::Object::Directory;
 
@@ -16,12 +16,13 @@ use BSON::Document;
 initialize-library();
 
 #-------------------------------------------------------------------------------
-# Allow switches after positionals. Pinched from the old panda program. Now it is
-# possible to make the script files executable with the path of this program.
+# Allow switches after positionals. Pinched from the old panda program. Now it
+# is possible to make the script files executable with the path of this program.
 #say "Args: ", @*ARGS;
 @*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
 #say "MArgs: ", @*ARGS;
 
+#`{{
 #-------------------------------------------------------------------------------
 # Store a list of tags in the configuration collection
 multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
@@ -29,10 +30,12 @@ multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
   my Array $drop-tags = [$dt.split(/ \s* <punct>+ \s* /)];
 
   # access config collection
-  my Library::Config::TagsList $c .= new(:root);
+  my Library::MetaConfig::TagsList $c .= new(:root);
   $c.set-tag-filter( @filter-list, :$drop-tags);
 }
+}}
 
+#`{{
 #-------------------------------------------------------------------------------
 # Store a list of regexes to filter on files and directories
 # in the configuration collection
@@ -51,9 +54,10 @@ note "Ds 0: ", $ds;
 note "Ds 1: ", $drop-skip;
 
   # access config collection
-  my Library::Config::SkipList $c .= new(:root);
+  my Library::MetaConfig::SkipList $c .= new(:root);
   $c.set-skip-filter( @filter-list, :$drop-skip, :$dir);
 }
+}}
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Store metadata about files.

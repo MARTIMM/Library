@@ -5,13 +5,13 @@ unit package Library:auth<github:MARTIMM>;
 
 use Library;
 use Library::Storage;
-use Library::Config;
+use Library::MetaConfig;
 
 use MongoDB;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
-class Config::TagsList does Library::Config {
+class MetaConfig::TagsList does Library::MetaConfig {
 
   #-----------------------------------------------------------------------------
   method set-tag-filter (
@@ -31,7 +31,7 @@ class Config::TagsList does Library::Config {
 
     $doc = $c.fetch;
 
-note "SR: ", $doc.perl;
+#note "SR: ", $doc.perl;
 
     # init if there isn't a document
     my Bool $found = $doc.defined;
@@ -56,8 +56,8 @@ note "SR: ", $doc.perl;
             |@filter-list
           ).grep(/^...+/)>>.lc.unique.sort
         ];
-note "FTags: @filter-list[*]";
-note "Tags: $tags[*]";
+#note "FTags: @filter-list[*]";
+#note "Tags: $tags[*]";
       }
 
       $doc = $!dbcfg.update: [ (
@@ -86,69 +86,12 @@ note "Tags: $tags[*]";
       }
     }
 
-note "DR: ", $doc.perl;
+#note "DR: ", $doc.perl;
     # test result of insert or update
     if $doc<ok> {
       my $selected = $doc<n>;
 
-      if (my $modified = $doc<nModified>).defined {
-        info-message("tags config update: modified $modified tags");
-      }
-
-      else {
-        info-message("tags config update: inserted $modified new tags");
-      }
-    }
-
-    else {
-      if $doc<writeErrors> {
-        for $doc<writeErrors> -> $we {
-          warn-message("tags config update: " ~ $we<errmsg>);
-        }
-      }
-
-      elsif $doc<errmsg> {
-        warn-message("tags config update: ", $doc<errmsg>);
-      }
-
-      else {
-        warn-message("tags config update: unknown error");
-      }
-    }
-
-#`{{
-    # remove any tags
-    for @$drop-tags -> $t is copy {
-      $t .= lc;
-      if (my $index = $tags.first( $t, :k)).defined {
-        $tags.splice( $index, 1);
-      }
-    }
-
-    if $found {
-      $doc = $!dbcfg.update: [ (
-          q => (
-            :config-type<tag-filter>,
-          ),
-
-          u => ( '$set' => ( :$tags,),),
-          upsert => False,
-        ),
-      ];
-    }
-
-    else {
-      $doc = $!dbcfg.insert: [ (
-          :config-type<tag-filter>,
-          :$tags,
-        ),
-      ];
-    }
-
-    if $doc<ok> {
-      my $selected = $doc<n>;
-
-      if (my $modified = $doc<nModified>).defined {
+      if $doc<nModified>.defined {
         info-message("tags config update: modified tags");
       }
 
@@ -172,7 +115,6 @@ note "DR: ", $doc.perl;
         warn-message("tags config update: unknown error");
       }
     }
-}}
 
     $doc
   }
