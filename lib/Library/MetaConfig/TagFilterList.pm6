@@ -15,31 +15,21 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
 
   #-----------------------------------------------------------------------------
   method set-tag-filter (
-#    @filter-list, Array :$drop-tags --> BSON::Document
     @filter-list, Bool :$drop = False
     --> BSON::Document
   ) {
 
-    my Array $tags;
     my BSON::Document $doc;
-
-    # find the config doc for tag filters. If not found, create a new one.
-    my $c = $!dbcfg.find(
-      :criteria( (:config-type<tag-filter>, )),
-      :number-to-return(1)
-    );
-
-    $doc = $c.fetch;
-
-#note "SR: ", $doc.perl;
+    my Array $tags = self.get-tag-filter;
 
     # init if there isn't a document
-    my Bool $found = $doc.defined;
+    my Bool $found = $tags.defined;
+    $tags //= [];
     if $found {
 
       # remove tags when drop is True
       if $drop {
-        $tags = [ ( ($doc<tags> // []).Slip).grep(/^...+/)>>.lc.unique.sort];
+        $tags = [ $tags.grep(/^...+/)>>.lc.unique.sort ];
         for @filter-list -> $t is copy {
           $t .= lc;
           if (my $index = $tags.first( $t, :k)).defined {
@@ -51,13 +41,7 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
       else {
         # filter tags shorter than 3 chars, lowercase convert, remove
         # doubles then sort
-        $tags = [
-          ( ($doc<tags> // []).Slip,
-            |@filter-list
-          ).grep(/^...+/)>>.lc.unique.sort
-        ];
-#note "FTags: @filter-list[*]";
-#note "Tags: $tags[*]";
+        $tags = [ ( |@$tags, |@filter-list ).grep(/^...+/)>>.lc.unique.sort ];
       }
 
       $doc = $!dbcfg.update: [ (
@@ -128,27 +112,23 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
       :number-to-return(1)
     );
 
-    my BSON::Document $doc;
-    $doc = $c.fetch;
+    my BSON::Document $doc = $c.fetch;
 
-    # init if there isn't a document
-#    my Bool $found = $doc.defined;
-    $doc //= BSON::Document.new;
-
-    $doc<tags> // []
+    # return array or Array type
+    $doc.defined ?? $doc<tags> !! Array
   }
 
   #-----------------------------------------------------------------------------
-  method filter-tags ( Array:D $tags is copy, Array $drop-tags = [] --> Array ) {
+  method filter-tags ( Array:D $tags is copy --> Array ) {
 
     my $filter-list = self.get-tag-filter;
 
-    # Filter tags shorter than 3 chars, lowercase convert, remove
+    # filter tags shorter than 3 chars, lowercase convert, remove
     # doubles then sort
     $tags = [$tags.grep(/^...+/)>>.lc.unique.sort.List.Slip];
 
     # remove any tags
-    for |@$filter-list, |@$drop-tags -> $t is copy {
+    for @$filter-list -> $t is copy {
       $t .= lc;
       if (my $index = $tags.first( $t, :k)).defined {
         $tags.splice( $index, 1);
