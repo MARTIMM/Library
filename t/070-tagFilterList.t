@@ -55,7 +55,7 @@ initialize-library;
 
 my MongoDB::Client $client := $Library::client;
 my MongoDB::Database $database = $client.database($db-name);
-#$database.run-command: (dropDatabase => 1,);
+$database.run-command: (dropDatabase => 1,);
 my MongoDB::Collection $cl-cfg = $database.collection($cl-name);
 my MongoDB::Cursor $cu;
 
@@ -63,8 +63,9 @@ my MongoDB::Cursor $cu;
 # Store a list of tags in the configuration collection
 subtest 'Insert tags', {
 
-  # Try to insert too small tag names
   my Library::MetaConfig::TagFilterList $c .= new;
+
+  # Try to insert too small tag names
   $c.set-tag-filter( <t1 t2 t3>, :!drop);
 
   $cu = $cl-cfg.find(
@@ -103,14 +104,33 @@ subtest 'Insert tags', {
 
   $doc = $cu.fetch;
   is-deeply $doc<tags>, [<pqr t1a t2b t3c xyz>], "tag list is still ok";
+
+
+  # get the tags list
+  is-deeply $c.get-tag-filter, [<pqr t1a t2b t3c xyz>],
+    "tag list retrieved using get-tag-filter";
+}
+
+#-------------------------------------------------------------------------------
+# Store a list of tags in the configuration collection
+subtest 'Filter tags', {
+
+  my Library::MetaConfig::TagFilterList $c .= new;
+
+  # filter too small tags
+  is-deeply $c.filter-tags([<t1 t2>]), [], "Filtered all out";
+
+  is-deeply $c.filter-tags([<t1a t2b Xab Xde>]), [<xab xde>],
+    "Filtered 2 tags";
 }
 
 #-------------------------------------------------------------------------------
 # Store a list of tags in the configuration collection
 subtest 'Drop tags', {
 
-  # Try to drop non existent tag names
   my Library::MetaConfig::TagFilterList $c .= new;
+
+  # Try to drop non existent tag names
   $c.set-tag-filter( <abc DeF>, :drop);
 
   $cu = $cl-cfg.find(
@@ -151,7 +171,7 @@ subtest 'Drop tags', {
 #-------------------------------------------------------------------------------
 done-testing;
 
-$database.run-command: (dropDatabase => 1,);
+#$database.run-command: (dropDatabase => 1,);
 $client.cleanup;
 
 unlink 't/Lib4/client-configuration.toml';
