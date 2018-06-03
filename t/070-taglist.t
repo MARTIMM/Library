@@ -5,7 +5,7 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::MetaConfig::TagsList;
+use Library::MetaConfig::TagFilterList;
 
 use MongoDB;
 use MongoDB::Client;
@@ -64,7 +64,7 @@ my MongoDB::Cursor $cu;
 subtest 'Insert tags', {
 
   # Try to insert too small tag names
-  my Library::MetaConfig::TagsList $c .= new;
+  my Library::MetaConfig::TagFilterList $c .= new;
   $c.set-tag-filter( <t1 t2 t3>, :!drop);
 
   $cu = $cl-cfg.find(
@@ -110,7 +110,7 @@ subtest 'Insert tags', {
 subtest 'Drop tags', {
 
   # Try to drop non existent tag names
-  my Library::MetaConfig::TagsList $c .= new;
+  my Library::MetaConfig::TagFilterList $c .= new;
   $c.set-tag-filter( <abc DeF>, :drop);
 
   $cu = $cl-cfg.find(

@@ -11,7 +11,7 @@ use MongoDB;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
-class MetaConfig::TagsList does Library::MetaConfig {
+class MetaConfig::TagFilterList does Library::MetaConfig {
 
   #-----------------------------------------------------------------------------
   method set-tag-filter (
