@@ -1,5 +1,13 @@
 use v6;
 
+=begin comment
+  Tag filter list is an array of words which are used to filter words found in
+  another list. The words must have at least 3 characters to enter in the list.
+  The words are all converted to lowercase and finally the list is sorted
+  before it is stored. The collection where it is stored is decided by the role
+  Library::MetaConfig
+=end comment
+
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
