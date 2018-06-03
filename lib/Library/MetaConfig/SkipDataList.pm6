@@ -64,7 +64,7 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
       }
     }
 
-note "DR: ", $doc.perl;
+#note "DR: ", $doc.perl;
     # test result of insert or update
     if $doc<ok> {
       if $doc<nModified>.defined {
