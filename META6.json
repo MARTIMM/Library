@@ -2,7 +2,7 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.8.2",
+  "version":                              "0.8.3",
   "license":                              "Artistic-2.0",
   "perl":                                 "6",
   "depends": [
@@ -13,18 +13,19 @@
   "build-depends": [ ],
   "tags": [ "metadata", "library", "mongodb", "database"],
   "provides": {
-    "Library":                            "lib/Library.pm6",
-    "Library::Configuration":             "lib/Library/Configuration.pm6",
+    "Library":                          "lib/Library.pm6",
+    "Library::Configuration":           "lib/Library/Configuration.pm6",
 
-    "Library::Config":                    "lib/Library/Config.pm6",
-    "Library::Config::TagsList":          "lib/Library/Config/TagsList.pm6",
-    "Library::Config::SkipList":          "lib/Library/Config/SkipList.pm6",
+    "Library::MetaConfig":              "lib/Library/MetaConfig.pm6",
+    "Library::MetaConfig::TagsList":    "lib/Library/MetaConfig/TagsList.pm6",
+    "Library::MetaConfig::SkipList":    "lib/Library/MetaConfig/SkipList.pm6",
 
-    "Library::Storage":                   "lib/Library/Storage.pm6",
+    "Library::Storage":                 "lib/Library/Storage.pm6",
 
-    "Library::Metadata::Object":          "lib/Library/Metadata/Object.pm6",
-    "Library::Metadata::Object::Directory":    "lib/Library/Metadata/Object/Directory.pm6",
-    "Library::Metadata::Object::File":    "lib/Library/Metadata/Object/File.pm6"
+    "Library::Metadata::Object":        "lib/Library/Metadata/Object.pm6",
+    "Library::Metadata::Object::Directory":
+      "lib/Library/Metadata/Object/Directory.pm6",
+    "Library::Metadata::Object::File":  "lib/Library/Metadata/Object/File.pm6"
   },
-  "source-url":                           "git://github.com/MARTIMM/Library.git"
+  "source-url":                         "git://github.com/MARTIMM/Library.git"
 }

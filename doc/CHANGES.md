@@ -1,5 +1,9 @@
 ## Release notes
 
+* 0.8.3
+  * Refactoring code from store-file-metadata.pl6 to library-tag.pl6
+  * Renaming modules
+  * Adding new tests
 * 0.8.2
   * removal of modules, rename modules and configuration changes
 * 0.8.1
