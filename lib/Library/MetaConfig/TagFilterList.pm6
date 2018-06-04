@@ -23,7 +23,7 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
 
   #-----------------------------------------------------------------------------
   method set-tag-filter (
-    @filter-list, Bool :$drop = False
+    *@filter-list, Bool :$drop = False
     --> BSON::Document
   ) {
 
