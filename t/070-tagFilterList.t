@@ -36,7 +36,7 @@ spurt( $filename, Q:qq:to/EOCFG/);
 
     [ connection ]
       server      = "localhost"
-      port        = "$p1"
+      port        = $p1
 
     [ library ]
       root-db     = "root070"
@@ -65,7 +65,8 @@ subtest 'Insert tags', {
 
   my Library::MetaConfig::TagFilterList $c .= new;
 
-  # Try to insert too small tag names
+  # try to insert too small tag names. this will insert a new document
+  # with an empty filter array.
   $c.set-tag-filter( <t1 t2 t3>, :!drop);
 
   $cu = $cl-cfg.find(
@@ -77,8 +78,8 @@ subtest 'Insert tags', {
 
 
 
-  # Try to insert mixed tag names. All are converted to lowercase,
-  # sorted and made unique.
+  # try to insert mixed tag names. all are converted to lowercase,
+  # sorted and made unique. this will update the filter list.
   $c.set-tag-filter( <T2B t3c t1a T3C>, :!drop);
 
   $cu = $cl-cfg.find(
@@ -94,7 +95,7 @@ subtest 'Insert tags', {
 
 
 
-  # Try to insert mixed tag names. Now add some overlap with existing tags.
+  # try to insert mixed tag names. Now add some overlap with existing tags.
   $c.set-tag-filter( <T2B T3C Pqr Xyz>, :!drop);
 
   $cu = $cl-cfg.find(
@@ -130,7 +131,7 @@ subtest 'Drop tags', {
 
   my Library::MetaConfig::TagFilterList $c .= new;
 
-  # Try to drop non existent tag names
+  # try to drop non existent tag names
   $c.set-tag-filter( <abc DeF>, :drop);
 
   $cu = $cl-cfg.find(
@@ -143,7 +144,7 @@ subtest 'Drop tags', {
 
 
 
-  # Try to drop mixed tag names. All are converted to lowercase,
+  # try to drop mixed tag names. all are converted to lowercase,
   # sorted and made unique before removal.
   $c.set-tag-filter( <T2B t2b PQrs>, :drop);
 
@@ -156,7 +157,7 @@ subtest 'Drop tags', {
   is-deeply $doc<tags>, [<pqr t1a t3c xyz>], "dropped one tag from list";
 
 
-  # Try to drop the rest.
+  # try to drop the rest.
   $c.set-tag-filter( <pqr t1a t3c xyz>, :drop);
 
   $cu = $cl-cfg.find(
@@ -166,6 +167,20 @@ subtest 'Drop tags', {
 
   $doc = $cu.fetch;
   is-deeply $doc<tags>, [], "tag list now empty";
+}
+
+#-------------------------------------------------------------------------------
+# Store a list of tags in the configuration collection
+subtest 'Insert tags', {
+
+  # drop the database to check if an insert operation works
+  $database.run-command: (dropDatabase => 1,);
+  my Library::MetaConfig::TagFilterList $c .= new;
+
+  # try to insert tags on empty filter list. test database insert.
+  $c.set-tag-filter( <t1ab bBax a2DE>, :!drop);
+  is-deeply $c.get-tag-filter, [<a2de bbax t1ab>],
+    "Tags inserted in empty filter list";
 }
 
 #-------------------------------------------------------------------------------

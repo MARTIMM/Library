@@ -36,7 +36,7 @@ class Storage {
   }
 
   #-----------------------------------------------------------------------------
-  method insert ( Array $documents --> BSON::Document ) {
+  method insert ( Array:D $documents --> BSON::Document ) {
 
     $!database.run-command: (
       insert => $!collection.name,
@@ -45,28 +45,17 @@ class Storage {
   }
 
   #-----------------------------------------------------------------------------
-  method update ( Array $updates --> BSON::Document ) {
+  method update ( Array:D $updates --> BSON::Document ) {
 
-#    my BSON::Document $req .= new: (
-#      update => $!collection.name,
-#      updates => $updates,
-#      ordered => True,
-#    );
-
-#note "Req: ", $req.perl;
-#    my BSON::Document $doc = $!database.run-command($req);
     $!database.run-command: (
       update => $!collection.name,
       updates => $updates,
       ordered => True,
     )
-
-#note "Doc: ", $doc.perl;
-#    $doc
   }
 
   #-----------------------------------------------------------------------------
-  method delete ( Array $deletes --> BSON::Document ) {
+  method delete ( Array:D $deletes --> BSON::Document ) {
 
     $!database.run-command: (
       delete => $!collection.name,
@@ -80,12 +69,9 @@ class Storage {
     my BSON::Document $req .= new;
     $req<count> = $!collection.name;
     $req<query> = $query if ?$query;
-#note "L req: ", $req.perl;
-    my $d = $!database.run-command($req);
-#note "L count: ", $d.perl;
-    $d;
-  }
 
+    $!database.run-command($req)
+  }
 
   multi method count (
     BSON::Document $query = BSON::Document.new
@@ -95,11 +81,8 @@ class Storage {
     my BSON::Document $req .= new;
     $req<count> = $!collection.name;
     $req<query> = $query if ?$query;
-#note "B req: ", $req.perl;
-#    my $d = $!database.run-command($req);
+
     $!database.run-command($req)
-#note "B: count: ", $d.perl;
-#    $d
   }
 
   #-----------------------------------------------------------------------------

@@ -67,7 +67,6 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
         # filter tags shorter than 3 chars, lowercase convert, remove
         # doubles then sort
         $tags = [ @filter-list.grep(/^...+/)>>.lc.unique.sort ];
-
         $doc = $!dbcfg.insert: [ (
             :config-type<tag-filter>,
             :$tags,
@@ -76,7 +75,6 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
       }
     }
 
-#note "DR: ", $doc.perl;
     # test result of insert or update
     if $doc<ok> {
       if $doc<nModified>.defined {
