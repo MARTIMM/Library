@@ -17,8 +17,8 @@ use BSON::Document;
 
 #------------------------------------------------------------------------------
 drop-send-to('mongodb');
-#drop-send-to('screen');
-modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
+drop-send-to('screen');
+#modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
 info-message("Test $?FILE start");
 
 #-------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ spurt( $filename, Q:qq:to/EOCFG/);
 
     [ connection ]
       server      = "localhost"
-      port        = "$p1"
+      port        = $p1
 
     [ library ]
       root-db     = "root071"
@@ -65,15 +65,30 @@ subtest 'Insert skip specs', {
 
   my Library::MetaConfig::SkipDataList $c .= new;
 
-  # Try to insert some skip specs
-  $c.set-skip-filter( <t1 t2 t3>, :!drop);
+  # Try to insert some skip specs. case preservation but remove duplicates
+  $c.set-skip-filter( <t1 T2 t3 t3>, :!drop);
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<skip-filter>, )),
+    :number-to-return(1)
   );
 
   my BSON::Document $doc = $cu.fetch;
-  is-deeply $doc<tags>, [], "No skip items inserted. All tags are too short";
+  is-deeply $doc<skips>, [<T2 t1 t3>], "Skip specs inserted.";
+
+  # insert new with some overlap
+  $c.set-skip-filter( <t1 T55>, :!drop);
+  is-deeply $c.get-skip-filter, [<T2 T55 t1 t3>], "Skip specs. Use getter";
+}
+
+#-------------------------------------------------------------------------------
+# Store a list of tags in the configuration collection
+subtest 'Drop skip specs', {
+
+  my Library::MetaConfig::SkipDataList $c .= new;
+
+  $c.set-skip-filter( <t3 t3>, :drop);
+  is-deeply $c.get-skip-filter, [<T2 T55 t1>], "One skip spec deleted";
 }
 
 #-------------------------------------------------------------------------------
