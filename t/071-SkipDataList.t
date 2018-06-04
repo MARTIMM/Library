@@ -60,12 +60,12 @@ my MongoDB::Collection $cl-cfg = $database.collection($cl-name);
 my MongoDB::Cursor $cu;
 
 #-------------------------------------------------------------------------------
-# Store a list of tags in the configuration collection
+# store a list of skip filter spec
 subtest 'Insert skip specs', {
 
   my Library::MetaConfig::SkipDataList $c .= new;
 
-  # Try to insert some skip specs. case preservation but remove duplicates
+  # try to insert some skip specs. case preservation but remove duplicates
   $c.set-skip-filter( <t1 T2 t3 t3>, :!drop);
 
   $cu = $cl-cfg.find(
@@ -78,23 +78,57 @@ subtest 'Insert skip specs', {
 
   # insert new with some overlap
   $c.set-skip-filter( <t1 T55>, :!drop);
-  is-deeply $c.get-skip-filter, [<T2 T55 t1 t3>], "Skip specs. Use getter";
+  is-deeply $c.get-skip-filter, [<T2 T55 t1 t3>],
+    "Skip specs are '$c.get-skip-filter()'. Getter is used";
 }
 
 #-------------------------------------------------------------------------------
-# Store a list of tags in the configuration collection
+# filter using skip filter
+subtest 'filter path with filter', {
+
+  my Library::MetaConfig::SkipDataList $c .= new;
+
+  ok $c.filter('/abc/def/T2'), "Path '/abc/def/T2' is filtered";
+  nok $c.filter('/abc/def/pqr'), "Path '/abc/def/pqr' is not filtered";
+}
+
+#-------------------------------------------------------------------------------
+# drop skip filter specs
 subtest 'Drop skip specs', {
 
   my Library::MetaConfig::SkipDataList $c .= new;
 
   $c.set-skip-filter( <t3 t3>, :drop);
   is-deeply $c.get-skip-filter, [<T2 T55 t1>], "One skip spec deleted";
+
+  $c.set-skip-filter( <T2 T55 t1>, :drop);
+  is-deeply $c.get-skip-filter, [], "Rest is dropped too";
+}
+
+#-------------------------------------------------------------------------------
+# store a list of skip filter spec
+subtest 'Interesting skips', {
+
+  my Library::MetaConfig::SkipDataList $c .= new;
+
+  # insert real world skip specs. drop is by default False.
+  $c.set-skip-filter( '\/\.git<-[/]>*', '\/\.precomp<|w>');
+  diag "Skip filter set to: " ~ $c.get-skip-filter;
+
+  my Str $p = '/home/mt/Project/.git/HEAD';
+  ok $c.filter($p), "Path '$p' is filtered";
+  $p = '/home/mt/Project/.gitignore';
+  ok $c.filter($p), "Path '$p' is filtered";
+  $p = '/home/mt/Perl6/lib/.precomp/';
+  ok $c.filter($p), "Path '$p' is filtered";
+  $p = '/home/mt/Perl6/lib/Library.pm6';
+  nok $c.filter($p), "Path '$p' is not filtered";
 }
 
 #-------------------------------------------------------------------------------
 done-testing;
 
-#$database.run-command: (dropDatabase => 1,);
+$database.run-command: (dropDatabase => 1,);
 $client.cleanup;
 
 unlink 't/Lib4/client-configuration.toml';

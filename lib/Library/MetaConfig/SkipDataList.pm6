@@ -15,7 +15,7 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
 
   #-----------------------------------------------------------------------------
   method set-skip-filter (
-    @filter-list, Bool :$drop = False
+    *@filter-list, Bool :$drop = False
     --> BSON::Document
   ) {
 
@@ -31,7 +31,6 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
         $skips = [ $skips.List>>.eager.flat.unique.sort ];
 #note "Sk 0: ", $skips.perl;
         for @filter-list -> $t is copy {
-          $t .= lc;
           if (my $index = $skips.first( $t, :k)).defined {
             $skips.splice( $index, 1);
           }
@@ -39,10 +38,11 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
       }
 
       else {
+#note "Fl: ", @filter-list;
         $skips = [ ( |@$skips, |@filter-list )>>.eager.flat.unique.sort ];
       }
 
-#note "Sk 1: ", $skips.perl;
+#note "Sk 1: ", $skips;
       $doc = $!dbcfg.update: [ (
           q => ( :config-type<skip-filter>, ),
           u => ( '$set' => ( :$skips,),),
@@ -56,7 +56,9 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
       if !$drop {
         # need .eager.flat to get rid of (x).Seq items. in TagFilterList
         # .lc does that at the same time.
-        $skips = [ @filter-list>>.eager.flat.unique.sort ];
+#note "Fl: ", @filter-list.perl;
+        $skips = [ @filter-list.List>>.eager.flat.unique.sort ];
+#note "Sk: ", $skips.perl;
         $doc = $!dbcfg.insert: [ (
             :config-type<skip-filter>,
             :$skips,
@@ -65,7 +67,7 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
       }
     }
 
-note "DR: ", $doc.perl;
+#note "DR: ", $doc.perl;
     # test result of insert or update
     if $doc<ok> {
       if $doc<nModified>.defined {
@@ -110,5 +112,21 @@ note "DR: ", $doc.perl;
 
     # return array or Array type
     $doc.defined ?? $doc<skips> !! Array
+  }
+
+  #-----------------------------------------------------------------------------
+  method filter ( Str:D $path --> Bool ) {
+
+    my Bool $filtered = False;
+
+    my Array $skips = self.get-skip-filter;
+    for @$skips -> $skip {
+      if $path ~~ m/<$skip>/ {
+        $filtered = True;
+        last;
+      }
+    }
+
+    $filtered
   }
 }
