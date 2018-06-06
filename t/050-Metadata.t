@@ -5,8 +5,8 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Metadata::Object;
-use Library::Metadata::Object::File;
+use Library::MetaData;
+use Library::MetaData::File;
 
 use MongoDB;
 use BSON::Document;
@@ -20,16 +20,17 @@ info-message("Test $?FILE start");
 #------------------------------------------------------------------------------
 my Library::Test-support $ts .= new;
 my Int $p1 = $ts.server-control.get-port-number('s1');
+my Str $dir = 't/Lib4';
 
 # setup config directory
-mkdir 't/Lib4', 0o700 unless 't/Lib4'.IO ~~ :d;
-%*ENV<LIBRARY_CONFIG> = 't/Lib4';
-my Str $filename = 't/Lib4/client-configuration.toml';
+mkdir $dir, 0o700 unless $dir.IO ~~ :d;
+%*ENV<LIBRARY_CONFIG> = $dir;
+my Str $filename = $dir ~ '/client-configuration.toml';
 spurt( $filename, Q:qq:to/EOCFG/);
 
     [ connection ]
       server      = "localhost"
-      port        = "$p1"
+      port        = $p1
 
     [ library ]
       root-db     = "test"
@@ -52,7 +53,7 @@ subtest 'User added metadata', {
 
   my $filename = 't/030-OT-File.t';
   diag "update metadata with $filename";
-  my Library::Metadata::Object::File $lmo .= new(:object($filename));
+  my Library::MetaData::File $lmo .= new(:object($filename));
 
   diag "get metadata";
   my BSON::Document $udata = $lmo.get-metameta;
@@ -74,7 +75,7 @@ subtest 'Moving files around', {
   diag "set $filename and provide content";
   spurt $filename, 'hoeperdepoep zat op de stoep';
 
-  my Library::Metadata::Object::File $lmo;
+  my Library::MetaData::File $lmo;
   $lmo .= new(:object($filename));
 
   my BSON::Document $udata = $lmo.get-metameta(:subdoc<program-meta>);
