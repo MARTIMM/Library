@@ -3,7 +3,7 @@
 use v6;
 
 use Library;
-use Library::Config::TagsList;
+use Library::MetaConfig::TagFilterList;
 use Library::Config::SkipList;
 use Library::Metadata::Object::File;
 use Library::Metadata::Object::Directory;

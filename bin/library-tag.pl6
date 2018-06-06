@@ -3,7 +3,7 @@
 use v6;
 
 use Library;
-use Library::Config::TagsList;
+use Library::MetaConfig::TagFilterList;
 
 #-------------------------------------------------------------------------------
 initialize-library();
@@ -16,11 +16,11 @@ initialize-library();
 
 #-------------------------------------------------------------------------------
 # Store a list of tags in the configuration collection
-sub MAIN ( *@filter-list, Bool :$drop = False ) {
-
-  #my Array $drop-tags = [$dt.split(/ \s* <punct>+ \s* /)];
+sub MAIN ( *@filter-list, Bool :$drop = False, Bool :$list = False ) {
 
   # access config collection
-  my Library::Config::TagsList $c .= new;
-  $c.set-tag-filter( @filter-list, :$drop);
+  my Library::MetaConfig::TagFilterList $c .= new;
+  $c.set-tag-filter( @filter-list, :$drop) if ?@filter-list;
+
+  note "\n  [ '", $c.get-tag-filter.join("', '"), "']\n" if $list;
 }

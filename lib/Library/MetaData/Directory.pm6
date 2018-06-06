@@ -1,6 +1,6 @@
 use v6;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
@@ -10,10 +10,10 @@ use Library::MetaData;
 use MongoDB;
 use BSON::Document;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 class MetaData::Directory does Library::MetaData {
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   # Set the default informaton for a directory in the meta structure
   method specific-init-meta ( --> Bool ) {
 
@@ -30,7 +30,7 @@ class MetaData::Directory does Library::MetaData {
     return True;
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   # Update database with the data in the meta structure.
   # Returns result document with at least key field 'ok'
   method update-meta ( --> BSON::Document ) {

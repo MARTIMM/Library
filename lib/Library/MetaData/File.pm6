@@ -1,19 +1,20 @@
 use v6;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
 use Library;
+use Library::MetaConfig::TagFilterList;
 use Library::MetaConfig::SkipDataList;
 use Library::MetaData;
 
 use MongoDB;
 use BSON::Document;
 
-#------------------------------------------------------------------------------
-class Metadata::File does Library::MetaData {
+#-------------------------------------------------------------------------------
+class MetaData::File does Library::MetaData {
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   # Set the default informaton for a file in the meta structure
   method specific-init-meta ( --> Bool ) {
 
@@ -67,7 +68,7 @@ class Metadata::File does Library::MetaData {
     return $process-file;
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   # Update database with the data in the meta structure.
   # Returns result document with at least key field 'ok'
   method update-meta ( --> BSON::Document ) {
