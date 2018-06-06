@@ -27,16 +27,19 @@ sub initialize-library ( Str :$user-key ) is export {
   my Str $config-dir = check-config-dir();
 
   # setup logging
-  modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
+  modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Warn));
   modify-send-to(
-    'mongodb',
-    :pipe("sort > $config-dir/store-file-metadata.log")
+    'mongodb', :pipe("sort > $config-dir/store-file-metadata.log")
   );
+  # modify-send-to( 'mongodb', :level(MongoDB::MdbLoglevels::Trace));
 
   # set config file if it does not exist
   my Str $cfg-file = "$config-dir/client-configuration.toml";
   unless $cfg-file.IO ~~ :r {
     spurt( $cfg-file, Q:qq:to/EOCFG/);
+      #TODO root-db and contents of tables [ library.collections.root ]
+      # should be fixed? Settable in Configuration object
+
       [ connection ]
 
         # one of three possible ways to describe a servername
