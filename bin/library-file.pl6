@@ -3,10 +3,8 @@
 use v6;
 
 use Library;
-#use Library::MetaConfig::TagsList;
-#use Library::MetaConfig::SkipList;
-use Library::Metadata::Object::File;
-use Library::Metadata::Object::Directory;
+use Library::MetaData::File;
+use Library::MetaData::Directory;
 
 use MongoDB;
 use BSON::Document;
@@ -22,58 +20,23 @@ initialize-library();
 @*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
 #say "MArgs: ", @*ARGS;
 
-#`{{
-#-------------------------------------------------------------------------------
-# Store a list of tags in the configuration collection
-multi sub MAIN ( 'tag-filter', *@filter-list, Str :$dt = '' ) {
-
-  my Array $drop-tags = [$dt.split(/ \s* <punct>+ \s* /)];
-
-  # access config collection
-  my Library::MetaConfig::TagsList $c .= new(:root);
-  $c.set-tag-filter( @filter-list, :$drop-tags);
-}
-}}
-
-#`{{
-#-------------------------------------------------------------------------------
-# Store a list of regexes to filter on files and directories
-# in the configuration collection
-multi sub MAIN (
-  'skip-filter', *@filter-list, Str :$ds = '', Bool :$dir = False
-) {
-
-  # drop skip from list. comma separated list of regexes. a comma in a
-  # regex can be escaped with a '\' character.
-
-note "Ds 0: ", $ds;
-  my Array $drop-skip = [
-    $ds.split(/ \s* <!after '\\'> ',' \s* /)>>.subst(/\\/,'')
-  ];
-
-note "Ds 1: ", $drop-skip;
-
-  # access config collection
-  my Library::MetaConfig::SkipList $c .= new(:root);
-  $c.set-skip-filter( @filter-list, :$drop-skip, :$dir);
-}
-}}
-
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Store metadata about files.
 #
-# --t   supply tags. Separated by commas or repetition of option
 # --et  extract tags from filename
-# --dt  remove tags when there are any
 # --r   Recursive search through directories
 #
+#TODO do we need these?
+# --t   supply tags. Separated by commas or repetition of option
+# --dt  remove tags when there are any
+#
 multi sub MAIN (
-  'fs', *@files, Bool :$r = False,
+  *@files, Bool :$r = False,
   Str :$t = '', Bool :$et = False, Str :$dt = '',
 ) {
 
-#  my Library::Metadata::Object::File $mof;
-#  my Library::Metadata::Object::Directory $mod;
+#  my Library::MetaData::File $mof;
+#  my Library::MetaData::Directory $mod;
 
   my Bool $recursive := $r;                     # Aliases to longer name
   my Array $arg-tags = [$t.split(/:s \s* <punct>+ \s* /)];
@@ -88,22 +51,22 @@ multi sub MAIN (
 
   # recursively gather objects from this object if directory.
   # must run within a gather block.
-  # take returns Library::Metadata::Object objects
+  # take returns Library::MetaData objects
   sub rec-dir ( Str $o ) {
     if $o.IO.d {
       # first take this directory
-      take Library::Metadata::Object::Directory.new(:object($o));
+      take Library::MetaData::Directory.new(:object($o));
 
       # then check if the contents of dir must be sought
       if $recursive {
         for dir($o) -> $object {
           if $object.d {
-            take Library::Metadata::Object::Directory.new(:$object);
+            take Library::MetaData::Directory.new(:$object);
             rec-dir($object.Str);
           }
 
           else {
-            take Library::Metadata::Object::File.new(:$object);
+            take Library::MetaData::File.new(:$object);
           }
         }
       }
@@ -111,7 +74,7 @@ multi sub MAIN (
 
     elsif $o.IO.f {
       # take this file
-      take Library::Metadata::Object::File.new(:object($o));
+      take Library::MetaData::File.new(:object($o));
     }
 
     else {
