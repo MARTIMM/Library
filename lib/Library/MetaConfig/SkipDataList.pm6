@@ -1,5 +1,11 @@
 use v6;
 
+=begin comment
+  Skip filter list is an array of regexpresions  which are used to filter path
+  objects. The list is made unique and is sorted before it is stored. The
+  collection where it is stored is decided by the role Library::MetaConfig.
+=end comment
+
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
@@ -29,7 +35,6 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
       # remove tags when drop is True
       if $drop {
         $skips = [ $skips.List>>.eager.flat.unique.sort ];
-#note "Sk 0: ", $skips.perl;
         for @filter-list -> $t is copy {
           if (my $index = $skips.first( $t, :k)).defined {
             $skips.splice( $index, 1);
@@ -38,11 +43,9 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
       }
 
       else {
-#note "Fl: ", @filter-list;
         $skips = [ ( |@$skips, |@filter-list )>>.eager.flat.unique.sort ];
       }
 
-#note "Sk 1: ", $skips;
       $doc = $!dbcfg.update: [ (
           q => ( :config-type<skip-filter>, ),
           u => ( '$set' => ( :$skips,),),
@@ -56,9 +59,7 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
       if !$drop {
         # need .eager.flat to get rid of (x).Seq items. in TagFilterList
         # .lc does that at the same time.
-#note "Fl: ", @filter-list.perl;
         $skips = [ @filter-list.List>>.eager.flat.unique.sort ];
-#note "Sk: ", $skips.perl;
         $doc = $!dbcfg.insert: [ (
             :config-type<skip-filter>,
             :$skips,
@@ -67,7 +68,6 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
       }
     }
 
-#note "DR: ", $doc.perl;
     # test result of insert or update
     if $doc<ok> {
       if $doc<nModified>.defined {
