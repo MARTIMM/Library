@@ -215,7 +215,7 @@ note "S: $subdoc";
   method !process-object( ) {
 
     my Library::MetaConfig::SkipDataList $sdl .= new;
-    $!ignore-object = $sdl.filter( $!object.IO.absolute );
+    $!ignore-object = $sdl.filter($!object.IO.absolute);
     return if $!ignore-object;
 
     my BSON::Document $doc .= new;
