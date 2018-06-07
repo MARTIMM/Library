@@ -21,6 +21,8 @@ use BSON::Document;
 #-------------------------------------------------------------------------------
 class MetaConfig::TagFilterList does Library::MetaConfig {
 
+  has Regex $!grep-filter = /^ <alpha> ** 3..*/;
+
   #-----------------------------------------------------------------------------
   method set-tag-filter (
     *@filter-list, Bool :$drop = False
@@ -37,7 +39,7 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
 
       # remove tags when drop is True
       if $drop {
-        $tags = [ $tags.grep(/^...+/)>>.lc.unique.sort ];
+        $tags = [ $tags.grep($!grep-filter)>>.lc.unique.sort ];
         for @filter-list -> $t is copy {
           $t .= lc;
           if (my $index = $tags.first( $t, :k)).defined {
@@ -49,7 +51,10 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
       else {
         # filter tags shorter than 3 chars, lowercase convert, remove
         # doubles then sort
-        $tags = [ ( |@$tags, |@filter-list ).grep(/^...+/)>>.lc.unique.sort ];
+        $tags = [ (
+            |@$tags, |@filter-list
+          ).grep($!grep-filter)>>.lc.unique.sort
+        ];
       }
 
       $doc = $!dbcfg.update: [ (
@@ -66,7 +71,7 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
       if !$drop {
         # filter tags shorter than 3 chars, lowercase convert, remove
         # doubles then sort
-        $tags = [ @filter-list.grep(/^...+/)>>.lc.unique.sort ];
+        $tags = [ @filter-list.grep($!grep-filter)>>.lc.unique.sort ];
         $doc = $!dbcfg.insert: [ (
             :config-type<tag-filter>,
             :$tags,
@@ -106,6 +111,7 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
   }
 
   #-----------------------------------------------------------------------------
+#TODO caching
   method get-tag-filter ( --> Array ) {
 
     # find the config doc
@@ -125,9 +131,9 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
 
     my $filter-list = self.get-tag-filter;
 
-    # filter tags shorter than 3 chars, lowercase convert, remove
+    # filter tags shorter than 3 chars, hexnumbers, lowercase convert, remove
     # doubles then sort
-    $tags = [$tags.grep(/^...+/)>>.lc.unique.sort.List.Slip];
+    $tags = [$tags.grep($!grep-filter)>>.lc.unique.sort.List.Slip];
 
     # remove any tags
     for @$filter-list -> $t is copy {
