@@ -136,7 +136,7 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
     $tags = [$tags.grep($!grep-filter)>>.lc.unique.sort.List.Slip];
 
     # remove any tags
-    if ?$filter-list {
+    if $filter-list.defined {
       for @$filter-list -> $t is copy {
         $t .= lc;
         if (my $index = $tags.first( $t, :k)).defined {
@@ -144,7 +144,7 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
         }
       }
     }
-    
+
     $tags
   }
 }
