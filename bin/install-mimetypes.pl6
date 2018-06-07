@@ -42,10 +42,10 @@ sub MAIN ( ) {
   my Library::Configuration $cfg = $Library::lib-cfg;
   my MongoDB::Client $client = $Library::client;
 
-  my Str $db-name = $cfg.database-name;
-  my Str $col-name = $cfg.config<library><collections><root><mimetypes>;
+  my Str $db-name = $cfg.database-name(:root);
+  my Str $cl-name = $cfg.collection-name( 'mimetypes', :root);
   my MongoDB::Database $database = $client.database($db-name);
-  my MongoDB::Collection $collection = $database.collection($col-name);
+  my MongoDB::Collection $collection = $database.collection($cl-name);
 
   # gather data into hash
   my Hash $mt-hash = {};
@@ -102,7 +102,7 @@ sub MAIN ( ) {
 
 #note "DB: ", $database.perl;
     my BSON::Document $result-doc = $database.run-command: (
-      :insert($col-name), :$documents,
+      :insert($cl-name), :$documents,
     );
 
     if $result-doc<ok> ~~ 1e0 {
