@@ -310,7 +310,7 @@ entity {bgcolor: "#fafaf8", size: "10"}
 relationship {size: "9"}
 
 [FileMeta]
-*metaType {label: "ObjectType, ¬ ∅"}
+*metaType {label: "MetaType, ¬ ∅"}
 *name {label: "Str, ¬ ∅"}
 contentType {label: "Str"}
 path {label: "Str, ¬ ∅"}
@@ -318,13 +318,13 @@ exists {label: "Bool, ¬ ∅"}
 contentSha1 {label: "Str, ¬ ∅"}
 
 [DirMeta]
-*metaType {label: "ObjectType, ¬ ∅"}
+*metaType {label: "MetaType, ¬ ∅"}
 *name {label: "Str, ¬ ∅"}
 path {label: "Str, ¬ ∅"}
 exists {label: "Bool, ¬ ∅"}
 
 [WebMeta]
-*metaType {label: "ObjectType, ¬ ∅"}
+*metaType {label: "MetaType, ¬ ∅"}
 uri {label: "Str, ¬ ∅"}
 protocol {label: "Str, ¬ ∅"}
 server {label: "Str, ¬ ∅"}
@@ -333,11 +333,11 @@ arguments {label: "Str, ¬ ∅"}
 location {label: "Str, ¬ ∅"}
 
 [UserMeta]
-*metaType {label: "ObjectType, ¬ ∅"}
+*metaType {label: "MetaType, ¬ ∅"}
 anyitem
 
 [ProgramMeta]
-*metaType {label: "ObjectType, ¬ ∅"}
+*metaType {label: "MetaType, ¬ ∅"}
 anyitem
 
 # Each relationship must be between exactly two entities, which need not
