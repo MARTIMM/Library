@@ -22,5 +22,7 @@ sub MAIN ( *@filter-list, Bool :$drop = False, Bool :$list = False ) {
   my Library::MetaConfig::SkipDataList $c .= new;
   $c.set-skip-filter( @filter-list, :$drop) if ?@filter-list;
 
-  note "\n[ '", $c.get-skip-filter.join("',\n  '"), "'\n]\n" if $list;
+  my Array $filter-list = $c.get-skip-filter;
+  note "\n[ '", $filter-list.join("',\n  '"), "'\n]\n"
+    if $list and ?$filter-list;
 }
