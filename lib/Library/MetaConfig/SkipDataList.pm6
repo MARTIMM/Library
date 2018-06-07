@@ -99,6 +99,7 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
   }
 
   #-----------------------------------------------------------------------------
+#TODO caching
   method get-skip-filter ( --> Array ) {
 
     # find the config doc
