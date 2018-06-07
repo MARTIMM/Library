@@ -129,20 +129,22 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
   #-----------------------------------------------------------------------------
   method filter-tags ( Array:D $tags is copy --> Array ) {
 
-    my $filter-list = self.get-tag-filter;
+    my Array $filter-list = self.get-tag-filter;
 
     # filter tags shorter than 3 chars, hexnumbers, lowercase convert, remove
     # doubles then sort
     $tags = [$tags.grep($!grep-filter)>>.lc.unique.sort.List.Slip];
 
     # remove any tags
-    for @$filter-list -> $t is copy {
-      $t .= lc;
-      if (my $index = $tags.first( $t, :k)).defined {
-        $tags.splice( $index, 1);
+    if ?$filter-list {
+      for @$filter-list -> $t is copy {
+        $t .= lc;
+        if (my $index = $tags.first( $t, :k)).defined {
+          $tags.splice( $index, 1);
+        }
       }
     }
-
+    
     $tags
   }
 }

@@ -121,10 +121,12 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
     my Bool $filtered = False;
 
     my Array $skips = self.get-skip-filter;
-    for @$skips -> $skip {
-      if $path ~~ m/<$skip>/ {
-        $filtered = True;
-        last;
+    if ?$skips {
+      for @$skips -> $skip {
+        if $path ~~ m/<$skip>/ {
+          $filtered = True;
+          last;
+        }
       }
     }
 
