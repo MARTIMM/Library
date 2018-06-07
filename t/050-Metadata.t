@@ -51,19 +51,18 @@ initialize-library;
 #------------------------------------------------------------------------------
 subtest 'User added metadata', {
 
-  my $filename = 't/030-OT-File.t';
+  my $filename = 't/030-MT-File.t';
   diag "update metadata with $filename";
   my Library::MetaData::File $lmo .= new(:object($filename));
-
   diag "get metadata";
   my BSON::Document $udata = $lmo.get-metameta;
   $udata<note> = 'This is a test file';
   $udata<keys> = [< test library>];
   $lmo.set-metameta($udata);
 
-  for $lmo.find( :criteria( name => '030-OT-File.t',)) -> $doc {
+  for $lmo.find( :criteria( name => '030-MT-File.t',)) -> $doc {
 #note "Doc 0: ", $doc.perl;
-    is $doc<name>, '030-OT-File.t', 'file stored';
+    is $doc<name>, '030-MT-File.t', 'file stored';
     is $doc<user-meta><note>, 'This is a test file', 'note found too';
   }
 }
@@ -110,7 +109,7 @@ subtest 'Moving files around', {
   my Str $content-sha1;
   $filename.IO.move('t/ghi.pqr') unless $filename eq 't/ghi.pqr';
   $filename = 't/ghi.pqr';
-  $lmo .= new( :object($filename), :type(OT-File));
+  $lmo .= new( :object($filename), :type(MT-File));
   for $lmo.find( :criteria( name => 'ghi.pqr',)) -> $doc {
 diag "Doc 2: " ~ $doc.perl;
     next unless $doc<path> ~~ m/ 't' $/;
@@ -122,7 +121,7 @@ diag "Doc 2: " ~ $doc.perl;
 
   diag "modify content of $filename";
   spurt $filename, 'en laten we vrolijk wezen';
-  $lmo .= new( :object($filename), :type(OT-File));
+  $lmo .= new( :object($filename), :type(MT-File));
   for $lmo.find( :criteria( name => 'ghi.pqr',)) -> $doc {
 
 diag "Doc 3: " ~ $doc.perl;
@@ -136,7 +135,7 @@ diag "Doc 3: " ~ $doc.perl;
 
   diag "ghi.pqr created in t/Lib4 directory with same content";
   spurt "t/Lib4/ghi.pqr", "en laten we vrolijk wezen";
-  $lmo .= new( :object("t/Lib4/ghi.pqr"), :type(OT-File));
+  $lmo .= new( :object("t/Lib4/ghi.pqr"), :type(MT-File));
   for $lmo.find( :criteria( name => 'ghi.pqr',)) -> $doc {
 diag "Doc 4: " ~ $doc.perl;
     next unless $doc<path> ~~ m/ 't/Lib4' $/;
@@ -147,7 +146,7 @@ diag "Doc 4: " ~ $doc.perl;
 
   diag "$filename removed";
   unlink $filename;
-  $lmo .= new( :object($filename), :type(OT-File));
+  $lmo .= new( :object($filename), :type(MT-File));
   for $lmo.find( :criteria( name => 'ghi.pqr',)) -> $doc {
     next unless $doc<path> ~~ m/ 't' $/;
 
