@@ -5,7 +5,7 @@ use Test;
 use Test-support;
 
 use Library;
-use Library::Metadata::Object::File;
+use Library::MetaData::File;
 use MongoDB;
 use BSON::Document;
 
@@ -48,17 +48,17 @@ initialize-library;
 #------------------------------------------------------------------------------
 subtest 'OT File', {
 
-  my Library::Metadata::Object::File $f .= new(:object<t/030-OT-File.t>);
+  my Library::MetaData::File $f .= new(:object<t/030-MT-File.t>);
 
   my BSON::Document $d = $f.meta;
   diag "Meta data: $d.perl()";
-  is $d<name>, '030-OT-File.t', $d<name>;
+  is $d<name>, '030-MT-File.t', $d<name>;
   is $d<content-type>, 't', $d<content-type>;
   like $d<path>, /:s t $/, $d<path>;
   ok $d<exists>, 'object exists';
   ok $d<content-sha1>, 'sha calculated on content';
 
-  $f .= new( :object<t/other-file.t>, :type(OT-File));
+  $f .= new( :object<t/other-file.t>, :type(MT-File));
   $d = $f.meta;
   is $d<name>, 'other-file.t', $d<name>;
   like $d<path>, /:s t $/, $d<path>;
