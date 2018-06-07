@@ -20,119 +20,79 @@ initialize-library();
 @*ARGS = |@*ARGS.grep(/^ '-'/), |@*ARGS.grep(/^ <-[-]>/);
 #say "MArgs: ", @*ARGS;
 
+# needed by sub process-directory
+my Bool $recursive;
+
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Store metadata about files.
 #
 # --et  extract tags from filename
 # --r   Recursive search through directories
-#
-#TODO do we need these?
-# --t   supply tags. Separated by commas or repetition of option
-# --dt  remove tags when there are any
-#
-multi sub MAIN (
-  *@files, Bool :$r = False,
-  Str :$t = '', Bool :$et = False, Str :$dt = '',
-) {
 
-#  my Library::MetaData::File $mof;
-#  my Library::MetaData::Directory $mod;
+multi sub MAIN ( *@files-to-process, Bool :$r = False ) {
 
-  my Bool $recursive := $r;                     # Aliases to longer name
-  my Array $arg-tags = [$t.split(/:s \s* <punct>+ \s* /)];
-  my Array $drop-tags = [$dt.split(/ \s* <punct>+ \s* /)];
+  $recursive := $r;
 
-  my @files-to-process = @files;                # Copy to rw-able array.
-  if !@files-to-process {
-
-    info-message("No files to process");
-    exit(0);
+  # get the file and directory names and create Library::MetaData objects
+  # any filtered objects are not returned and not saved in database
+  my Seq $fp := gather for @files-to-process -> $object {
+    process-directory($object);
   }
 
-  # recursively gather objects from this object if directory.
-  # must run within a gather block.
-  # take returns Library::MetaData objects
-  sub rec-dir ( Str $o ) {
-    if $o.IO.d {
-      # first take this directory
-      take Library::MetaData::Directory.new(:object($o));
+  # then add tags to the documents
+  for $fp -> $meta-object {
+    note $meta-object.perl;
+    $meta-object.set-metameta-tags;
+  }
+}
+
+#-------------------------------------------------------------------------------
+# recursively gather objects from this object if directory.
+# must run within a gather block.
+# take returns Library::MetaData objects when the object is not ignored
+sub process-directory ( Str $o ) {
+  my Library::MetaData::Directory $mdir;
+  my Library::MetaData::Directory $mfile;
+
+  given $o.IO {
+
+    # test if $o is a directory
+    when :d {
+
+      # first queue this directory object
+      $mdir .= new(:object($o));
+      take $mdir unless $mdir.ignore-object;
+
+      # if a directory object is filtered out, al descendends are too
+      return if $mdir.ignore-object;
 
       # then check if the contents of dir must be sought
       if $recursive {
         for dir($o) -> $object {
           if $object.d {
-            take Library::MetaData::Directory.new(:$object);
-            rec-dir($object.Str);
+            # queue this directory and process
+            $mdir .= new(:$object);
+            take $mdir unless $mdir.ignore-object;
+            process-directory($object.Str);
           }
 
           else {
-            take Library::MetaData::File.new(:$object);
+            # queue this file
+            $mfile .= new(:$object);
+            take $mfile unless $mfile.ignore-object;
           }
         }
       }
     }
 
-    elsif $o.IO.f {
-      # take this file
-      take Library::MetaData::File.new(:object($o));
+    when :f {
+      # queue this file
+      $mfile .= new(:object($o));
+      take $mfile unless $mfile.ignore-object;
     }
 
-    else {
-      warn-message("Special file $o ignored");
-    }
-  }
-
-  my Seq $fp := gather for @files-to-process -> $object {
-    rec-dir($object);
-  }
-
-  for $fp -> $meta-object {
-    say $meta-object.perl;
-    $meta-object.set-metameta-tags( :$et, :$arg-tags, :$drop-tags);
-  }
-
-#`{{
-  while shift @files-to-process -> $file {
-
-    # Process directories
-    if $file.IO ~~ :d {
-
-      # Alias to proper name if dir
-      my $directory := $file;
-
-      info-message("process directory '$directory'");
-
-      $mod .= new(:object($directory));
-      $mod.set-metameta-tags( $directory, :$et, :$arg-tags, :$drop-tags);
-
-      if $recursive {
-
-        # only 'content' files no '.' or '..'
-        my @new-files = dir( $directory).List>>.absolute;
-
-        @files-to-process.push(|@new-files);
-      }
-
-      else {
-
-        info-message("Skip directory $directory");
-      }
-    }
-
-    # Process plain files
-    elsif $file.IO ~~ :f {
-
-      info-message("process file $file");
-
-      $mof .= new(:object($file));
-      $mof.set-metameta-tags( $file, :$et, :$arg-tags, :$drop-tags);
-    }
-
-    # Ignore other type of files
-    else {
-
-      warn-message("File $file is ignored, it is a special type of file");
+    default {
+      note "Special file $o ignored";
     }
   }
-}}
 }
