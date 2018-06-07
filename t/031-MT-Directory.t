@@ -6,7 +6,7 @@ use Test-support;
 
 use Library;
 use Library::Storage;
-use Library::Metadata::Object::Directory;
+use Library::MetaData::Directory;
 use MongoDB;
 use BSON::Document;
 
@@ -49,9 +49,9 @@ initialize-library;
 subtest 'OT File', {
 
   my Library::Storage $dbo .= new(:collection-key<meta-data>);
-  my Library::Metadata::Object::Directory $dir;
+  my Library::MetaData::Directory $dir;
 
-  $dir .= new( :$dbo, :object<t/Lib4>, :type(OT-Directory));
+  $dir .= new( :$dbo, :object<t/Lib4>, :type(MT-Directory));
   my BSON::Document $d = $dir.meta;
   diag $d.perl;
   is $d<name>, 'Lib4', $d<name>;
@@ -59,7 +59,7 @@ subtest 'OT File', {
   ok $d<exists>, 'object exists';
 
 
-  $dir .= new( :$dbo, :object<t/Lib4/no-dir>, :type(OT-Directory));
+  $dir .= new( :$dbo, :object<t/Lib4/no-dir>, :type(MT-Directory));
   $d = $dir.meta;
   diag $d.perl;
   is $d<name>, 'no-dir', $d<name>;
