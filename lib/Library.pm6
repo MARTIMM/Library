@@ -9,9 +9,9 @@ use Library::Configuration;
 
 #-------------------------------------------------------------------------------
 # Values are Str so they can be used as type value in a mongodb document
-enum ObjectType is export <<
-  :OT-File('File') :OT-Directory('Directory')
-  :OT-Program('Program') :OT-User('User') :OT-Web('Web')
+enum MetaType is export <<
+  :MT-File('File') :MT-Directory('Directory')
+  :MT-Program('Program') :MT-User('User') :MT-Web('Web')
 >>;
 
 our $lib-cfg;
