@@ -1,5 +1,10 @@
 ## Release notes
 
+* 0.8.5
+  * Refactoring code from store-file-metadata.pl6 to library-skip.pl6
+  * Renamed store-file-metadata.pl6 to library-file.pl6
+  * Improved programs and modules
+  * Bug fixes in programs library-tag.pl6 and library-skip.pl6
 * 0.8.4
   * MetaConfig:: * files renamed.
   * Rename MetaData:: * files and change module structure.
@@ -29,7 +34,7 @@
   * Many modules rewritten and bugs fixed
   * Program store-file-metadata.pl6 is now functional
 * 0.5.2
-  * Metadata gathering for OT-Directory implemented.
+  * Metadata gathering for MT-Directory implemented.
 * 0.5.1
   * work on store-file-metadat.pl6
 * 0.5.0
