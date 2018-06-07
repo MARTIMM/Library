@@ -18,60 +18,23 @@ class MetaData::File does Library::MetaData {
   # Set the default informaton for a file in the meta structure
   method specific-init-meta ( ) {
 
-#    my Bool $process-file = True;
-#`{{
-#    my Library::MetaConfig::SkipDataList $sl .= new;
-
-    # check for file to be skipped
-#    my Array $!skip-list = $sl.get-skip-filter;
-    my Str $path = $!object.IO.absolute;
-#note "Sl file: ", $!skip-list;
-    for @$!skip-list -> $sle {
-      if $path ~~ /<$sle>/ {
-        note "File $path skipped by file filter";
-        $process-file = False;
-        last;
-      }
-    }
-}}
-
-#`{{
-    if $process-file {
-      # is it in a directory which must be skipped
-      $!skip-list = $sl.get-skip-filter(:dir);
-      my Str $path = $!object.IO.absolute;
-#note "Sl dir: ", $!skip-list;
-      for @$!skip-list -> $sle {
-        if $path ~~ /<$sle>/ {
-          warn-message("File $path skipped by dir filter");
-          $process-file = False;
-          last;
-        }
-      }
-    }
-}}
-
     # file accepted, set other meta data
-#    if $process-file {
-      my Str $file = $!object.IO.basename;
-      my Str $extension = $!object.IO.extension;
-      my Str $path = $!object.IO.absolute;
-      $path ~~ s/ '/'? $file $//;
+    my Str $file = $!object.IO.basename;
+    my Str $extension = $!object.IO.extension;
+    my Str $path = $!object.IO.absolute;
+    $path ~~ s/ '/'? $file $//;
 
-      $!meta-data<name> = $file;
+    $!meta-data<name> = $file;
 #TODO translate extension into mimetype
-      $!meta-data<content-type> = $extension;
-      $!meta-data<path> = $path;
-      $!meta-data<meta-type> = MT-File.Str;
-      $!meta-data<exists> = $!object.IO ~~ :r;
-      $!meta-data<content-sha1> = self!sha1-content($!object);
-      $!meta-data<hostname> = qx[hostname].chomp;
+    $!meta-data<content-type> = $extension;
+    $!meta-data<path> = $path;
+    $!meta-data<meta-type> = MT-File.Str;
+    $!meta-data<exists> = $!object.IO ~~ :r;
+    $!meta-data<content-sha1> = self!sha1-content($!object);
+    $!meta-data<hostname> = qx[hostname].chomp;
 
-      info-message("metadata set for $!object");
-      debug-message($!meta-data.perl);
-#    }
-
-#    return $process-file;
+    info-message("metadata set for $!object");
+    debug-message($!meta-data.perl);
   }
 
   #-----------------------------------------------------------------------------

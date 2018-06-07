@@ -222,20 +222,15 @@ note "S: $subdoc";
 
     # modify database if needed
     $!meta-data .= new;
-    if self.specific-init-meta {
+    self.specific-init-meta;
 
-      #my Library::MetaConfig::TagFilterList $tfl .= new;
-      #$!tags-filter = $tfl.get-tag-filter;
+    #my Library::MetaConfig::TagFilterList $tfl .= new;
+    #$!tags-filter = $tfl.get-tag-filter;
 
-      # always select the meta-data collection in users database
-      $!dbo .= new( :collection-key<meta-data>, :!root);
+    # always select the meta-data collection in users database
+    $!dbo .= new( :collection-key<meta-data>, :!root);
 
-      $doc = self.update-meta;
-    }
-
-    else {
-      $!ignore-object = True;
-    }
+    $doc = self.update-meta;
   }
 
   #-----------------------------------------------------------------------------
