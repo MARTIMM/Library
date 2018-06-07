@@ -16,29 +16,32 @@ class MetaData::File does Library::MetaData {
 
   #-----------------------------------------------------------------------------
   # Set the default informaton for a file in the meta structure
-  method specific-init-meta ( --> Bool ) {
+  method specific-init-meta ( ) {
 
-    my Bool $process-file = True;
-    my Library::MetaConfig::SkipDataList $sl .= new;
+#    my Bool $process-file = True;
+#`{{
+#    my Library::MetaConfig::SkipDataList $sl .= new;
 
     # check for file to be skipped
-    my Array $skip-list = $sl.get-skip-filter;
+#    my Array $!skip-list = $sl.get-skip-filter;
     my Str $path = $!object.IO.absolute;
-#note "Sl file: ", $skip-list;
-    for @$skip-list -> $sle {
+#note "Sl file: ", $!skip-list;
+    for @$!skip-list -> $sle {
       if $path ~~ /<$sle>/ {
-        warn-message("File $path skipped by file filter");
+        note "File $path skipped by file filter";
         $process-file = False;
         last;
       }
     }
+}}
 
+#`{{
     if $process-file {
       # is it in a directory which must be skipped
-      $skip-list = $sl.get-skip-filter(:dir);
+      $!skip-list = $sl.get-skip-filter(:dir);
       my Str $path = $!object.IO.absolute;
-#note "Sl dir: ", $skip-list;
-      for @$skip-list -> $sle {
+#note "Sl dir: ", $!skip-list;
+      for @$!skip-list -> $sle {
         if $path ~~ /<$sle>/ {
           warn-message("File $path skipped by dir filter");
           $process-file = False;
@@ -46,26 +49,29 @@ class MetaData::File does Library::MetaData {
         }
       }
     }
+}}
 
     # file accepted, set other meta data
-    if $process-file {
+#    if $process-file {
       my Str $file = $!object.IO.basename;
       my Str $extension = $!object.IO.extension;
+      my Str $path = $!object.IO.absolute;
       $path ~~ s/ '/'? $file $//;
 
       $!meta-data<name> = $file;
+#TODO translate extension into mimetype
       $!meta-data<content-type> = $extension;
       $!meta-data<path> = $path;
-      $!meta-data<meta-type> = OT-File.Str;
+      $!meta-data<meta-type> = MT-File.Str;
       $!meta-data<exists> = $!object.IO ~~ :r;
       $!meta-data<content-sha1> = self!sha1-content($!object);
       $!meta-data<hostname> = qx[hostname].chomp;
 
       info-message("metadata set for $!object");
       debug-message($!meta-data.perl);
-    }
+#    }
 
-    return $process-file;
+#    return $process-file;
   }
 
   #-----------------------------------------------------------------------------
@@ -82,7 +88,7 @@ class MetaData::File does Library::MetaData {
     if self.is-in-db: (
       name => $!meta-data<name>,
       path => $!meta-data<path>,
-      meta-type => ~OT-File,
+      meta-type => ~MT-File,
       content-sha1 => $!meta-data<content-sha1>,
       hostname => $!meta-data<hostname>,
     ) {
@@ -99,7 +105,7 @@ class MetaData::File does Library::MetaData {
       # search again using name and content
       if self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
-          meta-type => ~OT-File,
+          meta-type => ~MT-File,
           content-sha1 => $!meta-data<content-sha1>,
           hostname => $!meta-data<hostname>,
         )
@@ -142,7 +148,7 @@ class MetaData::File does Library::MetaData {
 
       # else search with path and content
       elsif self.is-in-db( $query .= new: (
-          meta-type => ~OT-File,
+          meta-type => ~MT-File,
           path => $!meta-data<path>,
           content-sha1 => $!meta-data<content-sha1>,
           hostname => $!meta-data<hostname>,
@@ -176,7 +182,7 @@ class MetaData::File does Library::MetaData {
 
       # else search for its content only
       elsif self.is-in-db( $query .= new: (
-          meta-type => ~OT-File,
+          meta-type => ~MT-File,
           content-sha1 => $!meta-data<content-sha1>,
           hostname => $!meta-data<hostname>,
       )) {
@@ -205,7 +211,7 @@ class MetaData::File does Library::MetaData {
       # else search for name and path
       elsif self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
-          meta-type => ~OT-File,
+          meta-type => ~MT-File,
           path => $!meta-data<path>,
           hostname => $!meta-data<hostname>,
       )) {
