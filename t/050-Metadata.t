@@ -11,16 +11,16 @@ use Library::MetaData::File;
 use MongoDB;
 use BSON::Document;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #drop-send-to('mongodb');
 #drop-send-to('screen');
-modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
-info-message("Test $?FILE start");
+#modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
+#info-message("Test $?FILE start");
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 my Library::Test-support $ts .= new;
 my Int $p1 = $ts.server-control.get-port-number('s1');
-my Str $dir = 't/Lib4';
+my Str $dir = 't/Meta050';
 
 # setup config directory
 mkdir $dir, 0o700 unless $dir.IO ~~ :d;
@@ -33,8 +33,11 @@ spurt( $filename, Q:qq:to/EOCFG/);
       port        = $p1
 
     [ library ]
-      root-db     = "test"
-      user-db     = "meta050"
+      root-db         = "test"
+      user-db         = "meta050"
+      logfile         = "meta050.log"
+      loglevelfile    = "Info"
+      loglevelscreen  = "Info"
 
     [ library.collections ]
       meta-data   = "meta050Data"
@@ -48,7 +51,7 @@ spurt( $filename, Q:qq:to/EOCFG/);
 initialize-library;
 
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 subtest 'User added metadata', {
 
   my $filename = 't/030-MT-File.t';
@@ -67,7 +70,7 @@ subtest 'User added metadata', {
   }
 }
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 subtest 'Moving files around', {
 
   my $filename = 't/abc.def';
@@ -95,13 +98,13 @@ subtest 'Moving files around', {
   }
 
 
-  diag "move $filename to 't/Lib4/ghi.xyz'";
-  $filename.IO.move('t/Lib4/ghi.xyz') unless $filename eq 't/Lib4/ghi.xyz';
-  $filename = 't/Lib4/ghi.xyz';
+  diag "move $filename to $dir/ghi.xyz'";
+  $filename.IO.move($dir ~ '/ghi.xyz') unless $filename eq $dir ~ '/ghi.xyz';
+  $filename = $dir ~ '/ghi.xyz';
   $lmo .= new(:object($filename));
   for $lmo.find( :criteria( name => 'ghi.xyz',)) -> $doc {
 #diag "Doc 1: " ~ $doc.perl;
-    like $doc<path>, / 't/Lib4' /, 'file moved';
+    like $doc<path>, / $dir /, 'file moved';
     is-deeply $doc<program-meta><keys>, [< moved renamed edited>], 'keys found';
   }
 
@@ -133,14 +136,14 @@ diag "Doc 3: " ~ $doc.perl;
     $content-sha1 = $doc<content-sha1>;
   }
 
-  diag "ghi.pqr created in t/Lib4 directory with same content";
-  spurt "t/Lib4/ghi.pqr", "en laten we vrolijk wezen";
-  $lmo .= new( :object("t/Lib4/ghi.pqr"), :type(MT-File));
+  diag "ghi.pqr created in $dir directory with same content";
+  spurt "$dir/ghi.pqr", "en laten we vrolijk wezen";
+  $lmo .= new( :object("$dir/ghi.pqr"), :type(MT-File));
   for $lmo.find( :criteria( name => 'ghi.pqr',)) -> $doc {
 diag "Doc 4: " ~ $doc.perl;
-    next unless $doc<path> ~~ m/ 't/Lib4' $/;
+    next unless $doc<path> ~~ m/ $dir $/;
 
-    like $doc<path>, / '/t/Lib4' /, 'file created anew';
+    like $doc<path>, / $dir /, 'file created anew';
     nok $content-sha1 eq $doc<content-sha1>, 'Content same as other file';
   }
 
@@ -159,21 +162,20 @@ diag "Doc 5: " ~ $doc.perl;
 #  note $d.perl;
 }
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 CATCH {
   default {
     .note;
   }
 }
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # cleanup
 done-testing;
 
 unlink 't/ghi.xyz';
-
 unlink 't/ghi.pqr';
-unlink 't/Lib4/client-configuration.toml';
-unlink 't/Lib4/store-file-metadata.log';
-unlink 't/Lib4/ghi.pqr';
-rmdir 't/Lib4';
+#unlink $dir ~ '/client-configuration.toml';
+#unlink $dir ~ '/library.log';
+unlink $dir ~ '/ghi.pqr';
+#rmdir $dir;

@@ -41,6 +41,8 @@ spurt( $filename, Q:qq:to/EOCFG/);
     [ library ]
       root-db     = "root070"
       user-db     = "$db-name"
+      loglevelfile    = "Info"
+      loglevelscreen  = "Info"
 
     [ library.collections ]
       meta-data   = "meta070Data"
