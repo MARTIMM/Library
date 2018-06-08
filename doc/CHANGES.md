@@ -1,5 +1,7 @@
 ## Release notes
 
+* 0.9.0
+  * New module for class Library::MetaConfig::Mimetypes
 * 0.8.5
   * Refactoring code from store-file-metadata.pl6 to library-skip.pl6
   * Renamed store-file-metadata.pl6 to library-file.pl6
