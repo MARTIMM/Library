@@ -26,13 +26,6 @@ sub initialize-library ( Str :$user-key ) is export {
   # check for config directory
   my Str $config-dir = check-config-dir();
 
-  # setup logging
-  modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Warn));
-  modify-send-to(
-    'mongodb', :pipe("sort > $config-dir/store-file-metadata.log")
-  );
-  # modify-send-to( 'mongodb', :level(MongoDB::MdbLoglevels::Trace));
-
   # set config file if it does not exist
   my Str $cfg-file = "$config-dir/client-configuration.toml";
   unless $cfg-file.IO ~~ :r {
@@ -54,7 +47,7 @@ sub initialize-library ( Str :$user-key ) is export {
       #  password            = "some-pw"
       #  database            = "MyLibrary"
       #TODO thoughts
-        #  logfile             = "Mylibrary.log
+      #  logfile             = "Mylibrary.log
 
       #[ connection.options ]
       #  replicaSet          = MetaLibrary
@@ -69,8 +62,10 @@ sub initialize-library ( Str :$user-key ) is export {
         # for collections which must be available to all users.
         root-db             = "Library"
         user-db             = "MyLibrary"
-      #TODO thoughts
+
         logfile             = "library.log"
+        loglevelfile        = "Warn"
+        loglevelscreen      = "Warn"
 
       [ library.collections ]
         meta-data           = "Metadata"
@@ -104,12 +99,27 @@ sub initialize-library ( Str :$user-key ) is export {
     :$user-key
   );
 
+  # setup logging
+  my Str $log-file;
+  my MongoDB::MdbLoglevels $log-levelfile;
+  my MongoDB::MdbLoglevels $log-levelscreen;
+  ( $log-file, $log-levelfile, $log-levelscreen) = $lib-cfg.get-loginfo;
+note "Loglevel type: ", $log-levelscreen;
+
+  drop-send-to('screen');
+  drop-send-to('mongodb');
+  add-send-to( 'libs', :to($*ERR), :min-level($log-levelscreen));
+  my $handle = "$config-dir/$log-file".IO.open( :mode<wo>, :create, :append);
+  add-send-to( 'libf', :to($handle), :min-level($log-levelfile));
+  info-message("Log file opened");
+
   # throw old client object and get a new one.
   $client.cleanup if $client.defined;
 
   # note that uri is not defined in the configfile. it will be set when the
   # config is checked by Library::Configuration.
   $client = MongoDB::Client.new(:uri($lib-cfg.config<connection><uri>));
+  info-message("Config initialized");
 }
 
 #-------------------------------------------------------------------------------

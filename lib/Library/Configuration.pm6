@@ -4,11 +4,7 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Config::TOML;
-
 use MongoDB;
-use MongoDB::Client;
-use MongoDB::Database;
-use MongoDB::Collection;
 
 #-------------------------------------------------------------------------------
 class Configuration {
@@ -79,6 +75,14 @@ class Configuration {
     $cl-name;
   }
 
+  #-----------------------------------------------------------------------------
+  method get-loginfo ( --> List ) {
+    ( $!config<library><logfile>,
+      $!config<library><loglevelfile>,
+      $!config<library><loglevelscreen>
+    )
+  }
+
   # ==[ Private Stuff ]=========================================================
   #-----------------------------------------------------------------------------
   method !check-config ( ) {
@@ -91,6 +95,13 @@ class Configuration {
 
     self!check-config-field( <library root-db>, :default<Library>);
     self!check-config-field( <library user-db>, :default<MyLibrary>);
+    self!check-config-field( <library logfile>, :default<library.log>);
+
+    self!check-config-field( <library loglevelfile>, :default<Warn>);
+    self!check-config-field( <library loglevelscreen>, :default<Warn>);
+    self!check-loglevel($!config<library><loglevelfile>);
+    self!check-loglevel($!config<library><loglevelscreen>);
+
     self!check-config-field(
       <library collections meta-data>, :default<Metadata>
     );
@@ -167,6 +178,40 @@ class Configuration {
       debug-message(
         "Missing keys '{@fields.join('.')}' from config, set to '$default'"
       );
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method !check-loglevel ( $log-level is rw ) {
+
+    given $log-level {
+      when 'Trace' {
+        $log-level = MongoDB::MdbLoglevels::Trace;
+      }
+
+      when 'Debug' {
+        $log-level = MongoDB::MdbLoglevels::Debug;
+      }
+
+      when 'Info' {
+        $log-level = MongoDB::MdbLoglevels::Info;
+      }
+
+      when 'Warn' {
+        $log-level = MongoDB::MdbLoglevels::Warn;
+      }
+
+      when 'Error' {
+        $log-level = MongoDB::MdbLoglevels::Error;
+      }
+
+      when 'Fatal' {
+        $log-level = MongoDB::MdbLoglevels::Fatal;
+      }
+
+      default {
+        $log-level = MongoDB::MdbLoglevels::Warn;
+      }
     }
   }
 }
