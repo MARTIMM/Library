@@ -67,7 +67,7 @@ subtest 'Insert tags', {
 
   # try to insert too small tag names. this will insert a new document
   # with an empty filter array.
-  $c.set-tag-filter( <t1 t2 t3>, :!drop);
+  $c.set-tag-filter( <ta tb tc>, :!drop);
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<tag-filter>, )),
@@ -80,7 +80,7 @@ subtest 'Insert tags', {
 
   # try to insert mixed tag names. all are converted to lowercase,
   # sorted and made unique. this will update the filter list.
-  $c.set-tag-filter( <T2B t3c t1a T3C>, :!drop);
+  $c.set-tag-filter( <TaB tac taa TaC>, :!drop);
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<tag-filter>, )),
@@ -88,7 +88,7 @@ subtest 'Insert tags', {
 
   $doc = $cu.fetch;
   is $doc<config-type>, 'tag-filter', "Config type is tag-filter";
-  is-deeply $doc<tags>, [<t1a t2b t3c>], "tag list is set properly";
+  is-deeply $doc<tags>, [<taa tab tac>], "tag list is set properly";
 
   $doc = $cu.fetch;
   nok $doc, 'There is only one record';
@@ -96,7 +96,7 @@ subtest 'Insert tags', {
 
 
   # try to insert mixed tag names. Now add some overlap with existing tags.
-  $c.set-tag-filter( <T2B T3C Pqr Xyz>, :!drop);
+  $c.set-tag-filter( <TaB TaC Pqr Xyz>, :!drop);
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<tag-filter>, )),
@@ -104,11 +104,11 @@ subtest 'Insert tags', {
   );
 
   $doc = $cu.fetch;
-  is-deeply $doc<tags>, [<pqr t1a t2b t3c xyz>], "tag list is still ok";
+  is-deeply $doc<tags>, [<pqr taa tab tac xyz>], "tag list is still ok";
 
 
   # get the tags list
-  is-deeply $c.get-tag-filter, [<pqr t1a t2b t3c xyz>],
+  is-deeply $c.get-tag-filter, [<pqr taa tab tac xyz>],
     "tag list retrieved using get-tag-filter";
 }
 
@@ -119,9 +119,9 @@ subtest 'Filter tags', {
   my Library::MetaConfig::TagFilterList $c .= new;
 
   # filter too small tags
-  is-deeply $c.filter-tags([<t1 t2>]), [], "Filtered all out";
+  is-deeply $c.filter-tags([<ta tb>]), [], "Filtered all out";
 
-  is-deeply $c.filter-tags([<t1a t2b Xab Xde>]), [<xab xde>],
+  is-deeply $c.filter-tags([<taa tab Xab Xde>]), [<xab xde>],
     "Filtered 2 tags";
 }
 
@@ -139,14 +139,14 @@ subtest 'Drop tags', {
   );
 
   my BSON::Document $doc = $cu.fetch;
-  is-deeply $doc<tags>, [<pqr t1a t2b t3c xyz>],
+  is-deeply $doc<tags>, [<pqr taa tab tac xyz>],
     "No tags dropped. Tags weren't there";
 
 
 
   # try to drop mixed tag names. all are converted to lowercase,
   # sorted and made unique before removal.
-  $c.set-tag-filter( <T2B t2b PQrs>, :drop);
+  $c.set-tag-filter( <TaB tab PQrs>, :drop);
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<tag-filter>, )),
@@ -154,11 +154,11 @@ subtest 'Drop tags', {
   );
 
   $doc = $cu.fetch;
-  is-deeply $doc<tags>, [<pqr t1a t3c xyz>], "dropped one tag from list";
+  is-deeply $doc<tags>, [<pqr taa tac xyz>], "dropped one tag from list";
 
 
   # try to drop the rest.
-  $c.set-tag-filter( <pqr t1a t3c xyz>, :drop);
+  $c.set-tag-filter( <pqr taa tac xyz>, :drop);
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<tag-filter>, )),
@@ -178,8 +178,8 @@ subtest 'Insert tags', {
   my Library::MetaConfig::TagFilterList $c .= new;
 
   # try to insert tags on empty filter list. test database insert.
-  $c.set-tag-filter( <t1ab bBax a2DE>, :!drop);
-  is-deeply $c.get-tag-filter, [<a2de bbax t1ab>],
+  $c.set-tag-filter( <taab bBax aaDE>, :!drop);
+  is-deeply $c.get-tag-filter, [<aade bbax taab>],
     "Tags inserted in empty filter list";
 }
 
