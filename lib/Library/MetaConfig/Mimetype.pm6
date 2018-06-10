@@ -39,76 +39,21 @@ class MetaConfig::Mimetype does Library::MetaConfig {
   }
 
   #-----------------------------------------------------------------------------
-  method install-mimetypes ( ) {
-
-    # gather data into hash
-    my Hash $mt-hash = {};
+  method install-mimetypes ( Bool :$check-all = False ) {
 
     # Get the list from comment pod-block and store in a hash
     my Str $content = self!get-data('linux-mimetypes');
     for $content.split("\n") -> $line {
 
-      my Str $ext;
-      my Str $mimetype;
-      my Str $mt-type;
-      my Str $mt-subtype;
-
       my @line-items = $line.split(/\s+/);
-      $mimetype = @line-items.shift;
-      ( $mt-type, $mt-subtype) = $mimetype.split(/\//);
+      if self.add-mimetype(
+           @line-items.shift,
+           :extensions(@line-items>>.fmt(".%s").join(','))
+         ) {
 
-      my Str $id = $mimetype;
-      $mt-hash{$id} = {};
-      $mt-hash{$id}<type> = $mt-type;
-      $mt-hash{$id}<subtype> = $mt-subtype;
-      $mt-hash{$id}<ext> = [];
-
-  #note "$id, $mimetype, $mt-type, $mt-subtype, {@line-items.join(', ')}";
-      if +@line-items {
-        # add a dot before extension to prevent clashes with type-subtype id
-        $mt-hash{$id}<ext>.push: |@line-items>>.fmt(".%s");
-      }
-  #note "E: {$mt-hash{$id}<ext>.join(', ')}";
-    }
-
-    # rearrange all to store documents in the collection
-    for $mt-hash.keys.sort -> $id {
-      my Array $documents = [];
-
-      # document store with key on type_subtype
-      $documents.push( BSON::Document.new( (
-            :_id($id),
-            :type($mt-hash{$id}<type>),
-            :subtype($mt-hash{$id}<subtype>),
-            :ext($mt-hash{$id}<ext>),
-          )
-        )
-      );
-
-      for @($mt-hash{$id}<ext>) -> $ext {
-        # documents store with key on extension
-        $documents.push( BSON::Document.new( (
-              :_id($ext),
-              :mimetype_id($id),
-            )
-          )
-        );
-      }
-
-  #note "DB: ", $!database.perl;
-      my BSON::Document $result-doc = $!database.run-command: (
-        :insert($!cl-name), :$documents,
-      );
-
-      if $result-doc<ok> ~~ 1e0 {
-        info-message(
-          "mimetype id '$id' stored and {+$documents -1} extension docs"
-        );
-      }
-
-      else {
-        warn-message("duplicate key, mimetype id '$id' is stored before");
-  note "Fail result: ", $result-doc.perl;
+        # mime found before. stop because others are inserted already
+        # unless we have to check all entries
+        last unless $check-all;
       }
     }
   }
@@ -119,20 +64,27 @@ class MetaConfig::Mimetype does Library::MetaConfig {
     --> Bool
   ) {
 
+    my Bool $found-mime = False;
     my Array $documents = [];
     my Array $exts;
 
-    unless self.get-mimetype(:$mimetype).defined {
+    if self.get-mimetype(:$mimetype).defined {
+
+      warn-message("duplicate key, mimetype id '$mimetype' is stored before");
+      $found-mime = True;
+    }
+
+    else {
       my Str ( $mt-type, $mt-subtype) = $mimetype.split(/\//);
       $exts = [ $extensions.split(/\s* \, \s*/) ];
       for @$exts -> $e is rw {
-        $e = ".$e" unless $e ~~ m/^ \. /;
+        $e ~~ s/^ \. //;
       }
 
       my Str $id = $mimetype;
       $documents.push( BSON::Document.new: (
           :_id($id), :type($mt-type), :subtype($mt-subtype),
-          :$exts, :$exec
+          :exts([$exts.sort]), :$exec
         )
       );
 
@@ -145,20 +97,23 @@ class MetaConfig::Mimetype does Library::MetaConfig {
         }
       }
 
-note "D: $!db-name.$!cl-name, $documents[*]";
-      my BSON::Document $result-doc = $!database.run-command: (
-      :insert($!cl-name), :$documents
+#note "D: $!db-name.$!cl-name, $documents[*]";
+      my BSON::Document $doc = $!database.run-command: (
+        :insert($!cl-name), :$documents
       );
-note $result-doc.perl;
 
-      if $result-doc<ok> ~~ 1e0 {
-        info-message("mimetype id '$id' stored");
+      if $doc<ok> ~~ 1e0 {
+        info-message("mimetype '$mimetype' stored");
       }
 
       else {
-        warn-message("duplicate key, mimetype id '$id' is stored before");
+note $doc.perl;
+        fatal-message(
+          "Error storing mimetype: code=$doc<errcode>, msg=$doc<errmsg>");
       }
     }
+
+    $found-mime
   }
 
   #-----------------------------------------------------------------------------
@@ -178,10 +133,40 @@ note $result-doc.perl;
   }
 
   #-----------------------------------------------------------------------------
-  method modify-mimetype ( ) {
+  method modify-mimetype (
+    Str $mimetype, Str :$extensions = '', Str :$exec = ''
+    --> BSON::Document
+  ) {
 
+    my BSON::Document $result;
+    if ?$mimetype or :$extensions {
+      my BSON::Document $doc = self.get-mimetype($mimetype);
+      if ?$doc {
+        my BSON::Document $r .= new;
+        $r<q> = ( :_id($mimetype, );
+        $r<u> = (
+          '$set' => ( :$tags,),),
+        );
+
+        $doc = $!dbcfg.update: [ (
+            q => ( :_id($mimetype, ),
+            u => ( '$set' => ( :$tags,),),
+            upsert => False,
+          ),
+        ];
+
+    }
+
+    $result
   }
 
+  #-----------------------------------------------------------------------------
+  method remove-mimetype (
+    Str:D $mimetype, Str :$extensions = '', Str :$exec = ''
+    --> Bool
+  ) {
+
+  }
 
   # ==[ Private Stuff ]=========================================================
   #-----------------------------------------------------------------------------
@@ -1970,7 +1955,9 @@ application/x-java-pack200			pack
 application/x-killustrator			kil
 application/x-latex				latex
 application/x-netcdf				nc cdf
-application/x-perl				pl
+application/x-perl				pl pm
+application/x-perl6				pl6 pm6
+application/x-semixml     sxml
 application/x-rpm				rpm
 application/x-sh				sh
 application/x-shar				shar

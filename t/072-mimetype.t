@@ -62,7 +62,13 @@ my MongoDB::Cursor $cu;
 subtest 'Install mimetypes', {
 
   my Library::MetaConfig::Mimetype $m .= new;
-  $m.install-mimetypes;
+  $m.install-mimetypes(:!check-all);
+
+  my BSON::Document $r = $m.get-mimetype(:mimetype<image/fits>);
+  is $r<_id>, "image/fits", "found image/fits";
+  is $r<type>, "image", "found its type";
+  is $r<subtype>, "fits", "found its subtype";
+  is-deeply $r<exts>, [<fit fits fts>], "found 3 extentions";
 }
 
 #-------------------------------------------------------------------------------
@@ -70,7 +76,7 @@ subtest 'add mimetypes', {
 
   # add existing mime
   my Library::MetaConfig::Mimetype $m .= new;
-  nok $m.add-mimetype(
+  ok $m.add-mimetype(
     "application/A2l", :extensions<.a2l>  #, :exec('/usr/bin/ffplay %f')
   ), "application/A2l already in mimetype collection";
 
@@ -78,7 +84,11 @@ subtest 'add mimetypes', {
   is $r<_id>, "application/A2l", "found application/A2l";
   is $r<type>, "application", "found its type";
   is $r<subtype>, "A2l", "found its subtype";
-  is-deeply $r<exts>, [<.a2l>], "found extentions";
+  is-deeply $r<exts>, [<a2l>], "found 1 extention";
+
+  nok $m.add-mimetype(
+    "application/x-myprog", :extensions<mprg,mprl>, :exec('/tmp/myprg %f')
+  ), "application/x-myprog added to mimes";
 }
 
 #-------------------------------------------------------------------------------
