@@ -8,11 +8,6 @@ use Library;
 use Library::MetaConfig::Mimetype;
 
 use MongoDB;
-use MongoDB::Client;
-use MongoDB::Database;
-use MongoDB::Collection;
-use MongoDB::Cursor;
-
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
@@ -52,23 +47,18 @@ spurt( $filename, Q:qq:to/EOCFG/);
 #initialize-library(:user-key<u1>);
 initialize-library;
 
-my MongoDB::Client $client := $Library::client;
-my MongoDB::Database $database = $client.database( $db-name, :root);
-$database.run-command: (dropDatabase => 1,);
-my MongoDB::Collection $cl-cfg = $database.collection( $cl-name, :root);
-my MongoDB::Cursor $cu;
-
 #-------------------------------------------------------------------------------
 subtest 'Install mimetypes', {
 
   my Library::MetaConfig::Mimetype $m .= new;
-  $m.install-mimetypes(:!check-all);
+  $m.install-mimetypes( :!check-all, :one-entry);
 
-  my BSON::Document $r = $m.get-mimetype(:mimetype<image/fits>);
-  is $r<_id>, "image/fits", "found image/fits";
-  is $r<type>, "image", "found its type";
-  is $r<subtype>, "fits", "found its subtype";
-  is-deeply $r<exts>, [<fit fits fts>], "found 3 extentions";
+  my BSON::Document $r =
+     $m.get-mimetype(:mimetype<application/1d-interleaved-parityfec>);
+  is $r<_id>, "application/1d-interleaved-parityfec", "found mimetype $r<_id>";
+  is $r<type>, "application", "found its type $r<type>";
+  is $r<subtype>, "1d-interleaved-parityfec", "found its subtype $r<subtype>";
+  is-deeply $r<exts>, [''], "there are no extensions";
 }
 
 #-------------------------------------------------------------------------------
@@ -76,27 +66,62 @@ subtest 'add mimetypes', {
 
   # add existing mime
   my Library::MetaConfig::Mimetype $m .= new;
-  ok $m.add-mimetype(
-    "application/A2l", :extensions<.a2l>  #, :exec('/usr/bin/ffplay %f')
-  ), "application/A2l already in mimetype collection";
+  my BSON::Document $doc = $m.add-mimetype(
+    "application/1d-interleaved-parityfec"
+  );
+
+  nok ?$doc,
+      "mimetype 'application/1d-interleaved-parityfec' already in collection";
 
   my BSON::Document $r = $m.get-mimetype(:mimetype<application/A2l>);
-  is $r<_id>, "application/A2l", "found application/A2l";
-  is $r<type>, "application", "found its type";
-  is $r<subtype>, "A2l", "found its subtype";
-  is-deeply $r<exts>, [<a2l>], "found 1 extention";
+  nok ?$r, "mimetype 'application/A2l' not found";
 
-  nok $m.add-mimetype(
+  ok ?$m.add-mimetype(
     "application/x-myprog", :extensions<mprg,mprl>, :exec('/tmp/myprg %f')
-  ), "application/x-myprog added to mimes";
+  ).defined, "application/x-myprog added to mimes";
+
+  $r = $m.get-mimetype(:mimetype<application/x-myprog>);
+  is $r<_id>, "application/x-myprog", "found application/x-myprog";
+  is $r<type>, "application", "found its type";
+  is $r<subtype>, "x-myprog", "found its subtype";
+  is-deeply $r<exts>, [<mprg mprl>], "found 2 extensions";
+  is $r<exec>, '/tmp/myprg %f', 'exec field set';
+}
+
+#-------------------------------------------------------------------------------
+subtest 'modify mimetypes', {
+
+  my Library::MetaConfig::Mimetype $m .= new;
+
+  is $m.modify-mimetype(
+    "application/x-myprog", :extensions<mprg1,mprl1>, :exec('')
+  )<ok>, 1e0, "application/x-myprog added to mimes";
+
+  my BSON::Document $r = $m.get-mimetype(:mimetype<application/x-myprog>);
+  is-deeply $r<exts>, [<mprg1 mprl1>], "extensions modified";
+  is $r<exec>, '', 'exec field reset';
+
+}
+
+#-------------------------------------------------------------------------------
+subtest 'remove mimetypes', {
+
+  my Library::MetaConfig::Mimetype $m .= new;
+
+  is $m.remove-mimetype("application/x-myprog")<ok>, 1e0,
+      "remove application/x-myprog";
+
+  my BSON::Document $r = $m.get-mimetype(:mimetype<application/x-myprog>);
+  nok ?$r, "mimetype 'application/x-myprog' is deleted";
+  $r = $m.get-mimetype(:extension<mprg1>);
+  nok ?$r, "extension 'mprg1' is deleted";
+  $r = $m.get-mimetype(:extension<mprl1>);
+  nok ?$r, "extension 'mprl1' is deleted";
 }
 
 #-------------------------------------------------------------------------------
 done-testing;
 
-#$database.run-command: (dropDatabase => 1,);
-$client.cleanup;
-
-#unlink $dir ~ '/client-configuration.toml';
-#unlink $dir ~ '/meta072.log';
-#rmdir $dir;
+unlink $dir ~ '/client-configuration.toml';
+unlink $dir ~ '/meta072.log';
+rmdir $dir;

@@ -12,79 +12,94 @@ use Library::MetaConfig;
 use Library::Configuration;
 
 use MongoDB;
-use MongoDB::Client;
-use MongoDB::Database;
-use MongoDB::Collection;
+#use MongoDB::Client;
+#use MongoDB::Database;
+#use MongoDB::Collection;
 
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
 class MetaConfig::Mimetype does Library::MetaConfig {
 
-  has Library::Configuration $!cfg;
-  has MongoDB::Client $!client;
-  has Str $!db-name;
-  has Str $!cl-name;
-  has MongoDB::Database $!database;
-  has MongoDB::Collection $!collection;
-
   #-----------------------------------------------------------------------------
-  submethod BUILD ( ) {
-    $!cfg := $Library::lib-cfg;
-    $!client := $Library::client;
-    $!db-name = $!cfg.database-name(:root);
-    $!cl-name = $!cfg.collection-name( 'mimetypes', :root);
-    $!database = $!client.database($!db-name);
-    $!collection = $!database.collection($!cl-name);
+  multi submethod BUILD ( ) {
+
+    $!dbcfg .= new( :collection-key<mimetypes>, :root);
   }
 
   #-----------------------------------------------------------------------------
-  method install-mimetypes ( Bool :$check-all = False ) {
+  method install-mimetypes (
+    Bool :$check-all = False, Bool :$one-entry = False
+  ) {
 
     # Get the list from comment pod-block and store in a hash
     my Str $content = self!get-data('linux-mimetypes');
     for $content.split("\n") -> $line {
 
       my @line-items = $line.split(/\s+/);
-      if self.add-mimetype(
-           @line-items.shift,
-           :extensions(@line-items>>.fmt(".%s").join(','))
-         ) {
+      my $doc = self.add-mimetype(
+        @line-items.shift,
+        :extensions(@line-items>>.fmt(".%s").join(','))
+      );
 
+      if ?$doc and $doc<ok> == 0e0 {
         # mime found before. stop because others are inserted already
         # unless we have to check all entries
         last unless $check-all;
       }
+
+      # for testing purposes
+      last if $one-entry;
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  # get mimetype document
+  multi method get-mimetype ( Str:D :$mimetype! --> BSON::Document ) {
+
+    $!dbcfg.find( :criteria( (:_id($mimetype),)) ).fetch;
+  }
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # get mimetype document using extension reference when $get-mime-doc is True.
+  # if False, return the extension document
+  multi method get-mimetype (
+    Str:D :$extension!, Bool :$get-mime-doc = True
+    --> BSON::Document
+  ) {
+
+    my BSON::Document $m =
+      $!dbcfg.find( :criteria( (:_id($extension),)) ).fetch;
+
+    $m = self.get-mimetype(:mimetype($m<mimetype_id>)) if ?$m and $get-mime-doc;
+
+    $m
   }
 
   #-----------------------------------------------------------------------------
   method add-mimetype (
     Str:D $mimetype, Str :$extensions = '', Str :$exec = ''
-    --> Bool
+    --> BSON::Document
   ) {
 
-    my Bool $found-mime = False;
-    my Array $documents = [];
-    my Array $exts;
+    my BSON::Document $doc;
 
     if self.get-mimetype(:$mimetype).defined {
-
       warn-message("duplicate key, mimetype id '$mimetype' is stored before");
-      $found-mime = True;
     }
 
     else {
       my Str ( $mt-type, $mt-subtype) = $mimetype.split(/\//);
-      $exts = [ $extensions.split(/\s* \, \s*/) ];
+      my Array $exts = [ $extensions.split(/\s* \, \s*/).sort ];
       for @$exts -> $e is rw {
         $e ~~ s/^ \. //;
       }
 
+      my Array $documents = [];
       my Str $id = $mimetype;
       $documents.push( BSON::Document.new: (
           :_id($id), :type($mt-type), :subtype($mt-subtype),
-          :exts([$exts.sort]), :$exec
+          :$exts, :$exec
         )
       );
 
@@ -97,75 +112,113 @@ class MetaConfig::Mimetype does Library::MetaConfig {
         }
       }
 
-#note "D: $!db-name.$!cl-name, $documents[*]";
-      my BSON::Document $doc = $!database.run-command: (
-        :insert($!cl-name), :$documents
-      );
-
-      if $doc<ok> ~~ 1e0 {
-        info-message("mimetype '$mimetype' stored");
-      }
-
-      else {
-note $doc.perl;
-        fatal-message(
-          "Error storing mimetype: code=$doc<errcode>, msg=$doc<errmsg>");
-      }
+      $doc = $!dbcfg.insert($documents);
+      info-message("mimetype '$mimetype' stored") if $doc<ok> == 1e0;
     }
 
-    $found-mime
-  }
-
-  #-----------------------------------------------------------------------------
-  multi method get-mimetype ( Str:D :$mimetype! --> BSON::Document ) {
-
-    $!collection.find( :criteria( (:_id($mimetype),)) ).fetch;
-  }
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  multi method get-mimetype ( Str:D :$extension! --> BSON::Document ) {
-
-    my BSON::Document $m =
-      $!collection.find( :criteria( (:_id($extension),)) ).fetch;
-    $m = self.get-mimetype(:mimetype($m<mimetype_id>)) if ?$m;
-
-    $m
+    # doc undefined when
+    #   duplicate mimetype
+    $doc
   }
 
   #-----------------------------------------------------------------------------
   method modify-mimetype (
-    Str $mimetype, Str :$extensions = '', Str :$exec = ''
+    Str:D $mimetype, Str :$extensions = '', Str :$exec = ''
     --> BSON::Document
   ) {
 
     my BSON::Document $result;
-    if ?$mimetype or :$extensions {
-      my BSON::Document $doc = self.get-mimetype($mimetype);
-      if ?$doc {
-        my BSON::Document $r .= new;
-        $r<q> = ( :_id($mimetype, );
-        $r<u> = (
-          '$set' => ( :$tags,),),
-        );
 
-        $doc = $!dbcfg.update: [ (
-            q => ( :_id($mimetype, ),
-            u => ( '$set' => ( :$tags,),),
-            upsert => False,
-          ),
-        ];
+    my BSON::Document $doc = self.get-mimetype(:$mimetype);
 
+    # if there is a doc, we can update
+    if ?$doc {
+      my Array $exts;
+      if ?$extensions {
+        $exts = [ $extensions.split(/\s* \, \s*/) ];
+        for @$exts -> $e is rw {
+          $e ~~ s/^ \. //;
+        }
+
+        # take the difference to get all new extensions
+        my @new-extensions = ($exts (-) $doc<exts>).keys;
+        for @new-extensions -> $e is rw {
+          # check extension document for its mimetype
+          my BSON::Document $m = self.get-mimetype(
+            :extension($e), :!get-mime-doc
+          );
+
+          if ?$m {
+            if $m<_id> ne $mimetype {
+              warn-message(
+                "extension '$e' in use by mimetype '$mimetype', abort ..."
+              );
+
+              # return undefined doc
+              last;
+            }
+          }
+
+          else {
+            my BSON::Document $doc = $!dbcfg.insert(
+              [ BSON::Document.new: ( :_id($e), :mimetype_id($mimetype)), ]
+            );
+
+            info-message("extension $e inserted");
+          }
+        }
+
+        # take the difference again to get all old extensions to remove
+        my @old-extensions = ($doc<exts> (-) $exts).keys;
+        for @old-extensions -> $e is rw {
+          my BSON::Document $doc = $!dbcfg.delete(
+            [ (:q(_id => $e), :limit(1)), ]
+          );
+
+          info-message("extension $e deleted");
+        }
+      }
+
+      else {
+        # no changes, keep old set
+        $exts = $doc<exts> if ?$doc;
+      }
+
+      # update record
+      $result = $!dbcfg.update: [ (
+          q => ( :_id($mimetype), ),
+          u => ( '$set' => ( :$exts, :$exec,), ),
+          upsert => False,
+        ),
+      ];
     }
 
+    # result undefined means
+    #   no record found to modify
+    #   extension clash
     $result
   }
 
   #-----------------------------------------------------------------------------
-  method remove-mimetype (
-    Str:D $mimetype, Str :$extensions = '', Str :$exec = ''
-    --> Bool
-  ) {
+  method remove-mimetype ( Str:D $mimetype --> BSON::Document ) {
 
+    my BSON::Document $doc;
+    my BSON::Document $m = self.get-mimetype(:$mimetype);
+    if ?$m {
+      for @($m<exts>) -> $e {
+        $doc = $!dbcfg.delete( [ (:q(_id => $e), :limit(1)), ] );
+      }
+
+      $doc = $!dbcfg.delete( [ (:q(_id => $mimetype), :limit(1)), ] );
+    }
+
+    else {
+      warn-message("mimetype $mimetype not found");
+    }
+
+    # doc undefined means
+    #   no record found to remove
+    $doc
   }
 
   # ==[ Private Stuff ]=========================================================
@@ -1957,6 +2010,7 @@ application/x-latex				latex
 application/x-netcdf				nc cdf
 application/x-perl				pl pm
 application/x-perl6				pl6 pm6
+application/x-prove				t
 application/x-semixml     sxml
 application/x-rpm				rpm
 application/x-sh				sh
