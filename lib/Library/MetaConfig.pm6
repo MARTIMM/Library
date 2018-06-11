@@ -12,8 +12,12 @@ role MetaConfig {
   has Library::Storage $!dbcfg;
 
   #-----------------------------------------------------------------------------
-  submethod BUILD ( Bool :$root = False ) {
+  proto BUILD ( Bool :$root = False ) {*}
+  multi submethod BUILD ( Bool :$root = False ) {
 
     $!dbcfg .= new( :collection-key<meta-config>, :$root);
+
+    # call other BUILDs when there are any
+    callsame;
   }
 }
