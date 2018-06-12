@@ -103,6 +103,19 @@ multi sub MAIN ( Str:D $mimetype, Bool:D :$get! ) {
 }
 
 #-------------------------------------------------------------------------------
+multi sub MAIN ( Str:D $extension, Bool:D :$getx! ) {
+
+  my BSON::Document $doc = $m.get-mimetype(:$extension);
+  if $doc.defined {
+    note "Result: \n", $doc.perl;
+  }
+
+  else {
+    note "Mimetype not found";
+  }
+}
+
+#-------------------------------------------------------------------------------
 multi sub MAIN ( Bool:D :$install! ) {
 
   $m.install-mimetypes(:check-all);
