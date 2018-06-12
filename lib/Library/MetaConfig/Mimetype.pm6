@@ -12,10 +12,6 @@ use Library::MetaConfig;
 use Library::Configuration;
 
 use MongoDB;
-#use MongoDB::Client;
-#use MongoDB::Database;
-#use MongoDB::Collection;
-
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
@@ -24,7 +20,8 @@ class MetaConfig::Mimetype does Library::MetaConfig {
   #-----------------------------------------------------------------------------
   multi submethod BUILD ( ) {
 
-    $!dbcfg .= new( :collection-key<mimetypes>, :root);
+    $!dbcfg1 .= new( :collection-key<mimetypes>, :root);
+    $!dbcfg2 .= new( :collection-key<extensions>, :root);
   }
 
   #-----------------------------------------------------------------------------
@@ -39,7 +36,7 @@ class MetaConfig::Mimetype does Library::MetaConfig {
       my @line-items = $line.split(/\s+/);
       my $doc = self.add-mimetype(
         @line-items.shift,
-        :extensions(@line-items>>.fmt(".%s").join(','))
+        :extensions(@line-items>>.fmt(".%s").grep(/.+/).sort.join(','))
       );
 
       if ?$doc and $doc<ok> == 0e0 {
@@ -57,7 +54,7 @@ class MetaConfig::Mimetype does Library::MetaConfig {
   # get mimetype document
   multi method get-mimetype ( Str:D :$mimetype! --> BSON::Document ) {
 
-    $!dbcfg.find( :criteria( (:_id($mimetype),)) ).fetch;
+    $!dbcfg1.find( :criteria( (:_id($mimetype),)) ).fetch;
   }
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -69,7 +66,7 @@ class MetaConfig::Mimetype does Library::MetaConfig {
   ) {
 
     my BSON::Document $m =
-      $!dbcfg.find( :criteria( (:_id($extension),)) ).fetch;
+      $!dbcfg2.find( :criteria( (:_id($extension),)) ).fetch;
 
     $m = self.get-mimetype(:mimetype($m<mimetype_id>)) if ?$m and $get-mime-doc;
 
@@ -90,29 +87,28 @@ class MetaConfig::Mimetype does Library::MetaConfig {
 
     else {
       my Str ( $mt-type, $mt-subtype) = $mimetype.split(/\//);
-      my Array $exts = [ $extensions.split(/\s* \, \s*/).sort ];
+      my Array $exts = [ $extensions.split(/\s* \, \s*/).grep(/.+/).sort ];
       for @$exts -> $e is rw {
         $e ~~ s/^ \. //;
       }
 
-      my Array $documents = [];
-      my Str $id = $mimetype;
-      $documents.push( BSON::Document.new: (
-          :_id($id), :type($mt-type), :subtype($mt-subtype),
+      $doc = $!dbcfg1.insert: [ BSON::Document.new: (
+          :_id($mimetype), :type($mt-type), :subtype($mt-subtype),
           :$exts, :$exec
-        )
-      );
+        ),
+      ];
 
+      my Array $extdocs = [];
       for @$exts -> $e {
         unless self.get-mimetype(:extension($e)).defined {
-            $documents.push( BSON::Document.new: (
-              :_id($e), :mimetype_id($id),
+            $extdocs.push( BSON::Document.new: (
+              :_id($e), :mimetype_id($mimetype),
             )
           );
         }
       }
 
-      $doc = $!dbcfg.insert($documents);
+      $doc = $!dbcfg2.insert($extdocs);
       info-message("mimetype '$mimetype' stored") if $doc<ok> == 1e0;
     }
 
@@ -135,7 +131,7 @@ class MetaConfig::Mimetype does Library::MetaConfig {
     if ?$doc {
       my Array $exts;
       if ?$extensions {
-        $exts = [ $extensions.split(/\s* \, \s*/) ];
+        $exts = [ $extensions.split(/\s* \, \s*/).grep(/.+/).sort ];
         for @$exts -> $e is rw {
           $e ~~ s/^ \. //;
         }
@@ -160,7 +156,7 @@ class MetaConfig::Mimetype does Library::MetaConfig {
           }
 
           else {
-            my BSON::Document $doc = $!dbcfg.insert(
+            my BSON::Document $doc = $!dbcfg2.insert(
               [ BSON::Document.new: ( :_id($e), :mimetype_id($mimetype)), ]
             );
 
@@ -171,7 +167,7 @@ class MetaConfig::Mimetype does Library::MetaConfig {
         # take the difference again to get all old extensions to remove
         my @old-extensions = ($doc<exts> (-) $exts).keys;
         for @old-extensions -> $e is rw {
-          my BSON::Document $doc = $!dbcfg.delete(
+          my BSON::Document $doc = $!dbcfg2.delete(
             [ (:q(_id => $e), :limit(1)), ]
           );
 
@@ -185,7 +181,7 @@ class MetaConfig::Mimetype does Library::MetaConfig {
       }
 
       # update record
-      $result = $!dbcfg.update: [ (
+      $result = $!dbcfg1.update: [ (
           q => ( :_id($mimetype), ),
           u => ( '$set' => ( :$exts, :$exec,), ),
           upsert => False,
@@ -206,10 +202,10 @@ class MetaConfig::Mimetype does Library::MetaConfig {
     my BSON::Document $m = self.get-mimetype(:$mimetype);
     if ?$m {
       for @($m<exts>) -> $e {
-        $doc = $!dbcfg.delete( [ (:q(_id => $e), :limit(1)), ] );
+        $doc = $!dbcfg2.delete( [ (:q(_id => $e), :limit(1)), ] );
       }
 
-      $doc = $!dbcfg.delete( [ (:q(_id => $mimetype), :limit(1)), ] );
+      $doc = $!dbcfg1.delete( [ (:q(_id => $mimetype), :limit(1)), ] );
     }
 
     else {
