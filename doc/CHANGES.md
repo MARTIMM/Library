@@ -1,5 +1,6 @@
 ## Release notes
 
+* 0.9.3 Added --getx to mime program
 * 0.9.2 Mimetype program renamed to library-mimetype.pl6. Can do --add, --mod, --rem, --get and --install.
 * 0.9.1 Addition of methods to module Mimetypes.
 * 0.9.0 New module for class Library::MetaConfig::Mimetypes
