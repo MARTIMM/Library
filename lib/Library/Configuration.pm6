@@ -111,7 +111,9 @@ class Configuration {
     self!check-config-field(
       <library collections root mimetypes>, :default<Mimetypes>
     );
-
+    self!check-config-field(
+      <library collections root extensions>, :default<Extensions>
+    );
 #note "\nConfig:\n", $!config.perl;
 
     # create uri from config data

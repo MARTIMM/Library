@@ -71,8 +71,10 @@ sub initialize-library ( Str :$user-key ) is export {
         meta-data           = "Metadata"
         meta-config         = "Metaconfig"
 
+      #TODO fix root collection names
       [ library.collections.root ]
         mimetypes           = "Mimetypes"
+        extensions          = "Extensions"
 
       #TODO thoughts
       [ library.mimetypes ]
