@@ -58,7 +58,7 @@ subtest 'Install mimetypes', {
   is $r<_id>, "application/1d-interleaved-parityfec", "found mimetype $r<_id>";
   is $r<type>, "application", "found its type $r<type>";
   is $r<subtype>, "1d-interleaved-parityfec", "found its subtype $r<subtype>";
-  is-deeply $r<exts>, [''], "there are no extensions";
+  is-deeply $r<exts>, [], "there are no extensions";
 }
 
 #-------------------------------------------------------------------------------
