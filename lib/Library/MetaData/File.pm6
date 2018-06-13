@@ -6,6 +6,7 @@ unit package Library:auth<github:MARTIMM>;
 use Library;
 use Library::MetaConfig::TagFilterList;
 use Library::MetaConfig::SkipDataList;
+use Library::MetaConfig::Mimetype;
 use Library::MetaData;
 
 use MongoDB;
@@ -13,6 +14,13 @@ use BSON::Document;
 
 #-------------------------------------------------------------------------------
 class MetaData::File does Library::MetaData {
+
+  has Library::MetaConfig::Mimetype $!mime;
+
+  #-----------------------------------------------------------------------------
+  multi submethod BUILD ( ) {
+    $!mime .= new;
+  }
 
   #-----------------------------------------------------------------------------
   # Set the default informaton for a file in the meta structure
@@ -26,7 +34,9 @@ class MetaData::File does Library::MetaData {
 
     $!meta-data<name> = $file;
 #TODO translate extension into mimetype
-    $!meta-data<content-type> = $extension;
+#TODO other types of content detection from file command
+    $!meta-data<content-type> =
+      ($!mime.get-mimetype(:$extension) // {})<_id> // '';
     $!meta-data<path> = $path;
     $!meta-data<meta-type> = MT-File.Str;
     $!meta-data<exists> = $!object.IO ~~ :r;
