@@ -1,5 +1,15 @@
 ## Release notes
 
+* 0.9.4
+  * mimetype data is now in a resources file
+  * some configuration entries are now fixed;
+    ```
+    [ library.collections.root ]
+      mimetypes           = "Mimetypes"
+      extensions          = "Extensions"
+    [ library ]
+      root-db             = "Library"
+    ```
 * 0.9.3 Added --getx to mime program
 * 0.9.2 Mimetype program renamed to library-mimetype.pl6. Can do --add, --mod, --rem, --get and --install.
 * 0.9.1 Addition of methods to module Mimetypes.
