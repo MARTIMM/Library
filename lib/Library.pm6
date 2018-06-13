@@ -60,7 +60,6 @@ sub initialize-library ( Str :$user-key ) is export {
 
         # user-db can be used when no users are specified. root-db is used
         # for collections which must be available to all users.
-        root-db             = "Library"
         user-db             = "MyLibrary"
 
         logfile             = "library.log"
@@ -70,11 +69,6 @@ sub initialize-library ( Str :$user-key ) is export {
       [ library.collections ]
         meta-data           = "Metadata"
         meta-config         = "Metaconfig"
-
-      #TODO fix root collection names
-      [ library.collections.root ]
-        mimetypes           = "Mimetypes"
-        extensions          = "Extensions"
 
       #TODO thoughts
       [ library.mimetypes ]
@@ -106,7 +100,7 @@ sub initialize-library ( Str :$user-key ) is export {
   my MongoDB::MdbLoglevels $log-levelfile;
   my MongoDB::MdbLoglevels $log-levelscreen;
   ( $log-file, $log-levelfile, $log-levelscreen) = $lib-cfg.get-loginfo;
-note "Loglevel type: ", $log-levelscreen;
+#note "Loglevel type: ", $log-levelscreen;
 
   drop-send-to('screen');
   drop-send-to('mongodb');

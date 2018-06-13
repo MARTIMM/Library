@@ -93,7 +93,7 @@ class Configuration {
     self!check-config-field( <connection port>, :default(27017));
 #    self!check-config-field( <library recursive-scan-dirs>, :default([]));
 
-    self!check-config-field( <library root-db>, :default<Library>);
+    self!check-config-field( <library root-db>, :set<Library>);
     self!check-config-field( <library user-db>, :default<MyLibrary>);
     self!check-config-field( <library logfile>, :default<library.log>);
 
@@ -109,10 +109,13 @@ class Configuration {
       <library collections meta-config>, :default<Metaconfig>
     );
     self!check-config-field(
-      <library collections root mimetypes>, :default<Mimetypes>
+      <library collections root mimetypes>, :set<Mimetypes>
     );
     self!check-config-field(
-      <library collections root extensions>, :default<Extensions>
+      <library collections root extensions>, :set<Extensions>
+    );
+    self!check-config-field(
+      <library collections root magic>, :set<Magic>
     );
 #note "\nConfig:\n", $!config.perl;
 
@@ -151,7 +154,7 @@ class Configuration {
   }
 
   #-----------------------------------------------------------------------------
-  method !check-config-field ( *@fields, Str :$default ) {
+  multi method !check-config-field ( *@fields, Str :$default! ) {
 
     my Bool $missing-key = False;
     my Hash $c := $!config;
@@ -181,6 +184,31 @@ class Configuration {
         "Missing keys '{@fields.join('.')}' from config, set to '$default'"
       );
     }
+  }
+
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # set the field to a value. older config may have these fields still and
+  # will be overwritten.
+  multi method !check-config-field ( *@fields, Str :$set! ) {
+
+    my Hash $c := $!config;
+    my Hash $p;
+
+    # descent using field names into the configuration
+    for @fields -> $field {
+
+      # when field is missing or empty, init with empty Hash
+      $c{$field} = {} unless ? $c{$field};
+
+      # keep current config to set the default when we are ready
+      $p := $c;
+
+      # descent forther down if possible
+      $c := $c{$field} if $c{$field} ~~ Hash;
+    }
+
+    # Always set the field to the given value
+    $p{@fields[*-1]} = $set;
   }
 
   #-----------------------------------------------------------------------------
