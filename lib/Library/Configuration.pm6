@@ -1,6 +1,6 @@
 use v6;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
 use Config::TOML;
@@ -93,7 +93,7 @@ class Configuration {
     self!check-config-field( <connection port>, :default(27017));
 #    self!check-config-field( <library recursive-scan-dirs>, :default([]));
 
-    self!check-config-field( <library root-db>, :set<Library>);
+    self!set-config-field( <library root-db>, :set<Library>);
     self!check-config-field( <library user-db>, :default<MyLibrary>);
     self!check-config-field( <library logfile>, :default<library.log>);
 
@@ -108,13 +108,13 @@ class Configuration {
     self!check-config-field(
       <library collections meta-config>, :default<Metaconfig>
     );
-    self!check-config-field(
+    self!set-config-field(
       <library collections root mimetypes>, :set<Mimetypes>
     );
-    self!check-config-field(
+    self!set-config-field(
       <library collections root extensions>, :set<Extensions>
     );
-    self!check-config-field(
+    self!set-config-field(
       <library collections root magic>, :set<Magic>
     );
 #note "\nConfig:\n", $!config.perl;
@@ -154,7 +154,7 @@ class Configuration {
   }
 
   #-----------------------------------------------------------------------------
-  multi method !check-config-field ( *@fields, Str :$default! ) {
+  method !check-config-field ( *@fields, Str :$default! ) {
 
     my Bool $missing-key = False;
     my Hash $c := $!config;
@@ -189,7 +189,7 @@ class Configuration {
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   # set the field to a value. older config may have these fields still and
   # will be overwritten.
-  multi method !check-config-field ( *@fields, Str :$set! ) {
+  method !set-config-field ( *@fields, Str :$set ) {
 
     my Hash $c := $!config;
     my Hash $p;
