@@ -12,12 +12,6 @@ use MongoDB;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
-#drop-send-to('mongodb');
-#drop-send-to('screen');
-#modify-send-to( 'screen', :level(MongoDB::MdbLoglevels::Info));
-#info-message("Test $?FILE start");
-
-#-------------------------------------------------------------------------------
 my Library::Test-support $ts .= new;
 my Int $p1 = $ts.server-control.get-port-number('s1');
 my Str $dir = 't/Meta050';
