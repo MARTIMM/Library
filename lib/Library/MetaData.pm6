@@ -36,6 +36,10 @@ role MetaData {
       $object.Str.chars > 0;
 
     $!object = $object.Str;
+
+    # run users BUILDs too
+    callsame;
+
     self!process-object;
   }
 
@@ -45,6 +49,10 @@ role MetaData {
       $object.chars > 0;
 
     $!object = $object;
+
+    # run users BUILDs too
+    callsame;
+
     self!process-object;
   }
 
