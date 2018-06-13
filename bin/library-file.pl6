@@ -25,8 +25,6 @@ my Bool $recursive;
 
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Store metadata about files.
-#
-# --et  extract tags from filename
 # --r   Recursive search through directories
 
 multi sub MAIN ( *@files-to-process, Bool :$r = False ) {
@@ -52,47 +50,43 @@ multi sub MAIN ( *@files-to-process, Bool :$r = False ) {
 # take returns Library::MetaData objects when the object is not ignored
 sub process-directory ( Str $o ) {
   my Library::MetaData::Directory $mdir;
-  my Library::MetaData::Directory $mfile;
+  my Library::MetaData::File $mfile;
 
-  given $o.IO {
+  # test if $o is a directory
+  if $o.IO.d {
+    # first queue this directory object
+    $mdir .= new(:object($o));
+    take $mdir unless $mdir.ignore-object;
 
-    # test if $o is a directory
-    when :d {
+    # if a directory object is filtered out, al descendends are too
+    return if $mdir.ignore-object;
 
-      # first queue this directory object
-      $mdir .= new(:object($o));
-      take $mdir unless $mdir.ignore-object;
+    # then check if the contents of dir must be sought
+    if $recursive {
+      for dir($o) -> $object {
+        if $object.d {
+          # queue this directory and process
+          $mdir .= new(:$object);
+          take $mdir unless $mdir.ignore-object;
+          process-directory($object.Str);
+        }
 
-      # if a directory object is filtered out, al descendends are too
-      return if $mdir.ignore-object;
-
-      # then check if the contents of dir must be sought
-      if $recursive {
-        for dir($o) -> $object {
-          if $object.d {
-            # queue this directory and process
-            $mdir .= new(:$object);
-            take $mdir unless $mdir.ignore-object;
-            process-directory($object.Str);
-          }
-
-          else {
-            # queue this file
-            $mfile .= new(:$object);
-            take $mfile unless $mfile.ignore-object;
-          }
+        else {
+          # queue this file
+          $mfile .= new(:$object);
+          take $mfile unless $mfile.ignore-object;
         }
       }
     }
+  }
 
-    when :f {
-      # queue this file
-      $mfile .= new(:object($o));
-      take $mfile unless $mfile.ignore-object;
-    }
+  elsif $o.IO.f {
+    # queue this file
+    $mfile .= new(:object($o));
+    take $mfile unless $mfile.ignore-object;
+  }
 
-    default {
-      note "Special file $o ignored";
-    }
+  else {
+    note "Special file $o ignored";
   }
 }
