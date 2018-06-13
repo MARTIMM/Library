@@ -13,15 +13,15 @@
   "build-depends": [ ],
   "tags": [ "metadata", "library", "mongodb", "database"],
   "provides": {
-    "Library":                          "lib/Library.pm6",
-    "Library::Configuration":           "lib/Library/Configuration.pm6",
+    "Library":                      "lib/Library.pm6",
+    "Library::Configuration":       "lib/Library/Configuration.pm6",
 
-    "Library::MetaConfig":              "lib/Library/MetaConfig.pm6",
+    "Library::MetaConfig":          "lib/Library/MetaConfig.pm6",
     "Library::MetaConfig::TagFilterList":
       "lib/Library/MetaConfig/TagFilterList.pm6",
     "Library::MetaConfig::SkipDataList":
       "lib/Library/MetaConfig/SkipDataList.pm6",
-    "Library::MetaConfig::Mimetype": "lib/Library/MetaConfig/Mimetype.pm6",
+    "Library::MetaConfig::Mimetype":  "lib/Library/MetaConfig/Mimetype.pm6",
 
     "Library::Storage":             "lib/Library/Storage.pm6",
 
