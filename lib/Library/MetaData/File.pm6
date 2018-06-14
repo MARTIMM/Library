@@ -32,16 +32,24 @@ class MetaData::File does Library::MetaData {
     my Str $path = $!object.IO.absolute;
     $path ~~ s/ '/'? $file $//;
 
-    $!meta-data<name> = $file;
-#TODO translate extension into mimetype
-#TODO other types of content detection from file command
-    $!meta-data<content-type> =
+    my BSON::Document $object-meta .= new;
+    $object-meta<mime-type> =
       ($!mime.get-mimetype(:$extension) // {})<_id> // '';
+
+#    $object-meta<description> = $file-magic<description>;
+#    $object-meta<mime-type> = $file-magic<mime-type>;
+#    $object-meta<encoding> = $file-magic<encoding>;
+#    $object-meta<mime-type-with-encoding> =
+#      $file-magic<mime-type-with-encoding>;
+
+
+    $!meta-data<name> = $file;
     $!meta-data<path> = $path;
     $!meta-data<meta-type> = MT-File.Str;
     $!meta-data<exists> = $!object.IO ~~ :r;
     $!meta-data<content-sha1> = self!sha1-content($!object);
     $!meta-data<hostname> = qx[hostname].chomp;
+    $!meta-data<object-meta> = $object-meta;
 
     info-message("metadata set for $!object");
     debug-message($!meta-data.perl);
