@@ -365,8 +365,7 @@ The database is by default called **Library** and the meta data of each object i
 An extra collection is used to find some control documents. By default called **Metaconfig**. The following documents can be found there;
 * To skip objects a single document is specified with the fields;
   * **config-type**. Type field with value **skip-filter**.
-  * **fileskip**. Array of values to check on filename. These can be perl6 regular expressions. There is a skiplist for directories and one for files
-  * **dirskip**. Skip list for directories.
+  * **skips**. Array of values to check on filename, irectory or urls. These are perl6 regular expressions.
 * To filter tag fields also a single doc is used;
   * **config-type**. Type field with value **tag-filter**.
   * **tags**. Array of values to filter the tags with.
