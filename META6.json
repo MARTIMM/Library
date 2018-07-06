@@ -2,7 +2,7 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.9.4",
+  "version":                              "0.10.0",
   "license":                              "Artistic-2.0",
   "perl":                                 "6",
   "depends": [
@@ -29,7 +29,7 @@
     "Library::MetaData::File":      "lib/Library/MetaData/File.pm6"
   },
   "resources": [
-    "mimetypes", "magic"
+    "mimetypes"
   ],
   "source-url":                     "git://github.com/MARTIMM/Library.git"
 }
