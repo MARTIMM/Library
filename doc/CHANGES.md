@@ -1,5 +1,7 @@
 ## Release notes
 
+* 0.10.0
+  * moved some fields from top level into object-meta
 * 0.9.4
   * mimetype data is now in a resources file
   * some configuration entries are now fixed;
