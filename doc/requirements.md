@@ -260,6 +260,7 @@ This is meant to make relationships between the meta data documents. The questio
 ### All types of meta data
 * **meta-type**. This is the type of the meta data. This is 'File', 'Directory' etc.
 * **servername**. This can be a hostname or a domainname. For files and directories it is a hostname of the computer where the file or directory is found. For websites this the name of the server.
+* **object-meta**. Part which describes the object. Is set by the library.
 * **user-meta**. Optional sub-document of user information specific to the object where it is the sub-document from.
 * **program-meta**. Optional sub-document of program information specific to the object where it is the sub-document from.
 
