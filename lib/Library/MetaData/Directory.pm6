@@ -17,15 +17,18 @@ class MetaData::Directory does Library::MetaData {
   # Set the default information for a directory in the meta structure
   method specific-init-meta ( --> Bool ) {
 
+    my BSON::Document $object-meta .= new;
+    $object-meta<meta-type> = MT-Directory.Str;
+
     my Str $path = $!object.IO.absolute;
     my Str $dir = $!object.IO.basename;
     $path ~~ s/ '/'? $dir $//;
 
     $!meta-data<name> = $dir;
     $!meta-data<path> = $path;
-    $!meta-data<meta-type> = MT-Directory.Str;
     $!meta-data<exists> = $!object.IO ~~ :r;
     $!meta-data<hostname> = qx[hostname].chomp;
+    $!meta-data<object-meta> = $object-meta;
 
     return True;
   }
@@ -44,7 +47,7 @@ class MetaData::Directory does Library::MetaData {
     if self.is-in-db: (
       name => $!meta-data<name>,
       path => $!meta-data<path>,
-      meta-type => MT-Directory,
+      object-meta => (meta-type => MT-Directory,),
       hostname => $!meta-data<hostname>,
     ) {
 

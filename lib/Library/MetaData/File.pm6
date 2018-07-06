@@ -42,12 +42,12 @@ class MetaData::File does Library::MetaData {
 #    $object-meta<mime-type-with-encoding> =
 #      $file-magic<mime-type-with-encoding>;
 
+    $object-meta<meta-type> = MT-File.Str;
+    $object-meta<content-sha1> = self!sha1-content($!object);
 
     $!meta-data<name> = $file;
     $!meta-data<path> = $path;
-    $!meta-data<meta-type> = MT-File.Str;
     $!meta-data<exists> = $!object.IO ~~ :r;
-    $!meta-data<content-sha1> = self!sha1-content($!object);
     $!meta-data<hostname> = qx[hostname].chomp;
     $!meta-data<object-meta> = $object-meta;
 
@@ -69,8 +69,8 @@ class MetaData::File does Library::MetaData {
     if self.is-in-db: (
       name => $!meta-data<name>,
       path => $!meta-data<path>,
-      meta-type => ~MT-File,
-      content-sha1 => $!meta-data<content-sha1>,
+      object-meta => (meta-type => ~MT-File,),
+      object-meta => (content-sha1 => $!meta-data<object-meta><content-sha1>,),
       hostname => $!meta-data<hostname>,
     ) {
 
@@ -86,8 +86,10 @@ class MetaData::File does Library::MetaData {
       # search again using name and content
       if self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
-          meta-type => ~MT-File,
-          content-sha1 => $!meta-data<content-sha1>,
+          object-meta => (meta-type => ~MT-File,),
+          object-meta => (
+            content-sha1 => $!meta-data<object-meta><content-sha1>,
+          ),
           hostname => $!meta-data<hostname>,
         )
       ) {
@@ -129,9 +131,11 @@ class MetaData::File does Library::MetaData {
 
       # else search with path and content
       elsif self.is-in-db( $query .= new: (
-          meta-type => ~MT-File,
+          object-meta => (meta-type => ~MT-File,),
           path => $!meta-data<path>,
-          content-sha1 => $!meta-data<content-sha1>,
+          object-meta => (
+            content-sha1 => $!meta-data<object-data><content-sha1>,
+          ),
           hostname => $!meta-data<hostname>,
         )
       ) {
@@ -163,8 +167,10 @@ class MetaData::File does Library::MetaData {
 
       # else search for its content only
       elsif self.is-in-db( $query .= new: (
-          meta-type => ~MT-File,
-          content-sha1 => $!meta-data<content-sha1>,
+          object-meta => (meta-type => ~MT-File,),
+          object-meta => (
+            content-sha1 => $!meta-data<object-data><content-sha1>,
+          ),
           hostname => $!meta-data<hostname>,
       )) {
 
@@ -192,7 +198,7 @@ class MetaData::File does Library::MetaData {
       # else search for name and path
       elsif self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
-          meta-type => ~MT-File,
+          object-meta => (meta-type => ~MT-File,),
           path => $!meta-data<path>,
           hostname => $!meta-data<hostname>,
       )) {
