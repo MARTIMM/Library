@@ -98,7 +98,7 @@ role MetaData {
     # get user meta data
     my BSON::Document $udata = self.get-metameta(:$subdoc);
     my Array $prev-tags = $udata<tags> // [];
-note $udata.perl;
+#note $udata.perl;
 
     # filter out type tags
 #    my Str $e = $!object.IO.extension;
@@ -115,8 +115,8 @@ note $udata.perl;
     );
 
     # save new set of tags
-note "T: ", $tags;
-note "S: $subdoc";
+#note "T: ", $tags.join(',');
+#note "S: $subdoc";
     $udata<tags> = $tags;
     self.set-metameta( $udata, :$subdoc);
   }
@@ -149,21 +149,21 @@ note "S: $subdoc";
 
     # setup request. at the moment only a few types of path/url/uri
     my BSON::Document $req .= new;
-    if ?$!meta-data<path> {
+    if ?$!meta-data<object-meta><path> {
       $req<q> = (
         name => $!meta-data<name>,
         path => $!meta-data<path>,
       )
     }
 
-    elsif ?$!meta-data<uri> {
+    elsif ?$!meta-data<object-meta><uri> {
       $req<q> = (
         name => $!meta-data<name>,
         uri => $!meta-data<uri>,
       )
     }
 
-    elsif ?$!meta-data<url> {
+    elsif ?$!meta-data<object-meta><url> {
       $req<q> = (
         name => $!meta-data<name>,
         url => $!meta-data<url>,
@@ -177,28 +177,28 @@ note "S: $subdoc";
     my BSON::Document $doc = $!dbo.update: [ $req ];
 
     if $doc<ok> {
-      my $selected = $doc<n>;
-      my $modified = $doc<nModified>;
-      note "metameta $subdoc updated\n  selected = $selected\n",
-           "  modified = $modified";
+      if $doc<nModified> {
+        info-message("subdocument $subdoc updated");
+      }
+
+      else {
+        info-message("subdocument $subdoc unchanged");
+      }
     }
 
     else {
       if $doc<writeErrors> {
         for $doc<writeErrors> -> $we {
-          warn-message("metameta $subdoc update: " ~ $we<errmsg>);
-          note "metameta data in $subdoc error" ~ $we<errmsg>;
+          warn-message("update error for subdocument $subdoc: " ~ $we<errmsg>);
         }
       }
 
       elsif $doc<errmsg> {
-        warn-message("metameta $subdoc update: ", $doc<errmsg>);
-        note "metameta $subdoc update: $doc<errmsg>";
+        warn-message("update error for subdocument $subdoc: " ~ $doc<errmsg>);
       }
 
       else {
-        warn-message("metameta $subdoc update: unknown error");
-        note "metameta $subdoc update: unknown error";
+        warn-message("update error for subdocument $subdoc: unknown error");
       }
     }
 
