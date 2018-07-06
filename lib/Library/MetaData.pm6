@@ -245,12 +245,12 @@ role MetaData {
   method !log-update-message ( BSON::Document:D $doc ) {
 
     if $doc<ok> == 1 {
-      note "meta data of $!meta-data<name> updated";
+      info-message("meta data of $!meta-data<name> updated");
     }
 
     else {
-      note "updating meta data of $!meta-data<name> failed,\n",
-           "error: $doc<errmsg>";
+      warn-message("updating meta data of $!meta-data<name> failed,\n" ~
+           "error: $doc<errmsg>");
     }
   }
 }
