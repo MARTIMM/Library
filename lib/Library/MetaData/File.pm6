@@ -44,11 +44,11 @@ class MetaData::File does Library::MetaData {
 
     $object-meta<meta-type> = MT-File.Str;
     $object-meta<content-sha1> = self!sha1-content($!object);
+    $object-meta<path> = $path;
+    $object-meta<exists> = $!object.IO ~~ :r;
+    $object-meta<hostname> = qx[hostname].chomp;
 
     $!meta-data<name> = $file;
-    $!meta-data<path> = $path;
-    $!meta-data<exists> = $!object.IO ~~ :r;
-    $!meta-data<hostname> = qx[hostname].chomp;
     $!meta-data<object-meta> = $object-meta;
 
     info-message("metadata set for $!object");
@@ -68,10 +68,10 @@ class MetaData::File does Library::MetaData {
     # search file using all its meta data
     if self.is-in-db: (
       name => $!meta-data<name>,
-      path => $!meta-data<path>,
+      object-meta => (path => $!meta-data<path>,),
       object-meta => (meta-type => ~MT-File,),
       object-meta => (content-sha1 => $!meta-data<object-meta><content-sha1>,),
-      hostname => $!meta-data<hostname>,
+      object-meta => (hostname => $!meta-data<hostname>,),
     ) {
 
       # if file is found in db, we do not have to do anything
@@ -81,7 +81,9 @@ class MetaData::File does Library::MetaData {
     # So if not found ...
     else {
 
-      info-message("file $!meta-data<name> not found by name, path and content");
+      info-message(
+        "file $!meta-data<name> not found by name, path and content"
+      );
 
       # search again using name and content
       if self.is-in-db( $query .= new: (
@@ -90,7 +92,7 @@ class MetaData::File does Library::MetaData {
           object-meta => (
             content-sha1 => $!meta-data<object-meta><content-sha1>,
           ),
-          hostname => $!meta-data<hostname>,
+          object-meta => (hostname => $!meta-data<hostname>,),
         )
       ) {
 
@@ -102,7 +104,7 @@ class MetaData::File does Library::MetaData {
           # check first if file in this document is also an existing file on disk
           # if it exists, the file is moved (same name and contant).
           # modify the record found in the query to set the new .
-          if "$d<path>/$d<name>".IO ~~ :e {
+          if "$d<object-meta><path>/$d<name>".IO ~~ :e {
 
             info-message(
               "$!meta-data<name> found on disk elsewhere," ~
@@ -132,11 +134,11 @@ class MetaData::File does Library::MetaData {
       # else search with path and content
       elsif self.is-in-db( $query .= new: (
           object-meta => (meta-type => ~MT-File,),
-          path => $!meta-data<path>,
+          object-meta => (path => $!meta-data<path>,),
           object-meta => (
             content-sha1 => $!meta-data<object-data><content-sha1>,
           ),
-          hostname => $!meta-data<hostname>,
+          object-meta => (hostname => $!meta-data<hostname>,),
         )
       ) {
 
@@ -145,7 +147,7 @@ class MetaData::File does Library::MetaData {
         # Check first if file from this search has an existing file
         for self.find(:criteria($query)) -> $d {
 #note "Found ", $d.perl;
-          if "$d<path>/$d<name>".IO ~~ :e {
+          if "$d<object-meta><path>/$d<name>".IO ~~ :e {
 #!!!!!!
             info-message(
               "$!meta-data<name> found on disk elsewhere," ~
@@ -171,14 +173,14 @@ class MetaData::File does Library::MetaData {
           object-meta => (
             content-sha1 => $!meta-data<object-data><content-sha1>,
           ),
-          hostname => $!meta-data<hostname>,
+          object-meta => (hostname => $!meta-data<hostname>,),
       )) {
 
         info-message("File $!meta-data<name> found by its content");
 
         # Check first if file from this search has an existing file
         for self.find(:criteria($query)) -> $d {
-          if "$d<path>/$d<name>".IO ~~ :e {
+          if "$d<object-meta><path>/$d<name>".IO ~~ :e {
 
             info-message("$!meta-data<name> found on disk elsewhere, must have been renamed and moved, updated");
 
@@ -199,15 +201,15 @@ class MetaData::File does Library::MetaData {
       elsif self.is-in-db( $query .= new: (
           name => $!meta-data<name>,
           object-meta => (meta-type => ~MT-File,),
-          path => $!meta-data<path>,
-          hostname => $!meta-data<hostname>,
+          object-meta => (path => $!meta-data<path>,),
+          object-meta => (hostname => $!meta-data<hostname>,),
       )) {
 
         info-message("File $!meta-data<name> found by name and path");
 
         # Check first if file from this search has an existing file
         for self.find(:criteria($query)) -> $d {
-          if "$d<path>/$d<name>".IO ~~ :e {
+          if "$d<object-meta><path>/$d<name>".IO ~~ :e {
 
             info-message("$!meta-data<name> found on disk elsewhere, must have been modified or deleted, updated");
 

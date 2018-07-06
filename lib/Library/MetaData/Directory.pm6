@@ -17,17 +17,17 @@ class MetaData::Directory does Library::MetaData {
   # Set the default information for a directory in the meta structure
   method specific-init-meta ( --> Bool ) {
 
-    my BSON::Document $object-meta .= new;
-    $object-meta<meta-type> = MT-Directory.Str;
-
     my Str $path = $!object.IO.absolute;
     my Str $dir = $!object.IO.basename;
     $path ~~ s/ '/'? $dir $//;
 
+    my BSON::Document $object-meta .= new;
+    $object-meta<meta-type> = MT-Directory.Str;
+    $object-meta<path> = $path;
+    $object-meta<exists> = $!object.IO ~~ :r;
+    $object-meta<hostname> = qx[hostname].chomp;
+
     $!meta-data<name> = $dir;
-    $!meta-data<path> = $path;
-    $!meta-data<exists> = $!object.IO ~~ :r;
-    $!meta-data<hostname> = qx[hostname].chomp;
     $!meta-data<object-meta> = $object-meta;
 
     return True;
@@ -46,12 +46,14 @@ class MetaData::Directory does Library::MetaData {
     # If file is found in db, we do not have to do anything
     if self.is-in-db: (
       name => $!meta-data<name>,
-      path => $!meta-data<path>,
+      object-meta => (path => $!meta-data<path>,),
       object-meta => (meta-type => MT-Directory,),
-      hostname => $!meta-data<hostname>,
+      object-meta => (hostname => $!meta-data<hostname>,),
     ) {
 
-      info-message("directory $!meta-data<name> found by name and path, no update");
+      info-message(
+        "directory $!meta-data<name> found by name and path, no update"
+      );
     }
 
     # So if not found ...
