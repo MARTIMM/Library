@@ -26,9 +26,9 @@ use Library::Image;
 
 use Library;
 use Library::MetaConfig::TagFilterList;
-use Library::Config::SkipList;
-use Library::Metadata::Object::File;
-use Library::Metadata::Object::Directory;
+use Library::MetaConfig::SkipDataList;
+use Library::MetaData::File;
+use Library::MetaData::Directory;
 
 use MongoDB;
 use BSON::Document;
@@ -37,18 +37,18 @@ use IO::Notification::Recursive;
 #-------------------------------------------------------------------------------
 initialize-library();
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 class Gui { ... }
 my Gui $gui .= new;
 
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 class Gui {
 
   has GTK::Simple::App $!app;
   has GTK::Simple::Window $!collect-dialog;
   has GTK::Simple::Window $!metadata-dialog;
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   submethod BUILD ( ) {
 
     $!app .= new( :title("Meta Data Library"), :height(50), :width(180));
@@ -69,7 +69,7 @@ class Gui {
     $!app.run;
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method create-menu ( --> GTK::Simple::VBox ) {
 
     # 'File' menu
@@ -115,7 +115,7 @@ class Gui {
     $menu-bar.pack
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method create-toolbar ( --> GTK::Simple::VBox ) {
 
     # See for icon https://developer.gnome.org/gtk3/stable/gtk3-Stock-Items.html
@@ -150,18 +150,22 @@ class Gui {
     $toolbar.pack
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method create-collect-dialog ( ) {
 
     #==[ file chooser button set to select a folder ]==
     my GTK::Simple::FileChooserButton $file-cb .= new:
       :title("Select file or directory"),
-      :action(GTK_FILE_CHOOSER_ACTION_OPEN);
-#      :action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+#      :action(GTK_FILE_CHOOSER_ACTION_OPEN);
+      :action(GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
 
     #==[ checkbuttons for options ]==
-    my GTK::Simple::CheckButton $recursive-cbttn .= new: :label("Recurse down tree");
-    my GTK::Simple::CheckButton $tag-extract-cbttn .= new: :label("Tags from names");
+    my GTK::Simple::CheckButton $recursive-cbttn .= new: :label(
+      "Recurse down tree"
+    );
+#    my GTK::Simple::CheckButton $tag-extract-cbttn .= new: :label(
+#      "Tags from names"
+#    );
 
     my GTK::Simple::TextView $tags-insert .= new;
     my GTK::Simple::TextView $tags-remove .= new;
@@ -222,7 +226,7 @@ class Gui {
     gtk_window_set_position( $!collect-dialog.WIDGET, GTK_WIN_POS_MOUSE);
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method create-edit-metadata-dialog ( ) {
 
 #    my Library::Image $image1 .= new(
@@ -254,21 +258,21 @@ class Gui {
     gtk_window_set_position( $!metadata-dialog.WIDGET, GTK_WIN_POS_MOUSE);
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method select-file ( --> Str ) {
 
     my GTK::Simple::FileChooserButton $fcb .= new(:title("Select file or directory"));
     $fcb.file-name;
   }
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   method exit-app( :$widget ) {
     note $widget.perl;
     $!app.exit;
   }
 
 
-  #----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
   # collect and store metadata about files and directories.
   method collect-metadata (
     Str:D $object,                # file or directory name
@@ -278,8 +282,14 @@ class Gui {
     Bool :$extract-tags = False,  # get tags from absolute path and filename
   ) {
 
-    my Library::Metadata::Object::File $file-meta-object;
-    my Library::Metadata::Object::Directory $dir-meta-object;
+    shell "library-tag.pl6 {$tags[*]}" if $tags.elems;
+    shell "library-tag.pl6 {$drop-tags[*]} :drop" if $drop-tags.elems;
+
+    my Str $r = $recurse ?? '--r' !! '';
+    shell "library-file.pl6 $r $object" if ?$object;
+#`{{
+    my Library::MetaData::File $file-meta-object;
+    my Library::MetaData::Directory $dir-meta-object;
 
     # Copy to rw-able array.
     my @files-to-process = $object,;
@@ -336,5 +346,6 @@ class Gui {
         warn-message("File $file is ignored, it is a special type of file");
       }
     }
+}}
   }
 }
