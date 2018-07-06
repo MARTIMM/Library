@@ -37,8 +37,8 @@ sub initialize-library ( Str :$user-key ) is export {
 
         # one of three possible ways to describe a servername
         server              = "localhost.localdomain"
-        #server                 = 127.0.0.1
-        #server                 = ::1
+        #server                 = "127.0.0.1"
+        #server                 = "::1"
 
         port                = 27017
 
