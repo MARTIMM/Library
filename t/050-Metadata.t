@@ -23,8 +23,8 @@ my Str $filename = $dir ~ '/client-configuration.toml';
 spurt( $filename, Q:qq:to/EOCFG/);
 
     [ connection ]
-      server      = "localhost"
-      port        = $p1
+      server          = "localhost"
+      port            = $p1
 
     [ library ]
       root-db         = "test"
@@ -34,8 +34,8 @@ spurt( $filename, Q:qq:to/EOCFG/);
       loglevelscreen  = "Info"
 
     [ library.collections ]
-      meta-data   = "meta050Data"
-      meta-config = "meta050Cfg"
+      meta-data       = "meta050Data"
+      meta-config     = "meta050Cfg"
 
     #[ library.collections.root ]
 

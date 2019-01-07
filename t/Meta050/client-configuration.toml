@@ -1,0 +1,18 @@
+
+[ connection ]
+  server          = "localhost"
+  port            = 65010
+
+[ library ]
+  root-db         = "test"
+  user-db         = "meta050"
+  logfile         = "meta050.log"
+  loglevelfile    = "Info"
+  loglevelscreen  = "Info"
+
+[ library.collections ]
+  meta-data       = "meta050Data"
+  meta-config     = "meta050Cfg"
+
+#[ library.collections.root ]
+

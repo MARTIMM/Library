@@ -2,16 +2,16 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.10.1",
-  "license":                              "Artistic-2.0",
+  "version":                              "0.10.1.1",
+  "tags": [ "metadata", "library", "mongodb", "database", "NoSQL"],
   "perl":                                 "6",
+  "license":                              "Artistic-2.0",
   "depends": [
     "IO::Notification::Recursive", "Config::TOML", "BSON", "MongoDB",
     "GTK::Simple"
   ],
   "test-depends": [ "Test::META"],
   "build-depends": [ ],
-  "tags": [ "metadata", "library", "mongodb", "database"],
   "provides": {
     "Library":                      "lib/Library.pm6",
     "Library::Configuration":       "lib/Library/Configuration.pm6",
@@ -30,7 +30,7 @@
     "Library::MetaData::File":      "lib/Library/MetaData/File.pm6"
   },
   "resources": [
-    "mimetypes"
+    "mimetypes", "library.glade"
   ],
   "source-url":                     "git://github.com/MARTIMM/Library.git"
 }
