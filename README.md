@@ -20,7 +20,7 @@ Latest version of perl 6 on rakudo en moarvm.
 
 ## Installation
 
-`zef install github:MARTIMM/Library.git`
+`zef install Library`
 
 ## Author
 

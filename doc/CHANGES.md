@@ -1,5 +1,7 @@
 ## Release notes
 
+* 2019-01-07 0.10.1
+  * Started to create a new graphical user interface using GTK::Glade
 * 0.10.0
   * moved some fields from top level into object-meta
 * 0.9.4
