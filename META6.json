@@ -8,7 +8,7 @@
   "license":                              "Artistic-2.0",
   "depends": [
     "IO::Notification::Recursive", "Config::TOML", "BSON", "MongoDB",
-    "GTK::Simple"
+    "GTK::Glade"
   ],
   "test-depends": [ "Test::META"],
   "build-depends": [ ],
