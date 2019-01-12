@@ -10,3 +10,5 @@ spellTmp*
 Old/*
 ~*
 t/Travis-ci/*.tgz
+modified-ui.glade
+library.glade~
