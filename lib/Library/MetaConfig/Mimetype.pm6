@@ -12,6 +12,7 @@ use Library::MetaConfig;
 use Library::Configuration;
 
 use MongoDB;
+use MongoDB::Cursor;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
@@ -67,7 +68,8 @@ class MetaConfig::Mimetype does Library::MetaConfig {
   # get mimetype document
   multi method get-mimetype ( Str:D :$mimetype! --> BSON::Document ) {
 
-    $!dbcfg1.find( :criteria( (:_id($mimetype),)) ).fetch;
+    my MongoDB::Cursor $c = $!dbcfg1.find: (:_id($mimetype),), :limit(1);
+    $c.fetch;
   }
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -78,10 +80,12 @@ class MetaConfig::Mimetype does Library::MetaConfig {
     --> BSON::Document
   ) {
 
-    my BSON::Document $m =
-      $!dbcfg2.find( :criteria( (:_id($extension),)) ).fetch;
+    my MongoDB::Cursor $c = $!dbcfg2.find: (:_id($extension),), :limit(1);
+    my BSON::Document $m = $c.fetch;
 
-    $m = self.get-mimetype(:mimetype($m<mimetype_id>)) if ?$m and $get-mime-doc;
+    if ?$m and $get-mime-doc {
+      $m = self.get-mimetype(:mimetype($m<mimetype_id>));
+    }
 
     $m
   }

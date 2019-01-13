@@ -13,6 +13,7 @@ use Library;
 use Library::MetaConfig;
 
 use MongoDB;
+use MongoDB::Cursor;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
@@ -102,10 +103,8 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
   method get-skip-filter ( --> Array ) {
 
     # find the config doc
-    my $c = $!dbcfg.find(
-      :criteria( (:config-type<skip-filter>, )),
-      :number-to-return(1)
-    );
+    my MongoDB::Cursor $c = $!dbcfg.find:
+       (:config-type<skip-filter>, ), :limit(1);
 
     my BSON::Document $doc;
     $doc = $c.fetch;

@@ -16,7 +16,8 @@ role MetaData {
 
   has BSON::Document $!meta-data;
   has Library::Storage $!dbo handles <
-        insert update delete count find drop-collection drop-database
+        insert update delete count find
+        drop-collection drop-database
       >;
 
   # ignore the object when an object is filtered out
@@ -124,16 +125,24 @@ role MetaData {
   #-----------------------------------------------------------------------------
   multi method is-in-db ( List:D $query --> Bool ) {
 
+#note "is-in-db 1a, ", BSON::Document.new($query).perl;
+
     # use n to see the number of found records. 0 coerces to False,
     # True otherwise
-    ? ( $!dbo.count: ( $query ) )<n>
+    ##? ( $!dbo.count: ( $query ) )<n>
+    my $doc = $!dbo.count($query);
+#note "is-in-db 1b, ", $doc<ok>, ', ', $doc<n>;
+    ?($doc<ok> ?? $doc<n> !! 0)
   }
 
   multi method is-in-db ( BSON::Document:D $query --> Bool ) {
 
+#note "is-in-db 2a, ", $query.perl;
     # use n to see the number of found records. 0 coerces to False,
     # True otherwise
-    ? ( $!dbo.count: ( $query ) )<n>
+    my $doc = $!dbo.count($query);
+#note "is-in-db 2b, ", $doc<ok>, ', ', $doc<n>;
+    ?($doc<ok> ?? $doc<n> !! 0)
   }
 
   # ==[ Private stuff ]=========================================================

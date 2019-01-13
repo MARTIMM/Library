@@ -15,6 +15,7 @@ use Library;
 use Library::MetaConfig;
 
 use MongoDB;
+use MongoDB::Cursor;
 use BSON::Document;
 
 #-------------------------------------------------------------------------------
@@ -114,10 +115,8 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
   method get-tag-filter ( --> Array ) {
 
     # find the config doc
-    my $c = $!dbcfg.find(
-      :criteria( (:config-type<tag-filter>, )),
-      :number-to-return(1)
-    );
+    my MongoDB::Cursor $c = $!dbcfg.find:
+      (:config-type<tag-filter>, ), :limit(1);
 
     my BSON::Document $doc = $c.fetch;
 
