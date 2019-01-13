@@ -5,7 +5,11 @@
 
 ## Description
 
-The modules help maintaining metadata about everything imaginable. But as a first goal metadata about documents on disk. The software makes use of a mongodb server where everything can be stored.
+The modules help maintaining metadata about everything imaginable. But as a first goal metadata about documents on disk. The software makes use of a mongodb server where the meta data is stored.
+
+## Synopsis
+
+## List of programs
 
 ## Documentation
 
@@ -24,8 +28,7 @@ Latest version of perl 6 on rakudo en moarvm.
 
 ## Author
 
-Marcel Timmerman
-Github account MARTIMM
+Marcel Timmerman with Github account MARTIMM
 
 
 
