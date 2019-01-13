@@ -1,7 +1,7 @@
 #!/usr/bin/env perl6
 
 use v6;
-
+use lib "../mongo-perl6-driver/lib";
 use Library;
 use Library::MetaData::File;
 use Library::MetaData::Directory;
@@ -39,8 +39,8 @@ multi sub MAIN ( *@files-to-process, Bool :$r = False ) {
 
   # then add tags to the documents
   for $fp -> $meta-object {
-    note $meta-object.perl;
     $meta-object.set-metameta-tags;
+    note $meta-object.perl;
   }
 }
 

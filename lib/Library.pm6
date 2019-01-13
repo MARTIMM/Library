@@ -86,7 +86,7 @@ sub initialize-library ( Str :$user-key ) is export {
     exit(1);
   }
 
-#note "UK: {$user-key // 'no user key'}";
+note "UK: {$user-key // 'no user key'}";
 
   # clean configuration and set to new
   $lib-cfg = Nil if $lib-cfg.defined;
@@ -100,7 +100,8 @@ sub initialize-library ( Str :$user-key ) is export {
   my MongoDB::MdbLoglevels $log-levelfile;
   my MongoDB::MdbLoglevels $log-levelscreen;
   ( $log-file, $log-levelfile, $log-levelscreen) = $lib-cfg.get-loginfo;
-#note "Loglevel type: ", $log-levelscreen;
+note "Loglevel types screen, file: ", $log-levelscreen, ', ', $log-levelfile;
+note "Log file: ", $log-file;
 
   drop-send-to('screen');
   drop-send-to('mongodb');

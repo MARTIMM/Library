@@ -17,7 +17,7 @@ class Configuration {
   submethod BUILD (
     Str:D :library-config($file), Bool :$generate = False, Str :$!user-key
   ) {
-
+note "Cfg file: $file";
     # when generate is true, we start with an empty hash if no file is found
     if $generate {
       $!config = $file.IO ~~ :r ?? from-toml(:$file) !! {};
