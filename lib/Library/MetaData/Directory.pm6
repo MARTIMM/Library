@@ -18,7 +18,9 @@ class MetaData::Directory does Library::MetaData {
   method specific-init-meta ( --> Bool ) {
 
     my Str $path = $!object.IO.absolute;
-    my Str $dir = $!object.IO.basename;
+    my Str $dir = $path.IO.basename;
+
+    # Drop top directory from path
     $path ~~ s/ '/'? $dir $//;
 
     my BSON::Document $object-meta .= new;
@@ -43,13 +45,15 @@ class MetaData::Directory does Library::MetaData {
     my BSON::Document $doc .= new: (:ok(1));
     my BSON::Document $query;
 
-    # If file is found in db, we do not have to do anything
+    # If file is found in db, we do not have to do anything.
+    # keep in same order as stored!
+    my BSON::Document $object-meta = $!meta-data<object-meta>;
     if self.is-in-db: (
       name => $!meta-data<name>,
-      object-meta => (path => $!meta-data<path>,),
-      object-meta => (meta-type => MT-Directory,),
-      object-meta => (hostname => $!meta-data<hostname>,),
-    ) {
+      "object-meta.meta-type" => MT-Directory,
+      "object-meta.path" => $object-meta<path>,
+      "object-meta.hostname" => $object-meta<hostname>,
+      ) {
 
       info-message(
         "directory $!meta-data<name> found by name and path, no update"
