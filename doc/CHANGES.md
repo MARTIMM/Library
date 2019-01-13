@@ -1,5 +1,7 @@
 ## Release notes
 
+* 2019-01-13 0.10.2
+  * Bugfixes
 * 2019-01-07 0.10.1
   * Started to create a new graphical user interface using GTK::Glade
 * 0.10.0
