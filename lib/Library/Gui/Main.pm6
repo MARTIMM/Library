@@ -1,40 +1,100 @@
 use v6;
-#use lib "../gtk-glade/lib";
+
 use GTK::Glade;
+use GTK::Glade::NativeGtk :ALL;
+use GTK::Glade::Native::Gtk;
+use GTK::Glade::Native::GtkWidget;
+#use GTK::Glade::Native::GtkWindow;
+use GTK::Glade::Native::Toplevels;
+
+#use GTK::Glade::Native::Declarations;
+
+use Library::MetaConfig::TagFilterList;
+use Library::MetaConfig::SkipDataList;
+#-------------------------------------------------------------------------------
+unit class Library::Gui::Main:auth<github:MARTIMM> is GTK::Glade::Engine;
+
+has Library::MetaConfig::TagFilterList $!tag-filter-list;
+has Library::MetaConfig::SkipDataList $!skip-data-list;
+has Str $!id-list = 'library-id-0000000000';
 
 #-------------------------------------------------------------------------------
-class Library::Gui::Main:auth<github:MARTIMM> is GTK::Glade::Engine {
+submethod BUILD ( ) {
+  $!tag-filter-list .= new;
+  $!skip-data-list .= new;
+}
 
-  #-----------------------------------------------------------------------------
-  method exit-program ( Hash $o, :$widget, :$data, :$object ) {
+#-------------------------------------------------------------------------------
+method refresh-tagfilter-list ( :$widget, :$data, :$object ) {
 
-    gtk_main_quit();
+  my Array $list = $!tag-filter-list.get-tag-filter;
+  note "\n  [ '", $list.join("', '"), "']\n" if ?$list;
+
+  #TODO clear list
+
+  my GtkWidget $list-box = self.glade-get-widget('tagFilterListBox');
+
+
+  for @$list -> $tag {
+note "Tag: $tag";
+
+    my GtkWidget $textentry = gtk_entry_new();
+    gtk_entry_set_text( $textentry, $tag);
+    gtk_widget_set_visible( $textentry, True);
+
+    my GtkWidget $check = gtk_check_button_new_with_label('');
+    gtk_widget_set_visible( $check, True);
+
+    my GtkWidget $grid = gtk_grid_new();
+    gtk_widget_set_visible( $grid, True);
+    gtk_grid_attach( $grid, $textentry, 0, 0, 1, 1);
+    gtk_grid_attach( $grid, $check, 1, 0, 1, 1);
+note "lb: $list-box";
+    gtk_container_add( $list-box, $grid);
   }
+}
 
-  #-----------------------------------------------------------------------------
-  method show-about-dialog ( Hash $o, :$widget, :$data, :$object ) {
+#-------------------------------------------------------------------------------
+method refresh-skipdata-list ( :$widget, :$data, :$object ) {
 
-    my GtkWidget $dialog = $o<aboutDialog>;
-    note "dialog object: ", $dialog;
+  my Array $list = $!skip-data-list.get-skip-filter;
+  note "\n  [ '", $list.join("', '"), "']\n" if ?$list;
 
-    # Next calls are set on glade design
-    # my GtkWidget $parent = $o<mainWindow>;
-    # gtk_window_set_transient_for( $dialog, $parent);
-    # gtk_window_set_modal( $dialog, True);
+  #TODO clear list
 
-    given ( gtk_dialog_run($dialog) ) {
-      default {
-        .note;
-      }
-    }
+  my GtkWidget $list-box = self.glade-get-widget('skipDataListBox');
+
+  for @$list -> $skip {
+note "Tag: $skip";
+
+    my GtkWidget $textentry = gtk_entry_new();
+    gtk_entry_set_text( $textentry, $skip);
+    gtk_widget_set_visible( $textentry, True);
+
+    my GtkWidget $check = gtk_check_button_new_with_label('');
+    gtk_widget_set_visible( $check, True);
+
+    my GtkWidget $grid = gtk_grid_new();
+    gtk_widget_set_visible( $grid, True);
+    gtk_grid_attach( $grid, $textentry, 0, 0, 1, 1);
+    gtk_grid_attach( $grid, $check, 1, 0, 1, 1);
+note "lb: $list-box";
+    gtk_container_add( $list-box, $grid);
   }
+}
 
-  #-----------------------------------------------------------------------------
-  method close-about-dialog ( Hash $o, :$widget, :$data, :$object ) {
+#-------------------------------------------------------------------------------
+method exit-program ( :$widget, :$data, :$object ) {
 
-    my GtkWidget $dialog = $o<aboutDialog>;
-note "dialog object: ", $dialog;
-    gtk_dialog_response( $dialog, 1);
-    gtk_widget_hide($dialog);
-  }
+  gtk_main_quit();
+}
+
+#-------------------------------------------------------------------------------
+method show-about-dialog ( :$widget, :$data, :$object ) {
+
+  my GtkWidget $dialog = self.glade-get-widget('aboutDialog');
+  gtk_dialog_run($dialog);
+  #my $r = gtk_dialog_run($dialog);
+  #note "Pressed: ", GtkResponseType($r);
+  gtk_widget_hide($dialog);
 }

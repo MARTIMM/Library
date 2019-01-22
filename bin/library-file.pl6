@@ -1,7 +1,7 @@
 #!/usr/bin/env perl6
 
 use v6;
-use lib "../mongo-perl6-driver/lib";
+#use lib "../mongo-perl6-driver/lib";
 use Library;
 use Library::MetaData::File;
 use Library::MetaData::Directory;

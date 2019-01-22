@@ -91,7 +91,7 @@ class Storage {
 
   #-----------------------------------------------------------------------------
   method find (
-    $query, Int :$limit = 0, Bool :$debug = False --> BSON::Document
+    $query, Int :$limit = 0, Bool :$debug = False --> MongoDB::Cursor
   ) {
 
     my BSON::Document $req .= new;
@@ -100,8 +100,7 @@ class Storage {
     $req<limit> = $limit;
 
     my MongoDB::Cursor $c = $!database.run-command( $req, :cursor);
-    note "Find: ", $c.perl;# if $debug;
-    #$doc
+#note "Find: ", $c.perl;# if $debug;
 
     $c
   }
