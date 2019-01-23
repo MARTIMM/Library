@@ -11,6 +11,7 @@ use GTK::Glade::Native::Gtk::Checkbutton;
 use GTK::Glade::Native::Gtk::Grid;
 use GTK::Glade::Native::Gtk::Entry;
 use GTK::Glade::Native::Gtk::Container;
+use GTK::Glade::Native::Gtk::Listbox;
 
 use Library::MetaConfig::TagFilterList;
 use Library::MetaConfig::SkipDataList;
@@ -31,15 +32,18 @@ submethod BUILD ( ) {
 method refresh-tagfilter-list ( :$widget, :$data, :$object ) {
 
   my Array $list = $!tag-filter-list.get-tag-filter;
-  note "\n  [ '", $list.join("', '"), "']\n" if ?$list;
-
-  #TODO clear list
-
   my GtkWidget $list-box = self.glade-get-widget('tagFilterListBox');
 
-  for @$list -> $tag {
-note "Tag: $tag";
+  # Empty list first
+  loop {
+    # Keep the index 0, entries will shift up after removal
+    my GtkWidget $entry = gtk_list_box_get_row_at_index( $list-box, 0);
+    last unless ?$entry;
+    gtk_widget_destroy($entry);
+  }
 
+  # Fill it again
+  for @$list -> $tag {
     my GtkWidget $textentry = gtk_entry_new();
     gtk_entry_set_text( $textentry, $tag);
     gtk_widget_set_visible( $textentry, True);
@@ -51,7 +55,7 @@ note "Tag: $tag";
     gtk_widget_set_visible( $grid, True);
     gtk_grid_attach( $grid, $textentry, 0, 0, 1, 1);
     gtk_grid_attach( $grid, $check, 1, 0, 1, 1);
-note "lb: $list-box";
+
     gtk_container_add( $list-box, $grid);
   }
 }
@@ -60,15 +64,18 @@ note "lb: $list-box";
 method refresh-skipdata-list ( :$widget, :$data, :$object ) {
 
   my Array $list = $!skip-data-list.get-skip-filter;
-  note "\n  [ '", $list.join("', '"), "']\n" if ?$list;
-
-  #TODO clear list
-
   my GtkWidget $list-box = self.glade-get-widget('skipDataListBox');
 
-  for @$list -> $skip {
-note "Tag: $skip";
+  # Empty list first
+  loop {
+    # Keep the index 0, entries will shift up after removal
+    my GtkWidget $entry = gtk_list_box_get_row_at_index( $list-box, 0);
+    last unless ?$entry;
+    gtk_widget_destroy($entry);
+  }
 
+  # Fill it again
+  for @$list -> $skip {
     my GtkWidget $textentry = gtk_entry_new();
     gtk_entry_set_text( $textentry, $skip);
     gtk_widget_set_visible( $textentry, True);
@@ -80,7 +87,6 @@ note "Tag: $skip";
     gtk_widget_set_visible( $grid, True);
     gtk_grid_attach( $grid, $textentry, 0, 0, 1, 1);
     gtk_grid_attach( $grid, $check, 1, 0, 1, 1);
-note "lb: $list-box";
     gtk_container_add( $list-box, $grid);
   }
 }
