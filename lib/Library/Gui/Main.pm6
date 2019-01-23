@@ -1,13 +1,16 @@
 use v6;
 
 use GTK::Glade;
-use GTK::Glade::NativeGtk :ALL;
-use GTK::Glade::Native::Gtk;
-use GTK::Glade::Native::GtkWidget;
-#use GTK::Glade::Native::GtkWindow;
-use GTK::Glade::Native::Toplevels;
-
-#use GTK::Glade::Native::Declarations;
+#use GTK::Glade::NativeGtk :ALL;
+#use GTK::Glade::Native::Gtk;
+use GTK::Glade::Native::Gtk::Main;
+use GTK::Glade::Native::Gtk::Enums;
+use GTK::Glade::Native::Gtk::Widget;
+use GTK::Glade::Native::Gtk::Dialog;
+use GTK::Glade::Native::Gtk::Checkbutton;
+use GTK::Glade::Native::Gtk::Grid;
+use GTK::Glade::Native::Gtk::Entry;
+use GTK::Glade::Native::Gtk::Container;
 
 use Library::MetaConfig::TagFilterList;
 use Library::MetaConfig::SkipDataList;
@@ -16,7 +19,7 @@ unit class Library::Gui::Main:auth<github:MARTIMM> is GTK::Glade::Engine;
 
 has Library::MetaConfig::TagFilterList $!tag-filter-list;
 has Library::MetaConfig::SkipDataList $!skip-data-list;
-has Str $!id-list = 'library-id-0000000000';
+#has Str $!id-list = 'library-id-0000000000';
 
 #-------------------------------------------------------------------------------
 submethod BUILD ( ) {
@@ -33,7 +36,6 @@ method refresh-tagfilter-list ( :$widget, :$data, :$object ) {
   #TODO clear list
 
   my GtkWidget $list-box = self.glade-get-widget('tagFilterListBox');
-
 
   for @$list -> $tag {
 note "Tag: $tag";
