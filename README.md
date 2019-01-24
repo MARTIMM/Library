@@ -1,5 +1,7 @@
 # Library - Meta data library
 
+![logo][logo]
+
 [![Build Status](https://travis-ci.org/MARTIMM/Library.svg?branch=master)](https://travis-ci.org/MARTIMM/Library) [![License](http://martimm.github.io/label/License-label.svg)](http://www.perlfoundation.org/artistic_license_2_0)
 
 # Description
@@ -47,5 +49,6 @@ Marcel Timmerman with Github account MARTIMM
 [todo]: https://github.com/MARTIMM/Library/blob/master/doc/TODO.md
 [man]: https://github.com/MARTIMM/Library/blob/master/doc/manual.pdf
 [requir]: https://github.com/MARTIMM/Library/blob/master/doc/requirements.pdf
+[logo]: https://github.com/MARTIMM/Library/blob/master/resources/library-logo.png
 
 [exRNA]: http://genboree.org/theCommons/projects/exrna-mads/wiki/exRNA%20Metadata%20Standards
