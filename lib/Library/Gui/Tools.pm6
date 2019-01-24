@@ -1,9 +1,13 @@
 use v6;
 
 #-------------------------------------------------------------------------------
-unit class Library::Gui::Tools:auth<github:MARTIMM>;
+unit package Library:auth<github:MARTIMM>;
 
-#-----------------------------------------------------------------------------
-method glade-file ( :$which --> Str ) {
-  %?RESOURCES{$which}.Str;
+#-------------------------------------------------------------------------------
+class Gui::Tools {
+
+  #-----------------------------------------------------------------------------
+  method glade-file ( :$which --> Str ) {
+    %?RESOURCES{$which}.Str;
+  }
 }
