@@ -1,108 +1,161 @@
 use v6;
 
+#-------------------------------------------------------------------------------
+unit package Library:auth<github:MARTIMM>;
+
 use GTK::Glade;
+use GTK::Glade::Engine;
 #use GTK::Glade::NativeGtk :ALL;
 #use GTK::Glade::Native::Gtk;
+#use GTK::Glade::Native::Gtk::Enums;
 use GTK::Glade::Native::Gtk::Main;
-use GTK::Glade::Native::Gtk::Enums;
 use GTK::Glade::Native::Gtk::Widget;
 use GTK::Glade::Native::Gtk::Dialog;
-use GTK::Glade::Native::Gtk::Checkbutton;
-use GTK::Glade::Native::Gtk::Grid;
-use GTK::Glade::Native::Gtk::Entry;
-use GTK::Glade::Native::Gtk::Container;
-use GTK::Glade::Native::Gtk::Listbox;
+use GTK::Glade::Native::Gtk::Image;
+#use GTK::Glade::Native::Gtk::Checkbutton;
+#use GTK::Glade::Native::Gtk::Grid;
+#use GTK::Glade::Native::Gtk::Entry;
+#use GTK::Glade::Native::Gtk::Container;
+#use GTK::Glade::Native::Gtk::Listbox;
 
-use Library::MetaConfig::TagFilterList;
-use Library::MetaConfig::SkipDataList;
-#-------------------------------------------------------------------------------
-unit class Library::Gui::Main:auth<github:MARTIMM> is GTK::Glade::Engine;
-
-has Library::MetaConfig::TagFilterList $!tag-filter-list;
-has Library::MetaConfig::SkipDataList $!skip-data-list;
-#has Str $!id-list = 'library-id-0000000000';
+use Library::Gui::FilterList;
 
 #-------------------------------------------------------------------------------
-submethod BUILD ( ) {
-  $!tag-filter-list .= new;
-  $!skip-data-list .= new;
-}
+class Gui::Main is GTK::Glade::Engine {
 
-#-------------------------------------------------------------------------------
-method refresh-tagfilter-list ( :$widget, :$data, :$object ) {
+  has Str $!id-list = 'library-id-0000000000';
 
-  my Array $list = $!tag-filter-list.get-tag-filter;
-  my GtkWidget $list-box = self.glade-get-widget('tagFilterListBox');
-
-  # Empty list first
-  loop {
-    # Keep the index 0, entries will shift up after removal
-    my GtkWidget $entry = gtk_list_box_get_row_at_index( $list-box, 0);
-    last unless ?$entry;
-    gtk_widget_destroy($entry);
+  #-----------------------------------------------------------------------------
+  submethod BUILD ( ) {
   }
 
-  # Fill it again
-  for @$list -> $tag {
-    my GtkWidget $textentry = gtk_entry_new();
-    gtk_entry_set_text( $textentry, $tag);
-    gtk_widget_set_visible( $textentry, True);
-
-    my GtkWidget $check = gtk_check_button_new_with_label('');
-    gtk_widget_set_visible( $check, True);
-
-    my GtkWidget $grid = gtk_grid_new();
-    gtk_widget_set_visible( $grid, True);
-    gtk_grid_attach( $grid, $textentry, 0, 0, 1, 1);
-    gtk_grid_attach( $grid, $check, 1, 0, 1, 1);
-
-    gtk_container_add( $list-box, $grid);
-  }
-}
-
-#-------------------------------------------------------------------------------
-method refresh-skipdata-list ( :$widget, :$data, :$object ) {
-
-  my Array $list = $!skip-data-list.get-skip-filter;
-  my GtkWidget $list-box = self.glade-get-widget('skipDataListBox');
-
-  # Empty list first
-  loop {
-    # Keep the index 0, entries will shift up after removal
-    my GtkWidget $entry = gtk_list_box_get_row_at_index( $list-box, 0);
-    last unless ?$entry;
-    gtk_widget_destroy($entry);
+  #-----------------------------------------------------------------------------
+  # the realize event is fired when dialog is run. Object has name of listbox.
+  method filter-dialog-realized ( :$widget, :$data, :$object ) {
+note "realize tag dialog";
+    self.refresh-filter-list( :$widget, :$data, :$object );
   }
 
-  # Fill it again
-  for @$list -> $skip {
-    my GtkWidget $textentry = gtk_entry_new();
-    gtk_entry_set_text( $textentry, $skip);
-    gtk_widget_set_visible( $textentry, True);
+  #-----------------------------------------------------------------------------
+  # click event of refreshTagListBttn
+  method refresh-filter-list ( :$widget, :$data, :$object ) {
 
-    my GtkWidget $check = gtk_check_button_new_with_label('');
-    gtk_widget_set_visible( $check, True);
+note "O: $object";
+    my Library::Gui::FilterList $filter-list;
 
-    my GtkWidget $grid = gtk_grid_new();
-    gtk_widget_set_visible( $grid, True);
-    gtk_grid_attach( $grid, $textentry, 0, 0, 1, 1);
-    gtk_grid_attach( $grid, $check, 1, 0, 1, 1);
-    gtk_container_add( $list-box, $grid);
+    if $object eq 'tagFilterListBox' {
+      $filter-list .= new(
+        :filter-type(TagFilter),
+        :list-box(self.glade-get-widget($object))
+      );
+    }
+
+    elsif $object eq 'skipDataListBox' {
+
+      $filter-list .= new(
+        :filter-type(SkipFilter),
+        :list-box(self.glade-get-widget($object))
+      );
+    }
+
+    else {
+      die "unknown listbox name";
+    }
+
+    $filter-list.clean-filter-list;
+    $filter-list.load-filter-list;
   }
-}
+#`{{
+  #-----------------------------------------------------------------------------
+  # click event of refreshTagListBttn
+  method refresh-tagfilter-list ( :$widget, :$data, :$object ) {
 
-#-------------------------------------------------------------------------------
-method exit-program ( :$widget, :$data, :$object ) {
+    my Library::Gui::FilterList $tag-filter-list .= new(
+      :filter-type(TagFilter),
+      :list-box(self.glade-get-widget('tagFilterListBox'))
+    );
 
-  gtk_main_quit();
-}
+    $tag-filter-list.clean-filter-list;
+    $tag-filter-list.load-filter-list;
+  }
 
-#-------------------------------------------------------------------------------
-method show-about-dialog ( :$widget, :$data, :$object ) {
+  #-----------------------------------------------------------------------------
+  # the realize event is fired when dialog is run.
+  method skip-dialog-realized ( :$widget, :$data, :$object ) {
+note "realize skip dialog";
+    self.refresh-skipfilter-list( :$widget, :$data, :$object );
+  }
+}}
+#`{{
+  #-----------------------------------------------------------------------------
+  # click event of refreshSkipListBttn
+  method refresh-skipfilter-list ( :$widget, :$data, :$object ) {
 
-  my GtkWidget $dialog = self.glade-get-widget('aboutDialog');
-  gtk_dialog_run($dialog);
-  #my $r = gtk_dialog_run($dialog);
-  #note "Pressed: ", GtkResponseType($r);
-  gtk_widget_hide($dialog);
+    my Library::Gui::FilterList $skip-filter-list .= new(
+      :filter-type(SkipFilter),
+      :list-box(self.glade-get-widget('skipDataListBox'))
+    );
+
+    $skip-filter-list.clean-filter-list;
+    $skip-filter-list.load-filter-list;
+  }
+
+  #-----------------------------------------------------------------------------
+  method delete-tagfilter-items ( :$widget, :$data, :$object ) {
+note "Delete marked tag items";
+
+    my Library::Gui::FilterList $tag-filter-list .= new(
+      :filter-type(TagFilter),
+      :list-box(self.glade-get-widget('tagFilterListBox'))
+    );
+
+    $tag-filter-list.delete-filter-items;
+  }
+}}
+  #-----------------------------------------------------------------------------
+  method delete-skipfilter-items ( :$widget, :$data, :$object ) {
+note "Delete marked skip items";
+  }
+
+  #-----------------------------------------------------------------------------
+  method exit-program ( :$widget, :$data, :$object ) {
+
+    gtk_main_quit();
+  }
+
+  #-----------------------------------------------------------------------------
+  # object is set to the id of the dialog to show
+  method show-dialog ( :$widget, :$data, :$object ) {
+note "Show dialog";
+
+    my GtkWidget $dialog = self.glade-get-widget($object);
+note "Show dialog: ", $dialog;
+    gtk_dialog_run($dialog);
+  }
+
+  #-----------------------------------------------------------------------------
+  # object is set to the id of the dialog to close
+  method hide-dialog ( :$widget, :$data, :$object ) {
+note "Hide dialog: ", $data, ', ', $object;
+    my GtkWidget $dialog = self.glade-get-widget($object);
+    gtk_widget_hide($dialog);
+  }
+
+  #-----------------------------------------------------------------------------
+  method show-about-dialog ( :$widget, :$data, :$object ) {
+
+    my GtkWidget $dialog = self.glade-get-widget('aboutDialog');
+note "R: ", %?RESOURCES<library-logo.png>.Str;
+    my GtkWidget $logo = gtk_image_new_from_file(
+      %?RESOURCES<library-logo.png>.Str
+    );
+note "W: ", $logo;
+    my $pixbuf = gtk_image_get_pixbuf($logo);
+note "P: ", $pixbuf;
+    gtk_about_dialog_set_logo( $dialog, $pixbuf);
+note "pixbuf set";
+
+    gtk_dialog_run($dialog);
+    gtk_widget_hide($dialog);
+  }
 }
