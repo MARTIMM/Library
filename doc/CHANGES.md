@@ -1,5 +1,9 @@
 ## Release notes
 
+* 2019-01-24 0.11.0
+  * The graphical user interface can now show the tag filter list and skip data list.
+  * Added dialogs and moved filter frames into dialog.
+  * Set a logo on the about dialog
 * 2019-01-13 0.10.2
   * Bugfixes
 * 2019-01-07 0.10.1
