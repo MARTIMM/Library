@@ -24,13 +24,13 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
   has Regex $!grep-filter = /^ <alpha> ** 3..*/;
 
   #-----------------------------------------------------------------------------
-  method set-tag-filter (
+  method set-filter (
     *@filter-list, Bool :$drop = False
     --> BSON::Document
   ) {
 
     my BSON::Document $doc;
-    my Array $tags = self.get-tag-filter;
+    my Array $tags = self.get-filter;
 
     # init if there isn't a document
     my Bool $found = $tags.defined;
@@ -111,8 +111,7 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
   }
 
   #-----------------------------------------------------------------------------
-#TODO caching
-  method get-tag-filter ( --> Array ) {
+  method get-filter ( --> Array ) {
 
     # find the config doc
     my MongoDB::Cursor $c = $!dbcfg.find:
@@ -125,9 +124,9 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
   }
 
   #-----------------------------------------------------------------------------
-  method filter-tags ( Array:D $tags is copy --> Array ) {
+  method filter ( Array:D $tags is copy --> Array ) {
 
-    my Array $filter-list = self.get-tag-filter;
+    my Array $filter-list = self.get-filter;
 
     # filter tags shorter than 3 chars, hexnumbers, lowercase convert, remove
     # doubles then sort

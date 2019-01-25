@@ -20,8 +20,8 @@ sub MAIN ( *@filter-list, Bool :$drop = False, Bool :$list = False ) {
 
   # access config collection
   my Library::MetaConfig::TagFilterList $c .= new;
-  $c.set-tag-filter( @filter-list, :$drop) if ?@filter-list;
+  $c.set-filter( @filter-list, :$drop) if ?@filter-list;
 
-  my Array $filter-list = $c.get-tag-filter;
+  my Array $filter-list = $c.get-filter;
   note "\n  [ '", $filter-list.join("', '"), "']\n" if $list and ?$filter-list;
 }
