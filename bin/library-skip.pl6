@@ -20,9 +20,9 @@ sub MAIN ( *@filter-list, Bool :$drop = False, Bool :$list = False ) {
 
   # access config collection
   my Library::MetaConfig::SkipDataList $c .= new;
-  $c.set-skip-filter( @filter-list, :$drop) if ?@filter-list;
+  $c.set-filter( @filter-list, :$drop) if ?@filter-list;
 
-  my Array $filter-list = $c.get-skip-filter;
+  my Array $filter-list = $c.get-filter;
   note "\n[ '", $filter-list.join("',\n  '"), "'\n]\n"
     if $list and ?$filter-list;
 }

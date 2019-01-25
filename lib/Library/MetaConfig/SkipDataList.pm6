@@ -20,13 +20,13 @@ use BSON::Document;
 class MetaConfig::SkipDataList does Library::MetaConfig {
 
   #-----------------------------------------------------------------------------
-  method set-skip-filter (
+  method set-filter (
     *@filter-list, Bool :$drop = False
     --> BSON::Document
   ) {
 
     my BSON::Document $doc;
-    my Array $skips = self.get-skip-filter;
+    my Array $skips = self.get-filter;
     my Bool $found = $skips.defined;
     $skips //= [];
 
@@ -99,8 +99,7 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
   }
 
   #-----------------------------------------------------------------------------
-#TODO caching
-  method get-skip-filter ( --> Array ) {
+  method get-filter ( --> Array ) {
 
     # find the config doc
     my MongoDB::Cursor $c = $!dbcfg.find:
@@ -118,7 +117,7 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
 
     my Bool $filtered = False;
 
-    my Array $skips = self.get-skip-filter;
+    my Array $skips = self.get-filter;
     if $skips.defined {
       for @$skips -> $skip {
         if $path ~~ m/<$skip>/ {

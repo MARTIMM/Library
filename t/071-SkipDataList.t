@@ -66,7 +66,7 @@ subtest 'Insert skip specs', {
   my Library::MetaConfig::SkipDataList $c .= new;
 
   # try to insert some skip specs. case preservation but remove duplicates
-  $c.set-skip-filter( <t1 T2 t3 t3>, :!drop);
+  $c.set-filter( <t1 T2 t3 t3>, :!drop);
 
   $cu = $cl-cfg.find(
     :criteria( (:config-type<skip-filter>, )),
@@ -77,9 +77,9 @@ subtest 'Insert skip specs', {
   is-deeply $doc<skips>, [<T2 t1 t3>], "Skip specs inserted.";
 
   # insert new with some overlap
-  $c.set-skip-filter( <t1 T55>, :!drop);
-  is-deeply $c.get-skip-filter, [<T2 T55 t1 t3>],
-    "Skip specs are '$c.get-skip-filter()'. Getter is used";
+  $c.set-filter( <t1 T55>, :!drop);
+  is-deeply $c.get-filter, [<T2 T55 t1 t3>],
+    "Skip specs are '$c.get-filter()'. Getter is used";
 }
 
 #-------------------------------------------------------------------------------
@@ -98,11 +98,11 @@ subtest 'Drop skip specs', {
 
   my Library::MetaConfig::SkipDataList $c .= new;
 
-  $c.set-skip-filter( <t3 t3>, :drop);
-  is-deeply $c.get-skip-filter, [<T2 T55 t1>], "One skip spec deleted";
+  $c.set-filter( <t3 t3>, :drop);
+  is-deeply $c.get-filter, [<T2 T55 t1>], "One skip spec deleted";
 
-  $c.set-skip-filter( <T2 T55 t1>, :drop);
-  is-deeply $c.get-skip-filter, [], "Rest is dropped too";
+  $c.set-filter( <T2 T55 t1>, :drop);
+  is-deeply $c.get-filter, [], "Rest is dropped too";
 }
 
 #-------------------------------------------------------------------------------
@@ -112,8 +112,8 @@ subtest 'Interesting skips', {
   my Library::MetaConfig::SkipDataList $c .= new;
 
   # insert real world skip specs. drop is by default False.
-  $c.set-skip-filter( '\/\.git<-[/]>*', '\/\.precomp<|w>');
-  diag "Skip filter set to: " ~ $c.get-skip-filter;
+  $c.set-filter( '\/\.git<-[/]>*', '\/\.precomp<|w>');
+  diag "Skip filter set to: " ~ $c.get-filter;
 
   my Str $p = '/home/mt/Project/.git/HEAD';
   ok $c.filter($p), "Path '$p' is filtered";
