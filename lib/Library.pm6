@@ -42,8 +42,7 @@ sub initialize-library ( Str :$user-key ) is export {
 
         port                = 27017
 
-      #[ connection.user.u1 ]
-      #  user                = "marcel"
+      #[ connection.user.marcel ]
       #  password            = "some-pw"
       #  database            = "MyLibrary"
       #TODO thoughts

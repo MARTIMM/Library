@@ -117,7 +117,7 @@ note "Cfg file: $file";
     self!set-config-field(
       <library collections root magic>, :set<Magic>
     );
-#note "\nConfig:\n", $!config.perl;
+note "\nConfig:\n", $!config.perl;
 
     # create uri from config data
     $!config<connection><uri> = 'mongodb://';
