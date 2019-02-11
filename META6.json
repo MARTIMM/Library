@@ -2,7 +2,7 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.11.0",
+  "version":                              "0.11.1",
   "tags": [ "metadata", "library", "mongodb", "database", "NoSQL"],
   "perl":                                 "6",
   "license":                              "Artistic-2.0",

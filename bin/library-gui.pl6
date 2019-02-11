@@ -1,7 +1,8 @@
 #!/usr/bin/env perl6
 
 use v6;
-use lib "../gtk-glade/lib";
+use lib "../gtk-glade/lib", '../gtk-v3/lib';
+
 use GTK::Glade;
 use Library;
 use Library::Tools;

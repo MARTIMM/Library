@@ -1,5 +1,7 @@
 ## Release notes
 
+* 2019-02-11 0.11.1
+  * Changes for using GTK::V3
 * 2019-01-24 0.11.0
   * The graphical user interface can now show the tag filter list and skip data list.
   * Added dialogs and moved filter frames into dialog.

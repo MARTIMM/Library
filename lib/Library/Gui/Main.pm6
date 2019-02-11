@@ -8,15 +8,21 @@ use GTK::Glade::Engine;
 #use GTK::Glade::NativeGtk :ALL;
 #use GTK::Glade::Native::Gtk;
 #use GTK::Glade::Native::Gtk::Enums;
-use GTK::Glade::Native::Gtk::Main;
-use GTK::Glade::Native::Gtk::Widget;
-use GTK::Glade::Native::Gtk::Dialog;
-use GTK::Glade::Native::Gtk::Image;
+#use GTK::Glade::Native::Gtk::Main;
+#use GTK::Glade::Native::Gtk::Widget;
+#use GTK::Glade::Native::Gtk::Dialog;
+#use GTK::Glade::Native::Gtk::Image;
 #use GTK::Glade::Native::Gtk::Checkbutton;
 #use GTK::Glade::Native::Gtk::Grid;
 #use GTK::Glade::Native::Gtk::Entry;
 #use GTK::Glade::Native::Gtk::Container;
 #use GTK::Glade::Native::Gtk::Listbox;
+
+use GTK::V3::Gtk::GtkMain;
+use GTK::V3::Gtk::GtkWidget;
+use GTK::V3::Gtk::GtkDialog;
+use GTK::V3::Gtk::GtkImage;
+use GTK::V3::Gtk::GtkListBox;
 
 use Library::Tools;
 use Library::Gui::FilterList;
@@ -32,30 +38,26 @@ class Gui::Main is GTK::Glade::Engine {
   #-----------------------------------------------------------------------------
   # Realize event of tagsDialog or skipDialog
   # The realize event is fired when dialog is run. Object has name of listbox.
-  method filter-dialog-realized ( :$widget, :$data, :$object ) {
-    self.refresh-filter-list( :$widget, :$data, :$object );
+  method filter-dialog-realized ( |c ) {
+    self.refresh-filter-list( |c );
   }
 
   #-----------------------------------------------------------------------------
   # Click event of refreshTagListBttn refreshSkipListBttn
-  method refresh-filter-list ( :$widget, :$data, :$object ) {
+  method refresh-filter-list ( :widget($dialog), :$target-widget-name ) {
 
     my Library::Gui::FilterList $filter-list;
+    my GTK::V3::Gtk::GtkListBox $list-box;
 
     # test object for the listbox name to init the proper filter list
-    if $object eq 'tagFilterListBox' {
-      $filter-list .= new(
-        :filter-type(TagFilter),
-        :list-box(self.glade-get-widget($object))
-      );
+    if $target-widget-name eq 'tagFilterListBox' {
+      $list-box .= new(:widget(self.glade-get-widget($target-widget-name)));
+      $filter-list .= new( :filter-type(TagFilter), :$list-box);
     }
 
-    elsif $object eq 'skipDataListBox' {
-
-      $filter-list .= new(
-        :filter-type(SkipFilter),
-        :list-box(self.glade-get-widget($object))
-      );
+    elsif $target-widget-name eq 'skipDataListBox' {
+      $list-box .= new(:widget(self.glade-get-widget($target-widget-name)));
+      $filter-list .= new( :filter-type(SkipFilter), :$list-box);
     }
 
     else {
@@ -67,29 +69,27 @@ class Gui::Main is GTK::Glade::Engine {
   }
 
   #-----------------------------------------------------------------------------
-  method add-filter-item ( :$widget, :$data, :$object ) {
+  method add-filter-item ( :widget($dialog), :$target-widget-name ) {
 
     my Library::Gui::FilterList $filter-list;
-    my GtkWidget $input-entry;
+    my GTK::V3::Gtk::GtkEntry $input-entry;
+    my GTK::V3::Gtk::GtkListBox $list-box;
 
     # test object for the listbox name to init the proper filter list
-    if $object eq 'tagFilterListBox' {
-      $filter-list .= new(
-        :filter-type(TagFilter),
-        :list-box(self.glade-get-widget($object))
+    if $target-widget-name eq 'tagFilterListBox' {
+      $list-box .= new(:widget(self.glade-get-widget($target-widget-name)));
+      $filter-list .= new( :filter-type(TagFilter), :$list-box);
+      $input-entry .= new(
+        :widget(self.glade-get-widget('inputTagFilterItemText'))
       );
-
-      $input-entry = self.glade-get-widget('inputTagFilterItemText');
     }
 
-    elsif $object eq 'skipDataListBox' {
-
-      $filter-list .= new(
-        :filter-type(SkipFilter),
-        :list-box(self.glade-get-widget($object))
+    elsif $target-widget-name eq 'skipDataListBox' {
+      $list-box .= new(:widget(self.glade-get-widget($target-widget-name)));
+      $filter-list .= new( :filter-type(SkipFilter), :$list-box);
+      $input-entry .= new(
+        :widget(self.glade-get-widget('inputSkipFilterItemText'))
       );
-
-      $input-entry = self.glade-get-widget('inputSkipFilterItemText');
     }
 
     else {
@@ -100,24 +100,20 @@ class Gui::Main is GTK::Glade::Engine {
   }
 
   #-----------------------------------------------------------------------------
-  method delete-filter-items ( :$widget, :$data, :$object ) {
+  method delete-filter-items ( :widget($button), :$target-widget-name ) {
 
     my Library::Gui::FilterList $filter-list;
+    my GTK::V3::Gtk::GtkListBox $list-box;
 
     # test object for the listbox name to init the proper filter list
-    if $object eq 'tagFilterListBox' {
-      $filter-list .= new(
-        :filter-type(TagFilter),
-        :list-box(self.glade-get-widget($object))
-      );
+    if $target-widget-name eq 'tagFilterListBox' {
+      $list-box .= new(:widget(self.glade-get-widget($target-widget-name)));
+      $filter-list .= new( :filter-type(TagFilter), :$list-box);
     }
 
-    elsif $object eq 'skipDataListBox' {
-
-      $filter-list .= new(
-        :filter-type(SkipFilter),
-        :list-box(self.glade-get-widget($object))
-      );
+    elsif $target-widget-name eq 'skipDataListBox' {
+      $list-box .= new(:widget(self.glade-get-widget($target-widget-name)));
+      $filter-list .= new( :filter-type(SkipFilter), :$list-box);
     }
 
     else {
@@ -128,38 +124,45 @@ class Gui::Main is GTK::Glade::Engine {
   }
 
   #-----------------------------------------------------------------------------
-  method exit-program ( :$widget, :$data, :$object ) {
+  method exit-program ( ) {
 
-    gtk_main_quit();
+    self.glade-main-quit();
   }
 
   #-----------------------------------------------------------------------------
   # object is set to the id of the dialog to show
-  method show-dialog ( :$widget, :$data, :$object ) {
+  method show-dialog ( :$target-widget-name ) {
 
-    my GtkWidget $dialog = self.glade-get-widget($object);
-    gtk_dialog_run($dialog);
+    my GTK::V3::Gtk::GtkDialog $dialog .= new(
+      :widget(self.glade-get-widget($target-widget-name))
+    );
+    $dialog.gtk-dialog-run;
   }
 
   #-----------------------------------------------------------------------------
   # object is set to the id of the dialog to close
-  method hide-dialog ( :$widget, :$data, :$object ) {
-    my GtkWidget $dialog = self.glade-get-widget($object);
-    gtk_widget_hide($dialog);
+  method hide-dialog ( :widget($button), :$target-widget-name ) {
+
+    my GTK::V3::Gtk::GtkDialog $dialog .= new(
+      :widget(self.glade-get-widget($target-widget-name))
+    );
+    $dialog.gtk-widget-hide;
   }
 
   #-----------------------------------------------------------------------------
-  method show-about-dialog ( :$widget, :$data, :$object ) {
+  # widget can be one of GtkButton or GtkMenuItem
+  method show-about-dialog ( :$widget, :$target-widget-name ) {
 
-    my GtkWidget $dialog = self.glade-get-widget('aboutDialog');
-    my GtkWidget $logo = gtk_image_new_from_file(
-      %?RESOURCES<library-logo.png>.Str
+    my GTK::V3::Gtk::GtkDialog $about-dialog .= new(
+      :widget(self.glade-get-widget('aboutDialog'))
+    );
+    my GTK::V3::Gtk::GtkImage $logo .= new(
+      :filename(%?RESOURCES<library-logo.png>.Str)
     );
 
-    my $pixbuf = gtk_image_get_pixbuf($logo);
-    gtk_about_dialog_set_logo( $dialog, $pixbuf);
+    $about-dialog.set_logo($logo.get_pixbuf);
 
-    gtk_dialog_run($dialog);
-    gtk_widget_hide($dialog);
+    $about-dialog.gtk_dialog_run;
+    $about-dialog.gtk_widget_hide;
   }
 }
