@@ -134,7 +134,6 @@ class Gui::Main is GTK::Glade::Engine {
     $about-dialog.gtk-widget-hide;
   }
 
-
   #-----------------------------------------------------------------------------
   # object is set to the id of the dialog to show
   method show-dialog ( :$target-widget-name ) {
