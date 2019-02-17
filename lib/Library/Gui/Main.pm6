@@ -5,22 +5,11 @@ unit package Library:auth<github:MARTIMM>;
 
 use GTK::Glade;
 use GTK::Glade::Engine;
-#use GTK::Glade::NativeGtk :ALL;
-#use GTK::Glade::Native::Gtk;
-#use GTK::Glade::Native::Gtk::Enums;
-#use GTK::Glade::Native::Gtk::Main;
-#use GTK::Glade::Native::Gtk::Widget;
-#use GTK::Glade::Native::Gtk::Dialog;
-#use GTK::Glade::Native::Gtk::Image;
-#use GTK::Glade::Native::Gtk::Checkbutton;
-#use GTK::Glade::Native::Gtk::Grid;
-#use GTK::Glade::Native::Gtk::Entry;
-#use GTK::Glade::Native::Gtk::Container;
-#use GTK::Glade::Native::Gtk::Listbox;
 
 use GTK::V3::Gtk::GtkMain;
 use GTK::V3::Gtk::GtkWidget;
 use GTK::V3::Gtk::GtkDialog;
+use GTK::V3::Gtk::GtkAboutDialog;
 use GTK::V3::Gtk::GtkImage;
 use GTK::V3::Gtk::GtkListBox;
 
@@ -44,7 +33,7 @@ class Gui::Main is GTK::Glade::Engine {
 
   #-----------------------------------------------------------------------------
   # Click event of refreshTagListBttn refreshSkipListBttn
-  method refresh-filter-list ( :widget($dialog), :$target-widget-name ) {
+  method refresh-filter-list ( :widget($dialog), Str :$target-widget-name ) {
 
     my Library::Gui::FilterList $filter-list;
     my GTK::V3::Gtk::GtkListBox $list-box;
@@ -130,6 +119,23 @@ class Gui::Main is GTK::Glade::Engine {
   }
 
   #-----------------------------------------------------------------------------
+  # widget can be one of GtkButton or GtkMenuItem
+  method show-about-dialog ( :$widget, :$target-widget-name ) {
+
+    my GTK::V3::Gtk::GtkAboutDialog $about-dialog .= new(
+      :build-id('aboutDialog')
+    );
+    my GTK::V3::Gtk::GtkImage $logo .= new(
+      :filename(%?RESOURCES<library-logo.png>.Str)
+    );
+
+    $about-dialog.set-logo($logo.get-pixbuf);
+    $about-dialog.gtk-dialog-run;
+    $about-dialog.gtk-widget-hide;
+  }
+
+
+  #-----------------------------------------------------------------------------
   # object is set to the id of the dialog to show
   method show-dialog ( :$target-widget-name ) {
 
@@ -147,22 +153,5 @@ class Gui::Main is GTK::Glade::Engine {
       :widget(self.glade-get-widget($target-widget-name))
     );
     $dialog.gtk-widget-hide;
-  }
-
-  #-----------------------------------------------------------------------------
-  # widget can be one of GtkButton or GtkMenuItem
-  method show-about-dialog ( :$widget, :$target-widget-name ) {
-
-    my GTK::V3::Gtk::GtkDialog $about-dialog .= new(
-      :widget(self.glade-get-widget('aboutDialog'))
-    );
-    my GTK::V3::Gtk::GtkImage $logo .= new(
-      :filename(%?RESOURCES<library-logo.png>.Str)
-    );
-
-    $about-dialog.set_logo($logo.get_pixbuf);
-
-    $about-dialog.gtk_dialog_run;
-    $about-dialog.gtk_widget_hide;
   }
 }

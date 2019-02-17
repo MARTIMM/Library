@@ -3,23 +3,10 @@ use v6;
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
-#`{{
-use GTK::Glade::Native::Glib::GList;
-
-use GTK::Glade::Native::Gtk::Entry;
-use GTK::Glade::Native::Gtk::Widget;
-use GTK::Glade::Native::Gtk::Checkbutton;
-use GTK::Glade::Native::Gtk::Togglebutton;
-use GTK::Glade::Native::Gtk::Grid;
-use GTK::Glade::Native::Gtk::Label;
-use GTK::Glade::Native::Gtk::Container;
-use GTK::Glade::Native::Gtk::Listbox;
-}}
-
 use GTK::V3::Glib::GList;
+use GTK::V3::Gtk::GtkBin;
 use GTK::V3::Gtk::GtkWidget;
 use GTK::V3::Gtk::GtkCheckButton;
-use GTK::V3::Gtk::GtkToggleButton;
 use GTK::V3::Gtk::GtkGrid;
 use GTK::V3::Gtk::GtkLabel;
 use GTK::V3::Gtk::GtkContainer;
@@ -65,10 +52,9 @@ class Gui::FilterList {
 
     loop {
       # Keep the index 0, entries will shift up after removal
-      my GTK::V3::Gtk::GtkEntry $entry;
       my $nw = $!list-box.get-row-at-index(0);
       last unless ?$nw;
-      $entry($nw);
+      my GTK::V3::Gtk::GtkEntry $entry .= new(:widget($nw));
       $entry.gtk-widget-destroy;
     }
   }
@@ -79,18 +65,19 @@ class Gui::FilterList {
     my Array $list = $!filter-list.get-filter;
 
     for @$list -> $item-text {
-      my GTK::V3::Gtk::GtkLabel $label .= new(:text($item-text));
+
+      my GTK::V3::Gtk::GtkLabel $label .= new(:label($item-text));
       $label.set-visible(True);
 
-      my GTK::V3::Gtk::GtkCheckButton $check .= new(:text(''));
+      my GTK::V3::Gtk::GtkCheckButton $check .= new(:label(''));
       $check.set-visible(True);
 
-      my GTK::V3::Gtk::GtkGrid $grid .= new;
-      $grid.set_visible(True);
+      my GTK::V3::Gtk::GtkGrid $grid .= new(:empty);
+      $grid.set-visible(True);
       $grid.gtk_grid_attach( $check(), 0, 0, 1, 1);
       $grid.gtk_grid_attach( $label(), 1, 0, 1, 1);
 
-      $!list-box.gtk_container_add($grid);
+      $!list-box.gtk_container_add($grid());
     }
   }
 
@@ -117,13 +104,12 @@ class Gui::FilterList {
 
     my $index = 0;
     loop {
-      my GTK::V3::Gtk::GtkEntry $entry = $!list-box.get-row-at-index($index);
-
-      last unless ?$entry;
+      my $lb-row-widget = $!list-box.get-row-at-index($index);
+      last unless ?$lb-row-widget;
       $index++;
 
-      my GTK::V3::Glib::GList $children = $!list-box.get_children($entry());
-      my GTK::V3::Gtk::GtkGrid $grid .= new(:widget($children.nth-data(0)));
+      my GTK::V3::Gtk::GtkBin $lb-row .= new(:widget($lb-row-widget));
+      my GTK::V3::Gtk::GtkGrid $grid .= new(:widget($lb-row.get_child()));
       my GTK::V3::Gtk::GtkCheckButton $check-box .= new(
         :widget($grid.get-child-at( 0, 0))
       );
@@ -133,6 +119,7 @@ class Gui::FilterList {
         my GTK::V3::Gtk::GtkLabel $label .= new(
           :widget($grid.get-child-at( 1, 0))
         );
+
         $delete-list.push: $label.get-text;
       }
     }
