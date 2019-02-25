@@ -1,12 +1,14 @@
 #!/usr/bin/env perl6
 
 use v6;
-use lib "../gtk-glade/lib", '../gtk-v3/lib';
+#use lib '/home/marcel/Languages/Perl6/Projects/gtk-glade/lib',
+#        '/home/marcel/Languages/Perl6/Projects/gtk-v3/lib';
 
-use GTK::Glade;
 use Library;
 use Library::Tools;
 use Library::Gui::Main;
+
+use GTK::Glade;
 
 #-------------------------------------------------------------------------------
 initialize-library();
