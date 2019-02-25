@@ -2,15 +2,15 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.11.1",
+  "version":                              "0.12.0",
   "tags": [ "metadata", "library", "mongodb", "database", "NoSQL"],
   "perl":                                 "6",
   "license":                              "Artistic-2.0",
   "depends": [
     "IO::Notification::Recursive", "Config::TOML", "BSON", "MongoDB",
-    "GTK::Glade"
+    "GTK::Glade", "GTK::V3"
   ],
-  "test-depends": [ "Test::META"],
+  "test-depends": [ ],
   "build-depends": [ ],
   "provides": {
     "Library":                      "lib/Library.pm6",
@@ -24,14 +24,14 @@
     "Library::MetaConfig::Mimetype":  "lib/Library/MetaConfig/Mimetype.pm6",
 
     "Library::Storage":             "lib/Library/Storage.pm6",
+    "Library::Tools":               "lib/Library/Tools.pm6",
 
     "Library::MetaData":            "lib/Library/MetaData.pm6",
     "Library::MetaData::Directory": "lib/Library/MetaData/Directory.pm6",
     "Library::MetaData::File":      "lib/Library/MetaData/File.pm6",
 
     "Library::Gui::FilterList":     "lib/Library/Gui/FilterList.pm6",
-    "Library::Gui::Main":           "lib/Library/Gui/Main.pm6",
-    "Library::Gui::Tools":          "lib/Library/Gui/Tools.pm6"
+    "Library::Gui::Main":           "lib/Library/Gui/Main.pm6"
   },
   "resources": [
     "mimetypes", "library.glade"
