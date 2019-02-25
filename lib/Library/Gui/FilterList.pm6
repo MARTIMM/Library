@@ -54,8 +54,8 @@ class Gui::FilterList {
       # Keep the index 0, entries will shift up after removal
       my $nw = $!list-box.get-row-at-index(0);
       last unless ?$nw;
-      my GTK::V3::Gtk::GtkEntry $entry .= new(:widget($nw));
-      $entry.gtk-widget-destroy;
+      my GTK::V3::Gtk::GtkBin $lb-row .= new(:widget($nw));
+      $lb-row.gtk-widget-destroy;
     }
   }
 
