@@ -2,7 +2,12 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkImage" id="aboutImage">
+  <object class="GtkImage" id="aboutMbImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-about</property>
+  </object>
+  <object class="GtkImage" id="aboutTbImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="tooltip_text" translatable="yes">About</property>
@@ -28,7 +33,17 @@
     <property name="can_focus">False</property>
     <property name="stock">gtk-delete</property>
   </object>
-  <object class="GtkImage" id="quitImage">
+  <object class="GtkImage" id="findMbImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-find</property>
+  </object>
+  <object class="GtkImage" id="quitMbImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-quit</property>
+  </object>
+  <object class="GtkImage" id="quitTbImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="tooltip_text" translatable="yes">Exit</property>
@@ -39,8 +54,6 @@
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Set tag list</property>
     <signal name="delete-event" handler="exit-program" swapped="no"/>
-    <signal name="map" handler="init-on-show" swapped="no"/>
-    <signal name="show" handler="init-on-show" swapped="no"/>
     <child>
       <placeholder/>
     </child>
@@ -48,7 +61,6 @@
       <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <signal name="show" handler="init-on-show" swapped="no"/>
         <child>
           <object class="GtkMenuBar">
             <property name="visible">True</property>
@@ -64,12 +76,14 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem">
-                        <property name="label">gtk-new</property>
+                      <object class="GtkImageMenuItem" id="findFilesMBttn">
+                        <property name="label">Find Files</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <property name="image">findMbImage</property>
+                        <property name="use_stock">False</property>
+                        <property name="always_show_image">True</property>
+                        <signal name="activate" handler="show-file-chooser-dialog" object="fileSelectDialog" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -107,11 +121,12 @@
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="quitMBttn">
-                        <property name="label">gtk-quit</property>
+                        <property name="label">Quit</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <property name="image">quitMbImage</property>
+                        <property name="use_stock">False</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="exit-program" swapped="no"/>
                       </object>
                     </child>
@@ -188,11 +203,12 @@
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkImageMenuItem" id="aboutMBttn">
-                        <property name="label">gtk-about</property>
+                        <property name="label">About</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
+                        <property name="image">aboutMbImage</property>
+                        <property name="use_stock">False</property>
+                        <property name="always_show_image">True</property>
                         <signal name="activate" handler="show-about-dialog" swapped="no"/>
                       </object>
                     </child>
@@ -215,7 +231,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="image">quitImage</property>
+                <property name="image">quitTbImage</property>
                 <property name="always_show_image">True</property>
                 <signal name="clicked" handler="exit-program" swapped="no"/>
               </object>
@@ -229,7 +245,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="image">aboutImage</property>
+                <property name="image">aboutTbImage</property>
                 <property name="always_show_image">True</property>
                 <signal name="clicked" handler="show-about-dialog" swapped="no"/>
               </object>
@@ -252,6 +268,15 @@
             <property name="can_focus">False</property>
             <property name="row_spacing">1</property>
             <property name="column_spacing">1</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
             <child>
               <placeholder/>
             </child>
@@ -348,6 +373,141 @@
       </object>
     </child>
   </object>
+  <object class="GtkFileChooserDialog" id="fileSelectDialog">
+    <property name="can_focus">False</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="type_hint">dialog</property>
+    <property name="transient_for">mainWindow</property>
+    <property name="create_folders">False</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkGrid">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkButton" id="finishFileDialogBttn">
+                    <property name="label" translatable="yes">Finish</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="hide-dialog" object="fileSelectDialog" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="selectFileDialogBttn">
+                    <property name="label" translatable="yes">Select</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">Select files or directories to
+store in database</property>
+                    <signal name="clicked" handler="select-for-gather-process" object="fileSelectDialog" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="recursiveDialogCBttn">
+                    <property name="label" translatable="yes">Recursive</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Recurively process a directory</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="multSelDialogCBttn">
+                    <property name="label" translatable="yes">Multiple
+   Files</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                    <signal name="toggled" handler="multiple-select-files" object="fileSelectDialog" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="showHideDialogCBttn">
+                    <property name="label" translatable="yes">  Show
+ Hidden</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Hide or show hidden files</property>
+                    <property name="draw_indicator">True</property>
+                    <signal name="toggled" handler="show-hide-files" object="fileSelectDialog" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkImage" id="refreshSkipListImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-refresh</property>
+  </object>
   <object class="GtkDialog" id="skipDialog">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
@@ -437,12 +597,6 @@
                             <property name="top_attach">0</property>
                           </packing>
                         </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -519,6 +673,11 @@
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="refreshTagListImage">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-refresh</property>
+  </object>
   <object class="GtkDialog" id="tagsDialog">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
@@ -536,9 +695,6 @@
           <object class="GtkButtonBox">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
             <child>
               <object class="GtkButton" id="finishTagDialogBttn">
                 <property name="label" translatable="yes">Finish</property>
@@ -607,9 +763,6 @@
                             <property name="left_attach">0</property>
                             <property name="top_attach">0</property>
                           </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
                         </child>
                       </object>
                       <packing>
@@ -685,15 +838,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="refreshSkipListImage">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-refresh</property>
-  </object>
-  <object class="GtkImage" id="refreshTagListImage">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-refresh</property>
   </object>
 </interface>
