@@ -11,6 +11,14 @@ Just found something interesting [exRNA Metadata Standards][exRNA]. However it i
 # Synopsis
 
 # List of programs
+* Command line
+  * library-file.pl6
+  * library-mimetypes.pl6
+  * library-skip.pl6
+  * library-tag.pl6
+
+* Gui
+  * library-gui.pl6
 
 # Documentation
 
@@ -43,7 +51,7 @@ Marcel Timmerman with Github account MARTIMM
   GTK+ is free software and part of the GNU Project. However, the licensing terms for GTK+, the GNU LGPL 2.1, allow it to be used by all developers, including those developing proprietary software, without any license fees or royalties.
 
 <!----------------------------------------------------------------------------->
-[release]: https://github.com/MARTIMM/Library/blob/master/doc/CHANGES.md
+[release]: https://github.com/MARTIMM/Library/blob/master/doc/CHANGES.html
 [todo]: https://github.com/MARTIMM/Library/blob/master/doc/TODO.md
 [man]: https://github.com/MARTIMM/Library/blob/master/doc/manual.pdf
 [requir]: https://github.com/MARTIMM/Library/blob/master/doc/requirements.pdf
