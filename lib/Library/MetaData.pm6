@@ -14,7 +14,7 @@ use BSON::Document;
 #-------------------------------------------------------------------------------
 role MetaData {
 
-  has BSON::Document $!meta-data;
+  has BSON::Document $.meta-data;
   has Library::Storage $!dbo handles <
         insert update delete count find
         drop-collection drop-database
@@ -37,10 +37,6 @@ role MetaData {
       $object.Str.chars > 0;
 
     $!object = $object.Str;
-
-    # run users BUILDs too
-    callsame;
-
     self!process-object;
   }
 
@@ -99,14 +95,13 @@ role MetaData {
     # get user meta data
     my BSON::Document $udata = self.get-metameta(:$subdoc);
     my Array $prev-tags = $udata<tags> // [];
-#note $udata.perl;
 
     # filter out type tags
 #    my Str $e = $!object.IO.extension;
 #    $drop-tags.push($e) if ?$e;
 
     # check if to extract tags from object name
-    my Array $tags = $ct.filter-tags( [
+    my Array $tags = $ct.filter( [
         $!object.split(/ [\s || <punct>]+ /).Slip,
         ($!meta-data<path> // $!meta-data<url> // $!meta-data<uri> // '').split(
             / [\s || <punct>]+ /
