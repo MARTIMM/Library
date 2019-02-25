@@ -1,16 +1,22 @@
 ## Release notes
 
+* 2019-02-25 0.12.0
+  Added a file chooser dialog to select files for database insertion
+  <img src="Manual/Images/file-search-dialog.png" width="480" />
 * 2019-02-11 0.11.1
   * Changes for using GTK::V3
 * 2019-01-24 0.11.0
   * The graphical user interface can now show the tag filter list and skip data list.
   * Added dialogs and moved filter frames into dialog.
+  <img src="Manual/Images/about-dialog.png" width="310" />
   * Set a logo on the about dialog.
   * Tags- and skip-filter now now possible to refresh, add new items or delete them.
+  <img src="Manual/Images/tag-filter-dialog.png" width="200" />
 * 2019-01-13 0.10.2
   * Bugfixes
 * 2019-01-07 0.10.1
   * Started to create a new graphical user interface using GTK::Glade
+  <img src="Manual/Images/main-window.png" width="200" />
 * 0.10.0
   * moved some fields from top level into object-meta
 * 0.9.4
