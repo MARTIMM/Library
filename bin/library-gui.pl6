@@ -1,26 +1,37 @@
 #!/usr/bin/env perl6
 
 use v6;
-#use lib '/home/marcel/Languages/Perl6/Projects/gtk-glade/lib',
-#        '/home/marcel/Languages/Perl6/Projects/gtk-v3/lib';
+use lib '/home/marcel/Languages/Perl6/Projects/gtk-glade/lib',
+        '/home/marcel/Languages/Perl6/Projects/gtk-v3/lib',
+        '/home/marcel/Languages/Perl6/Projects/mongo-perl6-driver/lib';
+#use lib '/home/marcel/Languages/Perl6/Projects/gtk-v3/lib';
+
+# Version of library
+my Version $*version = v0.13.0;
+
 
 use Library;
 use Library::Tools;
 use Library::Gui::Main;
+use Library::Gui::FilterList;
 
 use GTK::Glade;
 
 #-------------------------------------------------------------------------------
+#initialize-library(:refine-key<marcel>);
 initialize-library();
 
 #-------------------------------------------------------------------------------
 sub MAIN ( ) {
 
   my Library::Tools $tools .= new;
-  my Library::Gui::Main $main-engine .= new;
-
   my Str $ui-file = $tools.get-resource(:which<library.glade>);
-  my GTK::Glade $gui .= new( :$ui-file, :engine($main-engine));
+
+  my GTK::Glade $gui .= new;
+  $gui.add-gui-file($ui-file);
+  $gui.add-engine(Library::Gui::Main.new);
+  $gui.add-engine(Library::Gui::FilterList.new);
+  $gui.run;
 }
 
 #-------------------------------------------------------------------------------

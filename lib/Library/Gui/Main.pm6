@@ -1,31 +1,38 @@
 use v6;
+use NativeCall;
 
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
+use Library;
+use Library::Configuration;
 use Library::Tools;
-use Library::Gui::FilterList;
 use Library::MetaData::File;
 use Library::MetaData::Directory;
 
 use GTK::Glade;
 use GTK::Glade::Engine;
 
-use GTK::V3::Gtk::GtkMain;
-use GTK::V3::Gtk::GtkWidget;
 use GTK::V3::Gtk::GtkDialog;
 use GTK::V3::Gtk::GtkAboutDialog;
 use GTK::V3::Gtk::GtkImage;
-use GTK::V3::Gtk::GtkListBox;
+use GTK::V3::Gtk::GtkGrid;
 use GTK::V3::Gtk::GtkEntry;
 use GTK::V3::Gtk::GtkFileChooserDialog;
 use GTK::V3::Gtk::GtkFileChooser;
+use GTK::V3::Gtk::GtkComboBoxText;
 
 use GTK::V3::Glib::GSList;
-use GTK::V3::Glib::GFile;
+#use GTK::V3::Glib::GFile;
 
-note "\nGlib: ", GTK::V3::Glib::.keys;
+use Config::TOML;
+use MIME::Base64;
+use MongoDB;
+
+#note "\nGlib: ", GTK::V3::Glib::.keys;
 #note "Gtk: ", GTK::V3::Gtk::.keys;
+
+#note "Lib config in main: ", $Library::lib-cfg;
 
 #-------------------------------------------------------------------------------
 class Gui::Main is GTK::Glade::Engine {
@@ -37,90 +44,6 @@ class Gui::Main is GTK::Glade::Engine {
   #submethod BUILD ( ) { }
 
   #-----------------------------------------------------------------------------
-  # Realize event of tagsDialog or skipDialog
-  # The realize event is fired when dialog is run. Object has name of listbox.
-  method filter-dialog-realized ( |c ) {
-    self.refresh-filter-list( |c );
-  }
-
-  #-----------------------------------------------------------------------------
-  # Click event of refreshTagListBttn refreshSkipListBttn
-  method refresh-filter-list ( :widget($dialog), Str :$target-widget-name ) {
-
-    my Library::Gui::FilterList $filter-list;
-    my GTK::V3::Gtk::GtkListBox $list-box;
-
-    # test object for the listbox name to init the proper filter list
-    if $target-widget-name eq 'tagFilterListBox' {
-      $list-box .= new(:build-id($target-widget-name));
-      $filter-list .= new( :filter-type(TagFilter), :$list-box);
-    }
-
-    elsif $target-widget-name eq 'skipDataListBox' {
-      $list-box .= new(:build-id($target-widget-name));
-      $filter-list .= new( :filter-type(SkipFilter), :$list-box);
-    }
-
-    else {
-      die X::Library.new(:message("unknown listbox name"));
-    }
-
-    $filter-list.clean-filter-list;
-    $filter-list.load-filter-list;
-  }
-
-  #-----------------------------------------------------------------------------
-  method add-filter-item ( :widget($dialog), :$target-widget-name ) {
-
-    my Library::Gui::FilterList $filter-list;
-    my GTK::V3::Gtk::GtkEntry $input-entry;
-    my GTK::V3::Gtk::GtkListBox $list-box;
-
-    # test object for the listbox name to init the proper filter list
-    if $target-widget-name eq 'tagFilterListBox' {
-      $list-box .= new(:buil-id($target-widget-name));
-      $filter-list .= new( :filter-type(TagFilter), :$list-box);
-      $input-entry .= new(:build-id<inputTagFilterItemText>);
-    }
-
-    elsif $target-widget-name eq 'skipDataListBox' {
-      $list-box .= new(:build-d($target-widget-name));
-      $filter-list .= new( :filter-type(SkipFilter), :$list-box);
-      $input-entry .= new(:build-id<inputSkipFilterItemText>);
-    }
-
-    else {
-      die X::Library.new(:message("unknown listbox name"));
-    }
-
-    $filter-list.add-filter-item($input-entry);
-  }
-
-  #-----------------------------------------------------------------------------
-  method delete-filter-items ( :widget($button), :$target-widget-name ) {
-
-    my Library::Gui::FilterList $filter-list;
-    my GTK::V3::Gtk::GtkListBox $list-box;
-
-    # test object for the listbox name to init the proper filter list
-    if $target-widget-name eq 'tagFilterListBox' {
-      $list-box .= new(:build-d($target-widget-name));
-      $filter-list .= new( :filter-type(TagFilter), :$list-box);
-    }
-
-    elsif $target-widget-name eq 'skipDataListBox' {
-      $list-box .= new(:build-d($target-widget-name));
-      $filter-list .= new( :filter-type(SkipFilter), :$list-box);
-    }
-
-    else {
-      die X::Library.new(:message("unknown listbox name"));
-    }
-
-    $filter-list.delete-filter-items;
-  }
-
-  #-----------------------------------------------------------------------------
   method exit-program ( ) {
 
     self.glade-main-quit();
@@ -129,6 +52,8 @@ class Gui::Main is GTK::Glade::Engine {
   #-----------------------------------------------------------------------------
   # widget can be one of GtkButton or GtkMenuItem
   method show-about-dialog ( :$widget ) {
+
+    #$widget.debug(:on);
 
     my GTK::V3::Gtk::GtkAboutDialog $about-dialog .= new(
       :build-id('aboutDialog')
@@ -139,7 +64,7 @@ class Gui::Main is GTK::Glade::Engine {
     );
     $about-dialog.set-logo($logo.get-pixbuf);
 
-    $about-dialog.set-version('0.12.0');
+    $about-dialog.set-version($*version.Str);
 
     $about-dialog.gtk-dialog-run;
     $about-dialog.gtk-widget-hide;
@@ -149,8 +74,7 @@ class Gui::Main is GTK::Glade::Engine {
   # widget can be one of GtkButton or GtkMenuItem
   method show-file-chooser-dialog ( :$widget, :$target-widget-name ) {
 
-note "Dialog id: $target-widget-name, ", $widget;
-    $widget.debug(:on);
+    #$widget.debug(:on);
 
     my GTK::V3::Gtk::GtkFileChooserDialog $file-select-dialog .= new(
       :build-id($target-widget-name)
@@ -162,10 +86,8 @@ note "Dialog id: $target-widget-name, ", $widget;
     # set buttons in proper status
     my Int $o = $fc.get-show-hidden;
     my GTK::V3::Gtk::GtkCheckButton $b .= new(:build-id<showHideDialogCBttn>);
-note "Hide: ", $o;
     $b.set-active($o);
-    $fc.set-show-hidden($o);  # is not set properly when started firt time
-note "Set hide: ", $b.get-active;
+    $fc.set-show-hidden($o);  # is not set properly when started first time
 
     $o = $fc.get-select-multiple;
     $b .= new(:build-id<multSelDialogCBttn>);
@@ -183,14 +105,12 @@ note "Set hide: ", $b.get-active;
   # $target-widget-name is set to the id of the dialog to show
   method show-hide-files ( :$widget, :$target-widget-name ) {
 
-note "Dialog id: $target-widget-name";
     my GTK::V3::Gtk::GtkFileChooserDialog $file-select-dialog .= new(
       :build-id($target-widget-name)
     );
 
     my GTK::V3::Gtk::GtkFileChooser $fc .= new(:widget($file-select-dialog));
     my Int $hidden = $fc.get-show-hidden;
-note "Files hidden?: ", $hidden;
     $fc.set-show-hidden(!?$hidden);
   }
 
@@ -198,14 +118,12 @@ note "Files hidden?: ", $hidden;
   # $target-widget-name is set to the id of the dialog to show
   method multiple-select-files ( :$widget, :$target-widget-name ) {
 
-note "Dialog id: $target-widget-name";
     my GTK::V3::Gtk::GtkFileChooserDialog $file-select-dialog .= new(
       :build-id($target-widget-name)
     );
 
     my GTK::V3::Gtk::GtkFileChooser $fc .= new(:widget($file-select-dialog));
     my Int $multiple = $fc.get_select_multiple;
-note "Multiple file select?: ", $multiple;
     $fc.set-select-multiple(!?$multiple);
   }
 
@@ -216,14 +134,14 @@ note "Multiple file select?: ", $multiple;
 
     # This might take a while, so run in thread.
     my Promise $p = start {
-  note "\nDialog id: $target-widget-name";
+#note "\nDialog id: $target-widget-name";
       my GTK::V3::Gtk::GtkFileChooserDialog $file-select-dialog .= new(
         :build-id($target-widget-name)
       );
 
       my GTK::V3::Gtk::GtkFileChooser $fc .= new(:widget($file-select-dialog));
       my GTK::V3::Glib::GSList $fnames .= new(:gslist($fc.get-filenames));
-      note "fn: ", $fnames;
+#note "fn: ", $fnames;
       my GTK::V3::Gtk::GtkCheckButton $b .=
         new(:build-id<recursiveDialogCBttn>
       );
@@ -238,12 +156,11 @@ note "get $fnames.nth-data-str($i)";
       # get the file and directory names and create Library::MetaData objects
       # any filtered objects are not returned and not saved in database
       my Seq $fp := gather for @files-to-process -> $object {
-      #my Array $fp = [gather for @files-to-process -> $object {
         note "Process $object";
         self!process-directory($object);
       };
       #}];
-#note "gathered ", $fp;
+note "gathered ", $fp;
 
       # then add tags to the documents
       for @$fp -> $meta-object {
@@ -260,10 +177,13 @@ note "get $fnames.nth-data-str($i)";
 
   #-----------------------------------------------------------------------------
   # $target-widget-name is set to the id of the dialog to show
-  method show-dialog ( :$target-widget-name ) {
+  method show-dialog ( :$widget, :$target-widget-name ) {
+
+#    $widget.debug(:on);
 
     my GTK::V3::Gtk::GtkDialog $dialog .= new(:build-id($target-widget-name));
-    $dialog.gtk-dialog-run;
+    note "Dialog return value: ", $dialog.gtk-dialog-run;
+#    $dialog.gtk-dialog-run;
   }
 
   #-----------------------------------------------------------------------------
@@ -272,6 +192,7 @@ note "get $fnames.nth-data-str($i)";
 
     my GTK::V3::Gtk::GtkDialog $dialog .= new(:build-id($target-widget-name));
     $dialog.gtk-widget-hide;
+    #$dialog.gtk_dialog_response(GTK_RESPONSE_CLOSE);
   }
 
   #-----------------------------------------------------------------------------
@@ -282,11 +203,12 @@ note "get $fnames.nth-data-str($i)";
     my Library::MetaData::Directory $mdir;
     my Library::MetaData::File $mfile;
 
+#note "O: $o.IO.f(), $o.IO.d()";
     # test if $o is a directory
     if $o.IO.d {
       # first queue this directory object
       $mdir .= new(:object($o));
-note "Take ", $mdir;
+#note "Take ", $mdir;
       take $mdir unless $mdir.ignore-object;
 
       # if a directory object is filtered out, al descendends are too
@@ -298,7 +220,7 @@ note "Take ", $mdir;
           if $object.d {
             # queue this directory and process
             $mdir .= new(:$object);
-note "Take ", $mdir;
+#note "Take ", $mdir;
             take $mdir unless $mdir.ignore-object;
             self!process-directory($object.Str) unless $mdir.ignore-object;
           }
@@ -306,7 +228,7 @@ note "Take ", $mdir;
           else {
             # queue this file
             $mfile .= new(:$object);
-note "Take ", $mfile;
+#note "Take ", $mfile;
             take $mfile unless $mfile.ignore-object;
           }
         }
@@ -316,12 +238,129 @@ note "Take ", $mfile;
     elsif $o.IO.f {
       # queue this file
       $mfile .= new(:object($o));
-note "Take ", $mfile;
+#note "Take ", $mfile;
       take $mfile unless $mfile.ignore-object;
     }
 
     else {
       note "Special file $o ignored";
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  method show-config-dialog ( :$widget, Str :$target-widget-name ) {
+
+#    $widget.debug(:on);
+
+#!! load from toml!!
+    my Library::Configuration $config := $Library::lib-cfg;
+#    $config.save-config;
+    my Hash $cfg := $config.config;
+#note "Cfg: ", $cfg.keys;
+
+
+    # Clear grid by removing the first column 3 times.
+    my GTK::V3::Gtk::GtkGrid $grid .= new(:build-id<configDialogGrid>);
+    $grid.remove-column(0) for ^3;
+
+    #my Array[Pair] $pairs = [];
+
+
+    my Str $key = 'server';
+    my Str $value = $cfg<connection><server>;
+    my GTK::V3::Gtk::GtkLabel $cfg-label .= new(:label($key));
+    $cfg-label.set-visible(True);
+    my GTK::V3::Gtk::GtkEntry $cfg-entry .= new(:empty);
+    $cfg-entry.set-visible(True);
+    $cfg-entry.set-text($value);
+    $grid.gtk-grid-attach( $cfg-label, 0, 0, 1, 1);
+    $grid.gtk-grid-attach( $cfg-entry, 1, 0, 1, 1);
+
+
+    my GTK::V3::Gtk::GtkDialog $dialog .= new(:build-id($target-widget-name));
+    $dialog.gtk-dialog-run;
+  }
+
+  #-----------------------------------------------------------------------------
+  # event from connectMBttn menu button
+  method show-connect-dialog ( :$widget, Str :$target-widget-name ) {
+
+#    $widget.debug(:on);
+    my GTK::V3::Gtk::GtkComboBoxText $section-cbox .= new(
+      :build-id<refineKeysCBox>
+    );
+    $section-cbox.remove-all;
+
+    my Library::Configuration $config := $Library::lib-cfg;
+#note "SK: ", $config.config<section-keys>;
+    for @($config.config<section-keys>) -> $skey {
+      $section-cbox.gtk-combo-box-text-prepend( $skey, $skey);
+    }
+    $section-cbox.gtk_combo_box_set_active(0);
+
+    my GTK::V3::Gtk::GtkDialog $dialog .= new(:build-id($target-widget-name));
+    $dialog.gtk-dialog-run;
+  }
+
+  #-----------------------------------------------------------------------------
+  # event from combobox selection on connect dialog
+  method set-username ( :$widget, Str :$target-widget-name ) {
+
+#    $widget.debug(:on);
+    my GTK::V3::Gtk::GtkComboBoxText $section-cbox .= new(
+      :build-id<refineKeysCBox>
+    );
+    my Str $section = $section-cbox.get-active-id;
+    my Library::Configuration $config := $Library::lib-cfg;
+    if ( $config.config<database>{$section}:exists and
+         $config.config<database>{$section}<username>:exists
+       ) {
+
+      my $un = $config.config<database>{$section}<username>;
+      my GTK::V3::Gtk::GtkEntry $un-entry .= new(:build-id<connectUNameEntry>);
+      $un-entry.set-text($un);
+    }
+  }
+
+  #-----------------------------------------------------------------------------
+  # event from connectConnectDialogBttn on connect dialog
+  method connect-server ( :$widget, Str :$target-widget-name ) {
+
+#    $widget.debug(:on);
+
+    my Library::Configuration $config := $Library::lib-cfg;
+    my GTK::V3::Gtk::GtkDialog $dialog .= new(:build-id($target-widget-name));
+
+    my GTK::V3::Gtk::GtkComboBoxText $section-cbox .= new(
+      :build-id<refineKeysCBox>
+    );
+    my Str $section = $section-cbox.get-active-id;
+
+    my GTK::V3::Gtk::GtkEntry $un-entry .= new(:build-id<connectUNameEntry>);
+    my GTK::V3::Gtk::GtkEntry $pw-entry .= new(:build-id<connectPWordEntry>);
+
+    my Str $un = $un-entry.get-text;
+    my Str $pw = $pw-entry.get-text;
+#note "n,p: $un, $pw";
+    if ?$un and ?$pw {
+      if $config.config<database>{$section}:exists {
+        my $ecpw = MIME::Base64.encode-str(
+          ($pw.encode Z+ 'abcdefghijklmnopqrstuvwxyz'.encode).join('.:.')
+        );
+#note "Epws: $ecpw, ", $config.config<database>{$section}<password>, ', ',
+#     $ecpw eq $config.config<database>{$section}<password>;
+        if $ecpw eq $config.config<database>{$section}<password> {
+          $config.reconfig(:refine-key($section));
+          my $topology = connect-meta-data-server();
+          $dialog.gtk-widget-hide unless $topology ~~ any(TT-Unknown,TT-NotSet);
+        }
+      }
+    }
+
+    else {
+      $config.reconfig(:refine-key($section));
+      my $topology = connect-meta-data-server();
+      $dialog.gtk-widget-hide unless $topology ~~ any(TT-Unknown,TT-NotSet);
     }
   }
 }
