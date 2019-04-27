@@ -2,13 +2,13 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.12.0",
+  "version":                              "0.13.1",
   "tags": [ "metadata", "library", "mongodb", "database", "NoSQL"],
   "perl":                                 "6",
   "license":                              "Artistic-2.0",
   "depends": [
-    "IO::Notification::Recursive", "Config::TOML", "BSON", "MongoDB",
-    "GTK::Glade", "GTK::V3"
+    "IO::Notification::Recursive", "Config::TOML", "MongoDB",
+    "GTK::Glade", "GTK::V3", "MIME::Base64", "Config::DataLang::Refine"
   ],
   "test-depends": [ ],
   "build-depends": [ ],
