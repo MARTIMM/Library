@@ -373,6 +373,66 @@ An extra collection is used to find some control documents. By default called **
 
 ## Configuration
 
+Toml type configuration stored in **\$HOME/.library/client-config.toml**. This will be placed later at **\$Home/.config/Library/client.toml**.
+
+Settings will be of a default user called **default** and any other user. Not all items have to be specified for a user. The config is loaded using `Config::DataLang::Refine`.
+
+```
+# defaults
+[connection]
+port = 65140
+server = "mediaserver.localdomain"
+
+[connect-options]
+replicaSet = "MetaLibrary"
+
+[program]
+logfile = "library.log"
+loglevelfile = Warn
+loglevelscreen = Warn
+
+[database]
+db-name = "Default"
+meta-config = "MetaConfig"
+meta-data = "MetaData"
+
+# admin user
+[database.admin]
+# Encoding:
+# my $ecpw = MIME::Base64.encode-str(
+#  ('password'.encode Z+ 'abcdefghijklmnopqrstuvwxyz'.encode).join('.:.')
+# );
+#
+# my $pw = utf8.new(
+#  utf8.new(
+#    MIME::Base64.decode-str($ecpw).split('.:.')>>.Int) Z-
+#    'abcdefghijklmnopqrstuvwxyz'.encode).decode
+#
+password = '...'
+
+db-name = "admin"
+
+# user marcel
+
+[database.marcel]
+password = '...'
+db-name = "mt1957"
+meta-config = "Metaconfig"
+meta-data = "Metadata"
+
+# TODO thoughts
+[mimetypes.default]
+image/jpeg          = "/usr/bin/gwenview %u"
+image/*             = "/usr/bin/gwenview %u"
+
+# fixed data is not stored in config
+# generated uri
+uri = "mongodb://mediaserver.localdomain:65140/mt1957?replicaSet=MetaLibrary"
+
+db-name = "Library"
+extensions = "Extensions"
+mimetypes = "Mimetypes"
+```
 
 # Implementation
 
