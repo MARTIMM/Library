@@ -105,6 +105,8 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
     my MongoDB::Cursor $c = $!dbcfg.find:
        (:config-type<skip-filter>, ), :limit(1);
 
+    return [] unless ?$c;
+
     my BSON::Document $doc;
     $doc = $c.fetch;
 

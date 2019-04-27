@@ -117,6 +117,8 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
     my MongoDB::Cursor $c = $!dbcfg.find:
       (:config-type<tag-filter>, ), :limit(1);
 
+    return [] unless ?$c;
+
     my BSON::Document $doc = $c.fetch;
 
     # return array or Array type
