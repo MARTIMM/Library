@@ -28,7 +28,6 @@ use GTK::V3::Gtk::GtkFileChooser;
 
 use GTK::V3::Glib::GSList;
 #use GTK::V3::Glib::GObject;
-#use GTK::V3::Glib::GFile;
 #use GTK::V3::Glib::GInterface;
 
 note "\nGlib: ", GTK::V3::Glib::.keys;
