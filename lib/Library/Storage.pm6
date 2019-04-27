@@ -20,23 +20,23 @@ class Storage {
 
   has MongoDB::Database $!database;
   has MongoDB::Collection $!collection;# handles <find>;
+  has Str $!collection-key;
+  has Bool $!use-lib-db;
 
   #-----------------------------------------------------------------------------
   # the database-key will be most of the time 'database' but the collectio-key
   # may vary. made this way for future flexibility. Mostly called from a
   # Library::Metadata::* class to set a specific database and collection
-  submethod BUILD ( Str:D :$collection-key, Bool :$root = False ) {
+  submethod BUILD ( Str:D :$!collection-key, Bool :$!use-lib-db = False ) {
+#note "dbo collection key: $!collection-key";
 
-    my Library::Configuration $lcg := $Library::lib-cfg;
-    my Str $db-name = $lcg.database-name(:$root);
-    my Str $col-name = $lcg.collection-name( $collection-key, :$root);
-
-    $!database = $Library::client.database($db-name);
-    $!collection = $!database.collection($col-name);
+    self!test-connection;
   }
 
   #-----------------------------------------------------------------------------
   method insert ( Array:D $documents --> BSON::Document ) {
+
+    return BSON::Document.new(:ok(0)) unless self!test-connection;
 
     $!database.run-command: (
       insert => $!collection.name,
@@ -46,6 +46,8 @@ class Storage {
 
   #-----------------------------------------------------------------------------
   method update ( Array:D $updates --> BSON::Document ) {
+
+    return BSON::Document.new: (:ok(0)) unless self!test-connection;
 
     $!database.run-command: (
       update => $!collection.name,
@@ -57,6 +59,8 @@ class Storage {
   #-----------------------------------------------------------------------------
   method delete ( Array:D $deletes --> BSON::Document ) {
 
+    return BSON::Document.new: (:ok(0)) unless self!test-connection;
+
     $!database.run-command: (
       delete => $!collection.name,
       deletes => $deletes
@@ -65,6 +69,8 @@ class Storage {
 
   #-----------------------------------------------------------------------------
   multi method count ( List $query = () --> BSON::Document ) {
+
+    return BSON::Document.new: (:ok(0)) unless self!test-connection;
 
     my BSON::Document $req .= new;
     $req<count> = $!collection.name;
@@ -78,6 +84,8 @@ class Storage {
     BSON::Document $query = BSON::Document.new
     --> BSON::Document
   ) {
+
+    return BSON::Document.new: (:ok(0)) unless self!test-connection;
 
     my BSON::Document $req .= new;
     $req<count> = $!collection.name;
@@ -93,6 +101,8 @@ class Storage {
   method find (
     $query, Int :$limit = 0, Bool :$debug = False --> MongoDB::Cursor
   ) {
+
+    return MongoDB::Cursor unless self!test-connection;
 
     my BSON::Document $req .= new;
     $req<find> = $!collection.name;
@@ -136,12 +146,40 @@ note "Get more: ", $doc.perl;
   #-----------------------------------------------------------------------------
   method drop-collection ( --> BSON::Document ) {
 
+    return BSON::Document.new: (:ok(0)) unless self!test-connection;
+
     $!database.run-command: (drop => $!collection.name,);
   }
 
   #-----------------------------------------------------------------------------
   method drop-database ( --> BSON::Document ) {
 
+    return BSON::Document.new: (:ok(0)) unless self!test-connection;
+
     $!database.run-command: (dropDatabase => 1,);
+  }
+
+  #--[ Private methods ]--------------------------------------------------------
+  method !test-connection ( --> Bool ) {
+
+#note "\ntest conn: $!collection-key, ", $Library::client.defined;
+    return False unless $Library::client.defined;
+
+    my Library::Configuration $lcg := $Library::lib-cfg;
+#note "prog config: ", $lcg.prog-config;
+#note "lib config: ", $lcg.lib-config;
+
+    # get database and collection name from configuration
+    my Str $db-name = $lcg.database-name(:$!use-lib-db);
+    my Str $col-name = $lcg.collection-name( $!collection-key, :$!use-lib-db);
+#note "lcg: $db-name, $col-name";
+
+    # create database with client and get collection
+    $!database = $Library::client.database($db-name);
+    $!collection = $!database.collection($col-name);
+
+#note "Col: ", $!collection.full-collection-name;
+
+    True
   }
 }
