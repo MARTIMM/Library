@@ -21,8 +21,10 @@ class MetaConfig::Mimetype does Library::MetaConfig {
   #-----------------------------------------------------------------------------
   multi submethod BUILD ( ) {
 
-    $!dbcfg1 .= new( :collection-key<mimetypes>, :root);
-    $!dbcfg2 .= new( :collection-key<extensions>, :root);
+    $!dbcfg1 .= new( :collection-key<mimetypes>, :use-lib-db);
+    $!dbcfg2 .= new( :collection-key<extensions>, :use-lib-db);
+
+#note "Mimetype initialized";
   }
 
   #-----------------------------------------------------------------------------

@@ -4,130 +4,124 @@ use v6;
 unit package Library:auth<github:MARTIMM>;
 
 use Config::TOML;
+use Config::DataLang::Refine;
 use MongoDB;
+use MIME::Base64;
 
 #-------------------------------------------------------------------------------
 class Configuration {
 
+  has Config::DataLang::Refine $!rc;
+  has Hash $.prog-config;
   has Hash $.config;
-  has Str $!user-key;
+  has Hash $.lib-config;
+  has Str $!refine-key;
+  has Str $!library-config;
 
   #-----------------------------------------------------------------------------
-  # We only have to load it once
   submethod BUILD (
-    Str:D :library-config($file), Bool :$generate = False, Str :$!user-key
+    Str:D :$!library-config, :$!refine-key = 'default'
   ) {
-note "Cfg file: $file";
-    # when generate is true, we start with an empty hash if no file is found
-    if $generate {
-      $!config = $file.IO ~~ :r ?? from-toml(:$file) !! {};
-    }
 
-    else {
-      $!config = from-toml(:$file);
-    }
-
-    self!check-config;
-
-    # write to file if generate is true and file didn't exist
-    spurt( $file, to-toml($!config)) if $generate and !$file.IO.e;
+    $!rc .= new(:config-name($!library-config));
+    $!config := $!rc.config;
+    self.reconfig;
   }
 
   #-----------------------------------------------------------------------------
-  method database-name ( Bool :$root = False --> Str ) {
+  method database-name ( Bool :$use-lib-db = False --> Str ) {
 
-    my Str $db-name;
-
-    if $root {
-      $db-name = $!config<library><root-db>;
+    if $use-lib-db {
+      $!lib-config<db-name>
     }
 
     else {
-      if $!user-key {
-        $db-name = $!config<connection><user>{$!user-key}<database>;
-      }
-
-      else {
-        #$db-name = $!config<library><database>;
-        $db-name = $!config<library><user-db>;
-      }
+      $!prog-config<database><db-name>
     }
-
-    $db-name;
   }
 
   #-----------------------------------------------------------------------------
   method collection-name (
-    Str:D $collection-key, Bool :$root = False
+    Str:D $collection-key, Bool :$use-lib-db = False
     --> Str
   ) {
 
-    my Str $cl-name;
-
-    if $root {
-      $cl-name = $!config<library><collections><root>{$collection-key};
+    if $use-lib-db {
+      $collection-key
     }
 
     else {
-      $cl-name = $!config<library><collections>{$collection-key};
+      die unless $collection-key ~~ any(<meta-config meta-data>);
+      $!prog-config<database>{$collection-key}
     }
-
-    $cl-name;
   }
 
   #-----------------------------------------------------------------------------
   method get-loginfo ( --> List ) {
-    ( $!config<library><logfile>,
-      $!config<library><loglevelfile>,
-      $!config<library><loglevelscreen>
+    ( $!prog-config<program><logfile>,
+      $!prog-config<program><loglevelfile>,
+      $!prog-config<program><loglevelscreen>
     )
   }
 
+  #-----------------------------------------------------------------------------
+  method save-config ( ) {
+
+    $!library-config.IO.spurt(to-toml($!config));
+    $!rc .= new(:config-name($!library-config));
+  }
+
+  #-----------------------------------------------------------------------------
+  method reconfig ( Str :$!refine-key = 'Default' ) {
+
+    # check for changed data
+    $!lib-config = {};
+    self!refine-config;
+    self!check-config;
+
+#note "$!library-config, $!refine-key";
+#note "\nCfg: ", $!config;
+#note "\nProg Cfg: ", $!prog-config;
+#note "\nLib-cfg: ", $!lib-config;
+  }
+
   # ==[ Private Stuff ]=========================================================
+  method !refine-config ( ) {
+
+    $!prog-config = %(
+      connection => ($!rc.refine( 'connection', $!refine-key)),
+      connect-options => ($!rc.refine( 'connect-options', $!refine-key)),
+      program => ($!rc.refine( 'program', $!refine-key)),
+      database => ($!rc.refine( 'database', $!refine-key)),
+      mimetypes => ($!rc.refine( 'mimetypes', $!refine-key)),
+#      => ($!rc.refine( '', $!refine-key)),
+    );
+  }
+
   #-----------------------------------------------------------------------------
   method !check-config ( ) {
 
-#note "\nConfig:\n", $!config.perl;
-    # set defaults if needed
-    self!check-config-field( <connection server>, :default<localhost>);
-    self!check-config-field( <connection port>, :default(27017));
-#    self!check-config-field( <library recursive-scan-dirs>, :default([]));
-
-    self!set-config-field( <library root-db>, :set<Library>);
-    self!check-config-field( <library user-db>, :default<MyLibrary>);
-    self!check-config-field( <library logfile>, :default<library.log>);
-
-    self!check-config-field( <library loglevelfile>, :default<Warn>);
-    self!check-config-field( <library loglevelscreen>, :default<Warn>);
-    self!check-loglevel($!config<library><loglevelfile>);
-    self!check-loglevel($!config<library><loglevelscreen>);
-
-    self!check-config-field(
-      <library collections meta-data>, :default<Metadata>
-    );
-    self!check-config-field(
-      <library collections meta-config>, :default<Metaconfig>
-    );
-    self!set-config-field(
-      <library collections root mimetypes>, :set<Mimetypes>
-    );
-    self!set-config-field(
-      <library collections root extensions>, :set<Extensions>
-    );
-    self!set-config-field(
-      <library collections root magic>, :set<Magic>
-    );
-note "\nConfig:\n", $!config.perl;
+    # fixed data is in $!lib-config
+    $!lib-config<db-name> = "Library";
+    $!lib-config<extensions> = "Extensions";
+    $!lib-config<mimetypes> = "Mimetypes";
+    $!lib-config<refined> = $!refine-key;
 
     # create uri from config data
-    $!config<connection><uri> = 'mongodb://';
+    $!lib-config<uri> = 'mongodb://';
 
-    # add user spec to rti
-    if $!user-key {
-      if ? (my $user-hash = $!config<connection><user>{$!user-key}) {
-        $!config<connection><uri> ~= $user-hash<user>;
-        $!config<connection><uri> ~= ":$user-hash<password>";
-        $!config<connection><uri> ~= '@';
+    # add user spec to uri
+    if $!refine-key ne 'default' {
+      my Str $un = $!config<database>{$!refine-key}<username> // '';
+      my Str $ecpw = $!config<database>{$!refine-key}<password> // '';
+      if 0 { #TODO authentication ... ?$un and ?$ecpw {
+        my Str $pw = utf8.new(
+          utf8.new(
+            MIME::Base64.decode-str($ecpw).split('.:.')>>.Int
+          ) Z- 'abcdefghijklmnopqrstuvwxyz'.encode
+        ).decode;
+
+        $!lib-config<uri> ~= "$un:$pw\@";
       }
     }
 
@@ -135,80 +129,21 @@ note "\nConfig:\n", $!config.perl;
     # server field must be checked for ip6 address. must be enclosed in [].
     my Str $server = $!config<connection><server>;
     $server = "[$server]" if $server ~~ /\:/;
-    $!config<connection><uri> ~=
-      $server ~ ':' ~ $!config<connection><port> ~ '/' ~
-      self.database-name;
+    $!lib-config<uri> ~= $server ~ ':' ~ $!config<connection><port> ~
+                          '/' ~ self.database-name;
 
     # add options
-    if $!config<connection><options>:exists {
+    if $!config<connect-options>:exists {
       my @optlist = ();
-      $!config<connection><uri> ~= '?';
-      for $!config<connection><options>.keys -> $option {
-        @optlist.push:
-          "$option=$!config<connection><options>{$option}";
+      for $!config<connect-options>.keys -> $option {
+        @optlist.push: "$option=$!config<connect-options>{$option}";
       }
-      $!config<connection><uri> ~= @optlist.join('&');
+      $!lib-config<uri> ~= '?';
+      $!lib-config<uri> ~= @optlist.join('&');
     }
 
-    info-message("Connect with '$!config<connection><uri>'");
-  }
-
-  #-----------------------------------------------------------------------------
-  method !check-config-field ( *@fields, Str :$default! ) {
-
-    my Bool $missing-key = False;
-    my Hash $c := $!config;
-    my Hash $p;
-
-    # descent using field names into the configuration
-    for @fields -> $field {
-
-      # when field is missing or empty set the Bool and init with empty Hash
-      unless ? $c{$field} {
-        $missing-key = True;
-        $c{$field} = {};
-      }
-
-      # keep current config to set the default when we are ready
-      $p := $c;
-
-      # descent forther down if possible
-      $c := $c{$field} if $c{$field} ~~ Hash;
-    }
-
-    # if any of the keys were missing, set the field to its default
-    # which overwrites the previously set empty Hash
-    if $missing-key {
-      $p{@fields[*-1]} = $default;
-      debug-message(
-        "Missing keys '{@fields.join('.')}' from config, set to '$default'"
-      );
-    }
-  }
-
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  # set the field to a value. older config may have these fields still and
-  # will be overwritten.
-  method !set-config-field ( *@fields, Str :$set ) {
-
-    my Hash $c := $!config;
-    my Hash $p;
-
-    # descent using field names into the configuration
-    for @fields -> $field {
-
-      # when field is missing or empty, init with empty Hash
-      $c{$field} = {} unless ? $c{$field};
-
-      # keep current config to set the default when we are ready
-      $p := $c;
-
-      # descent forther down if possible
-      $c := $c{$field} if $c{$field} ~~ Hash;
-    }
-
-    # Always set the field to the given value
-    $p{@fields[*-1]} = $set;
+#todo check-loglevel
+    #info-message("Connect with '$!lib-config<uri>'");
   }
 
   #-----------------------------------------------------------------------------
