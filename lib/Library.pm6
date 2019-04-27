@@ -14,14 +14,16 @@ enum MetaType is export <<
   :MT-Program('Program') :MT-User('User') :MT-Web('Web')
 >>;
 
-our $lib-cfg;
-our $client;
-our $user-key;
+our $lib-cfg;           # Type Library::Configuration
+our $client;            # Type MongoDB::Client
+our $refine-key;        # Type Str
+ # $?MODULE.^ver;   # '0.13.0';#$?PACKAGE.^ver;
+
 
 #-------------------------------------------------------------------------------
-sub initialize-library ( Str :$user-key ) is export {
+sub initialize-library ( Str :$refine-key = 'default' ) is export {
 
-  $Library::user-key = $user-key;
+  $Library::refine-key = $refine-key;
 
   # check for config directory
   my Str $config-dir = check-config-dir();
@@ -78,22 +80,20 @@ sub initialize-library ( Str :$user-key ) is export {
 
       EOCFG
 
-    warn-message(
-      "A default config file is written at $config-dir" ~
-      "/client-configuration.toml, adjust if needed, exiting..."
-    );
-    exit(1);
+#    warn-message(
+#      "A default config file is written at $config-dir" ~
+#      "/client-configuration.toml, adjust if needed, exiting..."
+#    );
+#    exit(1);
   }
 
-note "UK: {$user-key // 'no user key'}";
-
   # clean configuration and set to new
-  $lib-cfg = Nil if $lib-cfg.defined;
   $lib-cfg = Library::Configuration.new(
     :library-config("$config-dir/client-configuration.toml"),
-    :$user-key
+    :$refine-key
   );
 
+#`{{
   # setup logging
   my Str $log-file;
   my MongoDB::MdbLoglevels $log-levelfile;
@@ -108,14 +108,23 @@ note "Log file: ", $log-file;
   my $handle = "$config-dir/$log-file".IO.open( :mode<wo>, :create, :append);
   add-send-to( 'libf', :to($handle), :min-level($log-levelfile));
   info-message("Log file opened");
+}}
+}
+
+#-------------------------------------------------------------------------------
+sub connect-meta-data-server ( --> TopologyType ) is export {
 
   # throw old client object and get a new one.
   $client.cleanup if $client.defined;
 
   # note that uri is not defined in the configfile. it will be set when the
   # config is checked by Library::Configuration.
-  $client = MongoDB::Client.new(:uri($lib-cfg.config<connection><uri>));
-  info-message("Config initialized");
+  $client = MongoDB::Client.new(:uri($lib-cfg.lib-config<uri>));
+#  info-message("Config initialized");
+  sleep(0.8);
+note "Config initialized, ", $client;
+
+  $client.topology
 }
 
 #-------------------------------------------------------------------------------
