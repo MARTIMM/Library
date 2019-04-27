@@ -18,14 +18,9 @@ class MetaData::File does Library::MetaData {
   has Library::MetaConfig::Mimetype $!mime;
 
   #-----------------------------------------------------------------------------
-  multi submethod BUILD ( ) {
-    $!mime .= new;
-  }
-
-  #-----------------------------------------------------------------------------
   # Set the default informaton for a file in the meta structure
   method specific-init-meta ( ) {
-
+#note "get spec meta";
     # file accepted, set other meta data
     my Str $path = $!object.IO.absolute;
     my Str $file = $path.IO.basename;
@@ -34,9 +29,12 @@ class MetaData::File does Library::MetaData {
     # Drop basename from path
     $path ~~ s/ '/'? $file $//;
 
+    $!mime .= new unless ?$!mime;
     my BSON::Document $object-meta .= new;
+#note "empty meta: ", $object-meta.perl;
     $object-meta<mime-type> =
       ($!mime.get-mimetype(:$extension) // {})<_id> // '';
+#note "meta: ", $object-meta.perl;
 
 #    $object-meta<description> = $file-magic<description>;
 #    $object-meta<mime-type> = $file-magic<mime-type>;
@@ -53,6 +51,7 @@ class MetaData::File does Library::MetaData {
     $!meta-data<name> = $file;
     $!meta-data<object-meta> = $object-meta;
 
+#note "File meta: ", $!meta-data.perl;
     info-message("metadata set for $!object");
     debug-message($!meta-data.perl);
   }
@@ -62,6 +61,7 @@ class MetaData::File does Library::MetaData {
   # Returns result document with at least key field 'ok'
   method update-meta ( --> BSON::Document ) {
 
+#note "update meta";
     # Get the metadata and search in database using count. It depends
     # on the existence of the file what to do.
     my BSON::Document $doc .= new: (:ok(1));
@@ -245,6 +245,7 @@ note "Found 5...";
 #note "called from: ", callframe(1);
 #note "Meta: $!meta-data";
 #note "List: ", $list.perl;
+
     my BSON::Document $q .= new: (|$list);
     self.is-in-db($q) ?? $q !! BSON::Document
   }

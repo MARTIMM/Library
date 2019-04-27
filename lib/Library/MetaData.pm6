@@ -31,25 +31,16 @@ role MetaData {
   method update-meta ( ) { ... }
 
   #-----------------------------------------------------------------------------
-  multi submethod BUILD ( IO::Path:D :$object ) {
-
-    fatal-message('empty path objects are not handled') unless
-      $object.Str.chars > 0;
+  multi submethod BUILD ( IO::Path:D :$object where .e ) {
 
     $!object = $object.Str;
     self!process-object;
   }
 
   #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  multi submethod BUILD ( Str:D :$object ) {
-    fatal-message('empty path objects are not handled') unless
-      $object.chars > 0;
+  multi submethod BUILD ( Str:D :$object where .IO.e ) {
 
     $!object = $object;
-
-    # run users BUILDs too
-    callsame;
-
     self!process-object;
   }
 
@@ -240,7 +231,7 @@ role MetaData {
     #$!tags-filter = $tfl.get-tag-filter;
 
     # always select the meta-data collection in users database
-    $!dbo .= new( :collection-key<meta-data>, :!root);
+    $!dbo .= new(:collection-key<meta-data>);
 
     $doc = self.update-meta;
   }
