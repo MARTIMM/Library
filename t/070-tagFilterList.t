@@ -43,7 +43,7 @@ spurt( $filename, Q:qq:to/EOCFG/);
 
     EOCFG
 
-#initialize-library(:user-key<u1>);
+#initialize-library(:refine-key<u1>);
 initialize-library;
 
 my MongoDB::Client $client := $Library::client;

@@ -51,13 +51,13 @@ subtest 'configuration load and save', {
 
     EOCFG
 
-  my Library::Configuration $cfg .= new( :library-config($file), :user-key<u1>);
+  my Library::Configuration $cfg .= new( :library-config($file), :refine-key<u1>);
   is $cfg.config<connection><uri>,
      'mongodb://marcel:tplus@[::1]:27000/mt-data',
      'uri: ' ~ $cfg.config<connection><uri>;
 #  $cfg.config<my-data> = 'test 1';
 
-  $cfg .= new( :library-config($file), :user-key<u2>);
+  $cfg .= new( :library-config($file), :refine-key<u2>);
   is $cfg.config<connection><uri>, 'mongodb://piet:puk@[::1]:27000/my-data',
      'uri: ' ~ $cfg.config<connection><uri>;
 }
