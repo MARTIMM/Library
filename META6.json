@@ -2,7 +2,7 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.13.1",
+  "version":                              "0.13.1.1",
   "tags": [ "metadata", "library", "mongodb", "database", "NoSQL"],
   "perl":                                 "6",
   "license":                              "Artistic-2.0",
@@ -34,7 +34,7 @@
     "Library::Gui::Main":           "lib/Library/Gui/Main.pm6"
   },
   "resources": [
-    "mimetypes", "library.glade"
+    "mimetypes", "library.glade", "library-logo.png"
   ],
   "source-url":                     "git://github.com/MARTIMM/Library.git"
 }

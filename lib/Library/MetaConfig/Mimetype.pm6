@@ -24,7 +24,7 @@ class MetaConfig::Mimetype does Library::MetaConfig {
     $!dbcfg1 .= new( :collection-key<mimetypes>, :use-lib-db);
     $!dbcfg2 .= new( :collection-key<extensions>, :use-lib-db);
 
-#note "Mimetype initialized";
+note "Mimetype initialized";
   }
 
   #-----------------------------------------------------------------------------
