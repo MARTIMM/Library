@@ -7,7 +7,7 @@ use lib '/home/marcel/Languages/Perl6/Projects/gtk-glade/lib',
 #use lib '/home/marcel/Languages/Perl6/Projects/gtk-v3/lib';
 
 # Version of library
-my Version $*version = v0.13.0;
+my Version $*version = v0.13.1.1;
 
 
 use Library;
@@ -15,6 +15,7 @@ use Library::Tools;
 use Library::Gui::Main;
 use Library::Gui::FilterList;
 
+use GTK::V3::Gtk::GtkButton;
 use GTK::Glade;
 
 #-------------------------------------------------------------------------------
@@ -22,7 +23,7 @@ use GTK::Glade;
 initialize-library();
 
 #-------------------------------------------------------------------------------
-sub MAIN ( ) {
+sub MAIN ( Bool :$debug = False ) {
 
   my Library::Tools $tools .= new;
   my Str $ui-file = $tools.get-resource(:which<library.glade>);
@@ -31,6 +32,9 @@ sub MAIN ( ) {
   $gui.add-gui-file($ui-file);
   $gui.add-engine(Library::Gui::Main.new);
   $gui.add-engine(Library::Gui::FilterList.new);
+
+  GTK::V3::Gtk::GtkButton.new(:empty).debug(:on) if $debug;
+
   $gui.run;
 }
 
