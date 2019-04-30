@@ -1,5 +1,7 @@
 ## Release notes
 
+* 2019-04-30 0.13.2
+  * Bugfix in saving meta data on a file. Some fields are not tested and might change also by previous bugs perhaps. Also new fields might be added later and must be saved too when same file/directory is scanned again.
 * 2019-04-27 0.13.1
   * Config setup changes
 

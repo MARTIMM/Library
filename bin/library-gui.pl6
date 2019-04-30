@@ -7,7 +7,8 @@ use lib '/home/marcel/Languages/Perl6/Projects/gtk-glade/lib',
 #use lib '/home/marcel/Languages/Perl6/Projects/gtk-v3/lib';
 
 # Version of library
-my Version $*version = v0.13.1.1;
+my Version $*version = v0.13.2;
+my Bool $*debug = False;
 
 
 use Library;
@@ -34,6 +35,7 @@ sub MAIN ( Bool :$debug = False ) {
   $gui.add-engine(Library::Gui::FilterList.new);
 
   GTK::V3::Gtk::GtkButton.new(:empty).debug(:on) if $debug;
+  $*debug = $debug;
 
   $gui.run;
 }
