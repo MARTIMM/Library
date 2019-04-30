@@ -7,7 +7,7 @@ use lib '/home/marcel/Languages/Perl6/Projects/gtk-glade/lib',
 #use lib '/home/marcel/Languages/Perl6/Projects/gtk-v3/lib';
 
 # Version of library
-my Version $*version = v0.13.2;
+my Version $*version = v0.13.3;
 my Bool $*debug = False;
 
 

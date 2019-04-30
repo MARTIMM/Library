@@ -1,7 +1,12 @@
 ## Release notes
 
+
+* 2019-04-30 0.13.3
+  * Bugfixed; when taglist or skiplists were empty, it was not possible to add a new entry. The update used here needed an `upsert => True`.
+
 * 2019-04-30 0.13.2
   * Bugfix in saving meta data on a file. Some fields are not tested and might change also by previous bugs perhaps. Also new fields might be added later and must be saved too when same file/directory is scanned again.
+
 * 2019-04-27 0.13.1
   * Config setup changes
 
