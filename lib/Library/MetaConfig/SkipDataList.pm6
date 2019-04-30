@@ -49,7 +49,7 @@ class MetaConfig::SkipDataList does Library::MetaConfig {
       $doc = $!dbcfg.update: [ (
           q => ( :config-type<skip-filter>, ),
           u => ( '$set' => ( :$skips,),),
-          upsert => False,
+          upsert => True,
         ),
       ];
     }

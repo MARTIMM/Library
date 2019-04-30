@@ -60,7 +60,7 @@ class MetaConfig::TagFilterList does Library::MetaConfig {
       $doc = $!dbcfg.update: [ (
           q => ( :config-type<tag-filter>, ),
           u => ( '$set' => ( :$tags,),),
-          upsert => False,
+          upsert => True,
         ),
       ];
     }
