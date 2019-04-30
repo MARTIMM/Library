@@ -142,8 +142,6 @@ class Gui::FilterList {
   #-----------------------------------------------------------------------------
   method !clean-filter-list ( ) {
 
-    my Array $list = $!filter-list.get-filter;
-
     loop {
       # Keep the index 0, entries will shift up after removal
       my $nw = $!list-box.get-row-at-index(0);
