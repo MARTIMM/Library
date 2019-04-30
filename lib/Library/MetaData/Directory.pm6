@@ -55,9 +55,14 @@ class MetaData::Directory does Library::MetaData {
       "object-meta.hostname" => $object-meta<hostname>,
       ) {
 
-      info-message(
-        "directory $!meta-data<name> found by name and path, no update"
-      );
+      # Update the record to modify any other non-tested but changed fields
+      $doc = self.update: [ (
+          q => $query,
+          u => ( '$set' => $!meta-data,),
+        ),
+      ];
+
+      self!log-update-message($doc);
     }
 
     # So if not found ...

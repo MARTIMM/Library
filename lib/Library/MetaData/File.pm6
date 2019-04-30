@@ -61,7 +61,7 @@ class MetaData::File does Library::MetaData {
   # Returns result document with at least key field 'ok'
   method update-meta ( --> BSON::Document ) {
 
-#note "update meta";
+#note "\nupdate meta: ", $!meta-data.perl;
     # Get the metadata and search in database using count. It depends
     # on the existence of the file what to do.
     my BSON::Document $doc .= new: (:ok(1));
@@ -77,8 +77,14 @@ class MetaData::File does Library::MetaData {
       "object-meta.hostname" => $!meta-data<object-meta><hostname>,
     ) ) {
 
-      # if file is found in db, we do not have to do anything
-      info-message("File $!meta-data<name> found by name, path and content, no update");
+      # Update the record to modify any other non-tested but changed fields
+      $doc = self.update: [ (
+          q => $query,
+          u => ( '$set' => $!meta-data,),
+        ),
+      ];
+
+      self!log-update-message($doc);
     }
 
     # So if not found ...
@@ -89,7 +95,7 @@ class MetaData::File does Library::MetaData {
       );
 
       # search again using name and content but not by path
-note "$!meta-data<name> not found: $!meta-data";
+#note "$!meta-data<name> not found: $!meta-data";
       if ?($query = self.test-file: (
         name => $!meta-data<name>,
         "object-meta.meta-type" => ~MT-File,
