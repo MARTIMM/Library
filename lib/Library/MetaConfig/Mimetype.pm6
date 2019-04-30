@@ -21,8 +21,8 @@ class MetaConfig::Mimetype does Library::MetaConfig {
   #-----------------------------------------------------------------------------
   multi submethod BUILD ( ) {
 
-    $!dbcfg1 .= new( :collection-key<mimetypes>, :use-lib-db);
-    $!dbcfg2 .= new( :collection-key<extensions>, :use-lib-db);
+    $!dbcfg1 .= new( :collection-key<Mimetypes>, :use-lib-db);
+    $!dbcfg2 .= new( :collection-key<Extensions>, :use-lib-db);
 
 note "Mimetype initialized";
   }
@@ -71,7 +71,10 @@ note "Mimetype initialized";
   multi method get-mimetype ( Str:D :$mimetype! --> BSON::Document ) {
 
     my MongoDB::Cursor $c = $!dbcfg1.find: (:_id($mimetype),), :limit(1);
-    $c.fetch;
+    $c.fetch
+#my $d = $c.fetch;
+#note "Mime $mimetype: ", $d.perl;
+#$d
   }
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
