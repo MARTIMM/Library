@@ -149,7 +149,7 @@ class Gui::Main is GTK::Glade::Engine {
       my @files-to-process = ();
       for ^$fnames.g-slist-length -> $i {
         @files-to-process.push($fnames.nth-data-str($i));
-note "get $fnames.nth-data-str($i)";
+#note "get $fnames.nth-data-str($i)";
       }
 
       # get the file and directory names and create Library::MetaData objects
@@ -158,8 +158,7 @@ note "get $fnames.nth-data-str($i)";
         note "Process $object";
         self!process-directory($object);
       };
-      #}];
-note "gathered ", $fp;
+#note "gathered ", $fp if $*debug;
 
       # then add tags to the documents
       for @$fp -> $meta-object {
@@ -202,12 +201,12 @@ note "gathered ", $fp;
     my Library::MetaData::Directory $mdir;
     my Library::MetaData::File $mfile;
 
-note "O: $o.IO.f(), $o.IO.d()";
+#note "O: $o.IO.f(), $o.IO.d()";
     # test if $o is a directory
     if $o.IO.d {
       # first queue this directory object
       $mdir .= new(:object($o));
-note "Take ", $mdir;
+#note "Take ", $mdir;
       take $mdir unless $mdir.ignore-object;
 
       # if a directory object is filtered out, al descendends are too
@@ -219,7 +218,7 @@ note "Take ", $mdir;
           if $object.d {
             # queue this directory and process
             $mdir .= new(:$object);
-note "Take ", $mdir;
+#note "Take ", $mdir;
             take $mdir unless $mdir.ignore-object;
             self!process-directory($object.Str) unless $mdir.ignore-object;
           }
@@ -227,7 +226,7 @@ note "Take ", $mdir;
           else {
             # queue this file
             $mfile .= new(:$object);
-note "Take ", $mfile;
+#note "Take ", $mfile;
             take $mfile unless $mfile.ignore-object;
           }
         }
@@ -237,7 +236,7 @@ note "Take ", $mfile;
     elsif $o.IO.f {
       # queue this file
       $mfile .= new(:object($o));
-note "Take ", $mfile;
+#note "Take ", $mfile;
       take $mfile unless $mfile.ignore-object;
     }
 

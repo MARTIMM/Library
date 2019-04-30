@@ -162,17 +162,17 @@ note "Get more: ", $doc.perl;
   #--[ Private methods ]--------------------------------------------------------
   method !test-connection ( --> Bool ) {
 
-note "\ntest conn: $!collection-key, ", $Library::client.defined;
+#note "\ntest conn: $!collection-key, ", $Library::client.defined;
     return False unless $Library::client.defined;
 
     my Library::Configuration $lcg := $Library::lib-cfg;
-note "prog config: ", $lcg.prog-config;
-note "lib config: ", $lcg.lib-config;
+#note "\nprog config: ", $lcg.prog-config;
+#note "\nlib config: ", $lcg.lib-config;
 
     # get database and collection name from configuration
     my Str $db-name = $lcg.database-name(:$!use-lib-db);
     my Str $col-name = $lcg.collection-name( $!collection-key, :$!use-lib-db);
-note "lcg: $db-name, $col-name";
+#note "lcg: $db-name, $col-name";
 
     # create database with client and get collection
     $!database = $Library::client.database($db-name);
