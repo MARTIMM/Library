@@ -5,6 +5,8 @@ unit package Library:auth<github:MARTIMM>;
 
 use MongoDB;
 use MongoDB::Client;
+use MongoDB::Server;
+
 use Library::Configuration;
 
 #-------------------------------------------------------------------------------
@@ -112,7 +114,7 @@ note "Log file: ", $log-file;
 }
 
 #-------------------------------------------------------------------------------
-sub connect-meta-data-server ( --> TopologyType ) is export {
+sub connect-meta-data-server ( ) is export {
 
   # throw old client object and get a new one.
   $client.cleanup if $client.defined;
@@ -121,10 +123,18 @@ sub connect-meta-data-server ( --> TopologyType ) is export {
   # config is checked by Library::Configuration.
   $client = MongoDB::Client.new(:uri($lib-cfg.lib-config<uri>));
 #  info-message("Config initialized");
-  sleep(0.8);
 note "Config initialized, ", $client;
+}
 
+#-------------------------------------------------------------------------------
+sub db-topology ( --> TopologyType ) is export {
   $client.topology
+}
+
+#-------------------------------------------------------------------------------
+sub db-server ( --> Str ) is export {
+  my MongoDB::Server $server = $client.select-server;
+  $server.name
 }
 
 #-------------------------------------------------------------------------------
