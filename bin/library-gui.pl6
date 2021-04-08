@@ -1,10 +1,67 @@
+#!/usr/bin/env -S raku -Ilib
+use v6.d;
+#use lib '../gnome-gtk3/lib';
+use lib '../question-answer/lib';
+
+use Library::App::Application;
+
+#-------------------------------------------------------------------------------
+our $Library::version = Version.new(v0.14.1);
+our $Library::options-filter = <version show:s>;
+#-------------------------------------------------------------------------------
+given my Int $exit-code = Library::App::Application.new.run // 1 {
+  when 0 { }
+
+  when 1 {
+    show-usage;
+  }
+
+  default {
+    note "Unknown error: $exit-code";
+  }
+}
+
+exit($exit-code);
+
+#-------------------------------------------------------------------------------
+sub show-usage ( ) {
+  note Q:q:to/EO-USAGE/;
+
+  Library program. Used to gather document information from elsewhere after
+  which the user can add meta information and link to other sources.
+
+  Usage;
+    library-gui [<Options>] [<Arguments>]
+
+  Options;
+    --version                         Show version of library and exit
+
+  Arguments;
+    no arguments yet
+
+  EO-USAGE
+}
+
+
+
+
+
+
+
+
+
+=finish
 #!/usr/bin/env perl6
 
 use v6;
-use lib '/home/marcel/Languages/Perl6/Projects/gtk-glade/lib',
-        '/home/marcel/Languages/Perl6/Projects/gtk-v3/lib',
-        '/home/marcel/Languages/Perl6/Projects/mongo-perl6-driver/lib';
-#use lib '/home/marcel/Languages/Perl6/Projects/gtk-v3/lib';
+
+#use lib
+#        '/home/marcel/Languages/Perl6/Projects/perl6-gnome-native/lib',
+#        '/home/marcel/Languages/Perl6/Projects/perl6-gnome-glade3/lib',
+#        '/home/marcel/Languages/Perl6/Projects/perl6-gnome-gobject/lib',
+#        '/home/marcel/Languages/Perl6/Projects/perl6-gnome-gtk3/lib',
+#        '/home/marcel/Languages/Perl6/Projects/mongo-perl6-driver/lib',
+#        ;
 
 # Version of library
 my Version $*version = v0.13.4;
@@ -15,9 +72,15 @@ use Library;
 use Library::Tools;
 use Library::Gui::Main;
 use Library::Gui::FilterList;
+use Library::Gui::Search;
+use Library::Gui::Config;
+use Library::Gui::GatherData;
 
-use GTK::V3::Gtk::GtkButton;
-use GTK::Glade;
+use Gnome::Gtk3::Button;
+use Gnome::Gtk3::Glade;
+
+use Gnome::N::X;
+#Gnome::N::debug(:on);
 
 #-------------------------------------------------------------------------------
 #initialize-library(:refine-key<marcel>);
@@ -29,13 +92,16 @@ sub MAIN ( Bool :$debug = False ) {
   my Library::Tools $tools .= new;
   my Str $ui-file = $tools.get-resource(:which<library.glade>);
 
-  my GTK::Glade $gui .= new;
+  my Gnome::Gtk3::Glade $gui .= new;
   $gui.add-gui-file($ui-file);
   $gui.add-engine(Library::Gui::Main.new);
   $gui.add-engine(Library::Gui::FilterList.new);
+  $gui.add-engine(Library::Gui::Search.new);
+  $gui.add-engine(Library::Gui::Config.new);
+  $gui.add-engine(Library::Gui::GatherData.new);
 
-  GTK::V3::Gtk::GtkButton.new(:empty).debug(:on) if $debug;
   $*debug = $debug;
+  Gnome::N::debug(:on($debug));
 
   $gui.run;
 }

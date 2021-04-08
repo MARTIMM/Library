@@ -1,0 +1,38 @@
+/* Run glib-compile-resources resources/g-resources/library.xml */
+
+@define-color regular-text-color #005050;
+@define-color label-text-color #0060af;
+@define-color title-text-color #0060af;
+@define-color description-text-color #00507f;
+@define-color message-text-color #00507f;
+@define-color -text-color #00507f;
+
+@define-color field-normal-color #00eeee;
+@define-color field-ok-color #00ff44;
+@define-color field-fail-color #dd4400;
+
+/*
+applicationwindow {
+	background-color: #480044;
+	color: blue;
+}
+*/
+
+.background {
+/*
+  background-image: url('file:///home/marcel/Languages/Raku/Projects/Library/Old/I/p4.jpg');
+*/
+}
+
+aboutdialog box {
+  background-color: rgba(100%,100%,100%,0.1);
+}
+/*
+.QADialog {
+  background-image: url('file:///home/marcel/Languages/Raku/Projects/Library/Old/I/p4.jpg');
+}
+*/
+
+grid {
+  background-color: rgba(100%,100%,100%,0.1);
+}
