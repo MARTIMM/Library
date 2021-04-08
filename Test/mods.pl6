@@ -12,21 +12,21 @@ unit package Library:auth<github:MARTIMM>;
 use Library::Tools;
 use Library::Gui::FilterList;
 
-use GTK::Glade;
-use GTK::Glade::Engine;
+use Gnome::Gtk3::Glade;
+use Gnome::Gtk3::Glade::Engine;
 
 
-use GTK::V3::Gtk::GtkMain;
-use GTK::V3::Gtk::GtkWidget;
-use GTK::V3::Gtk::GtkDialog;
-use GTK::V3::Gtk::GtkAboutDialog;
-use GTK::V3::Gtk::GtkImage;
-use GTK::V3::Gtk::GtkListBox;
-use GTK::V3::Gtk::GtkEntry;
-use GTK::V3::Gtk::GtkFileChooserDialog;
-use GTK::V3::Gtk::GtkFileChooser;
+use Gnome::Gtk3::Main;
+use Gnome::Gtk3::Widget;
+use Gnome::Gtk3::Dialog;
+use Gnome::Gtk3::AboutDialog;
+use Gnome::Gtk3::Image;
+use Gnome::Gtk3::ListBox;
+use Gnome::Gtk3::Entry;
+use Gnome::Gtk3::FileChooserDialog;
+use Gnome::Gtk3::FileChooser;
 
-use GTK::V3::Glib::GSList;
+use Gnome::Glib::SList;
 #use GTK::V3::Glib::GObject;
 #use GTK::V3::Glib::GInterface;
 
