@@ -1,5 +1,23 @@
 ## Release notes
 
+* 2021-03-24 0.14.1
+  * Separated a MainWindow from gui.
+  * Added local and remote option processing.
+  * Separated XML files in resources file.
+  * File menu becomes Application menu.
+
+* 2020-12-03 0.14.0
+  * Application is now build using Gtk Application and ApplicationWindow. The menus come from an XML file.
+    * File menu quit.
+    * Help menu about.
+  * Re-design what needs to be on screen and how to activate it.
+
+* 2019-05-02 0.13.5
+  * Add Gui::Search
+  * Refactored Gui::GatherData and Gui::Config from Gui::Main.
+
+* 2019-05-01 0.13.4
+  * Connect button in toolbar
 
 * 2019-04-30 0.13.3
   * Bugfixed; when taglist or skiplists were empty, it was not possible to add a new entry. The update used here needed an `upsert => True`.
@@ -32,7 +50,7 @@
   * Bugfixes
 
 * 2019-01-07 0.10.1
-  * Started to create a new graphical user interface using GTK::Glade
+  * Started to create a new graphical user interface using Gnome::Gtk3::Glade
   <img src="Manual/Images/main-window.png" width="200" />
 
 * 0.10.0

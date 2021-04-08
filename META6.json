@@ -2,18 +2,27 @@
   "authors": [ "Marcel Timmerman"],
   "description":                          "Metadata library",
   "name":                                 "Library",
-  "version":                              "0.13.4",
+  "version":                              "0.14.1",
   "tags": [ "metadata", "library", "mongodb", "database", "NoSQL"],
   "perl":                                 "6",
   "license":                              "Artistic-2.0",
   "depends": [
     "IO::Notification::Recursive", "Config::TOML", "MongoDB",
-    "GTK::Glade", "GTK::V3", "MIME::Base64", "Config::DataLang::Refine"
+    "Gnome::Gtk3", "MIME::Base64", "Config::DataLang::Refine",
+    "QA"
   ],
   "test-depends": [ ],
-  "build-depends": [ ],
+  "build-depends": ["QA"],
+
   "provides": {
     "Library":                      "lib/Library.pm6",
+
+    "Library::App::Application":    "lib/Library/App/Application.pm6",
+    "Library::App::ApplicationWindow": "lib/Library/App/ApplicationWindow.pm6",
+
+    "Library::App::Menu::File": "lib/Library/App/Menu/File.pm6",
+    "Library::App::Menu::Help": "lib/Library/App/Menu/Help.pm6",
+
     "Library::Configuration":       "lib/Library/Configuration.pm6",
 
     "Library::MetaConfig":          "lib/Library/MetaConfig.pm6",
@@ -30,11 +39,18 @@
     "Library::MetaData::Directory": "lib/Library/MetaData/Directory.pm6",
     "Library::MetaData::File":      "lib/Library/MetaData/File.pm6",
 
+    "Library::Gui::Config":          "lib/Library/Gui/Config.pm6",
+    "Library::Gui::GatherData":     "lib/Library/Gui/GatherData.pm6",
     "Library::Gui::FilterList":     "lib/Library/Gui/FilterList.pm6",
-    "Library::Gui::Main":           "lib/Library/Gui/Main.pm6"
+    "Library::Gui::Main":           "lib/Library/Gui/Main.pm6",
+    "Library::Gui::Search":          "lib/Library/Gui/Search.pm6"
   },
+
   "resources": [
-    "mimetypes", "library.glade", "library-logo.png"
+    "mimetypes", "library.gresource", "library-logo.png",
+    "library-overview01.png", "library-overview02.png",
+    "library-overview03.png", "library-overview04.png"
   ],
+
   "source-url":                     "git://github.com/MARTIMM/Library.git"
 }
