@@ -1,0 +1,19 @@
+
+[ connection ]
+  server      = "localhost"
+  port        = 65010
+
+[ library ]
+  root-db         = "Library"
+  user-db         = "meta072"
+  logfile         = "meta072.log"
+  loglevelfile    = "Info"
+  loglevelscreen  = "Info"
+
+[ library.collections ]
+  meta-data   = "meta072Data"
+#  meta-config = "mimetypes"
+
+[ library.collections.root ]
+  mimetypes   = "Mimetypes"
+

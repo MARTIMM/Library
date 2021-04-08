@@ -1,0 +1,58 @@
+# possible keys
+'section-keys' = [ 'superuser', 'projects', 'extern', 'projects2']
+
+# defaults
+[connection]
+port = 65140
+server = "192.168.0.253"
+
+[connect-options]
+replicaSet = "MetaLibrary"
+
+[program]
+logfile = "library.log"
+loglevelfile = 'Warn'
+loglevelscreen = 'Warn'
+
+[database]
+db-name = "MetaLibrary"
+meta-config = "MetaConfig"
+meta-data = "MetaData"
+
+# TODO thoughts
+[mimetypes]
+'image/jpeg'          = "/usr/bin/gwenview %u"
+'image/*'             = "/usr/bin/gwenview %u"
+
+# super user
+[database.superuser]
+username = 'admin'
+password = 'MTc3LjouMTQ2LjouMjA5LjouMjEwLjouMjE4LjouMjA5LjouMTUy'
+db-name = "admin"
+
+# projects of user marcel
+[program.projects]
+logfile = "projects.log"
+loglevelfile = 'Info'
+loglevelscreen = 'Debug'
+
+[database.projects2]
+db-name = "mt1957"
+meta-config = "MetaConfig"
+meta-data = "MetaData"
+
+[database.projects]
+username = 'marcel'
+password = 'MTcyLjouMTQ2LjouMjIxLjouMjE3LjouMjEwLjouMTUx'
+db-name = "mt1957"
+meta-config = "MetaConfig"
+meta-data = "MetaData"
+
+# extern user test
+[database.extern]
+username = 'test'
+password = 'MTk1LjouMTQ3LjouMjE1LjouMjA0LjouMjE4LjouMjEyLjouMjE5LjouMTU1LjouMjE5'
+db-name = "test"
+meta-config = "Docs-Config"
+meta-data = "Docs-Data"
+

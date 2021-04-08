@@ -1,0 +1,13 @@
+
+[ connection ]
+  server          = "localhost"
+  port            = 65010
+
+[ library ]
+  user-db         = "meta070"
+  loglevelfile    = "Info"
+  loglevelscreen  = "Info"
+
+[ library.collections ]
+  meta-config     = "meta070Cfg"
+

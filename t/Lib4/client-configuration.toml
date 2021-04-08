@@ -1,0 +1,15 @@
+
+[ connection ]
+  server      = "localhost"
+  port        = 65010
+
+[ library ]
+  root-db     = "root071"
+  user-db     = "meta071"
+
+[ library.collections ]
+  meta-data   = "meta071Data"
+  meta-config = "meta071Cfg"
+
+#[ library.collections.root ]
+
