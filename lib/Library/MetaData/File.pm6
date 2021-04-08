@@ -119,7 +119,7 @@ note "Found ", $d.perl;
               " must have been moved, updated"
             );
 
-# TODO What if query returns more of the same, is that possible?
+# TODO:10 What if query returns more of the same, is that possible?
 # $query replace by data from $d
 # $!meta-data replaces all data!?
             # Update the record to reflect current situation
@@ -133,7 +133,7 @@ note "Found ", $d.perl;
             last;
           }
 
-# TODO when file not exists on disk .... what then?
+# TODO:20 when file not exists on disk .... what then?
           else {
           }
         }

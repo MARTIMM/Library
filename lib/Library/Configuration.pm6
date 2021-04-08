@@ -1,5 +1,13 @@
 use v6;
 
+=begin pod
+
+=head1 Library::Configuration
+
+=head2 Class defining the location where program info can be stored.
+
+=end pod
+
 #-------------------------------------------------------------------------------
 unit package Library:auth<github:MARTIMM>;
 
@@ -23,6 +31,7 @@ class Configuration {
     Str:D :$!library-config, :$!refine-key = 'default'
   ) {
 
+#note "LC: $!library-config";
     $!rc .= new(:config-name($!library-config));
     $!config := $!rc.config;
     self.reconfig;
