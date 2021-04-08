@@ -1,12 +1,12 @@
-# Library Requirements and Design
+# Library Requirements and design
 
-# Abstract
+## Abstract
 
 This is a small document describing the wishes and requirements which are needed for this project. It also describes the needed functionality, programs and structures.
 
 [TOC]
 
-# Introduction
+## Introduction
 
 Purpose of this project is to store meta information of objects. An object can be any type of document, url, project, contact etc. This information is about the object in question and is meant to give some extra meaning to it. For example when labels or keywords are used in the meta data, it is possible to group objects together when a value of the key or label is the same over all the objects of the same group. This information must be independent of the current location (if any) of an object.
 
@@ -21,7 +21,7 @@ The files can be found locally, other computers, local or external servers or in
 * Servers are objects of which the meta data can describe its services.
 
 
-## Implementation
+# Implementation
 
 This software package should come with several modules and programs to         suit several ways of accessing the data. There is also an issue of making the software platform independent so everyone can be happy with it.
 
