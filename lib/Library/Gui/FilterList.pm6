@@ -175,10 +175,10 @@ method !load-filter-list ( ) {
 
     my Gnome::Gtk3::Grid $grid .= new(:empty);
     $grid.set-visible(True);
-    $grid.gtk-grid-attach( $check(), 0, 0, 1, 1);
-    $grid.gtk-grid-attach( $label(), 1, 0, 1, 1);
+    $grid.attach( $check(), 0, 0, 1, 1);
+    $grid.attach( $label(), 1, 0, 1, 1);
 
-    $!list-box.gtk-container-add($grid());
+    $!list-box.add($grid());
   }
 }
 

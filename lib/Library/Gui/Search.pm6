@@ -92,10 +92,10 @@ note "Name found: ", $doc.perl;
 
     my Gnome::Gtk3::Grid $grid .= new(:empty);
     $grid.set-visible(True);
-    $grid.gtk-grid-attach( $id(), 0, 0, 1, 1);
-    $grid.gtk-grid-attach( $name(), 1, 0, 1, 1);
+    $grid.attach( $id(), 0, 0, 1, 1);
+    $grid.attach( $name(), 1, 0, 1, 1);
 
-    $!search-result-lbx.gtk-container-add($grid());
+    $!search-result-lbx.add($grid());
     $!search-docs{$id} = $doc;
   }
 

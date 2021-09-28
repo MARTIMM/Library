@@ -51,8 +51,8 @@ method show-config-dialog ( :$widget, Str :$target-widget-name --> Int ) {
   my Gnome::Gtk3::Entry $cfg-entry .= new(:empty);
   $cfg-entry.set-visible(True);
   $cfg-entry.set-text($value);
-  $grid.gtk-grid-attach( $cfg-label, 0, 0, 1, 1);
-  $grid.gtk-grid-attach( $cfg-entry, 1, 0, 1, 1);
+  $grid.attach( $cfg-label, 0, 0, 1, 1);
+  $grid.attach( $cfg-entry, 1, 0, 1, 1);
 
 
   my Gnome::Gtk3::Dialog $dialog .= new(:build-id($target-widget-name));
