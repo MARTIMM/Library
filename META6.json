@@ -1,16 +1,20 @@
 {
-  "authors": [ "Marcel Timmerman"],
-  "description":                          "Metadata library",
-  "name":                                 "Library",
-  "version":                              "0.14.1",
-  "tags": [ "metadata", "library", "mongodb", "database", "NoSQL"],
-  "perl":                                 "6",
-  "license":                              "Artistic-2.0",
+  "version":      "0.14.3",
+  "description":  "Metadata library",
+  "name":         "Library",
+  "tags": [
+                  "metadata", "library", "mongodb", "database", "NoSQL"
+  ],
+  "perl":         "6.d",
+  "authors":      [ "Marcel Timmerman"],
+  "license":      "Artistic-2.0",
+
   "depends": [
     "IO::Notification::Recursive", "Config::TOML", "MongoDB",
     "Gnome::Gtk3", "MIME::Base64", "Config::DataLang::Refine",
     "QA"
   ],
+
   "test-depends": [ ],
   "build-depends": ["QA"],
 
