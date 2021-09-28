@@ -9,10 +9,10 @@ use Gnome::Glib::VariantType;
 use Gnome::Gdk3::Pixbuf;
 use Gnome::Gdk3::Screen;
 
+use Gnome::Gtk3::Builder;
 use Gnome::Gtk3::ApplicationWindow;
 use Gnome::Gtk3::Grid;
 use Gnome::Gtk3::Window;
-use Gnome::Gtk3::Builder;
 use Gnome::Gtk3::CssProvider;
 use Gnome::Gtk3::StyleContext;
 use Gnome::Gtk3::StyleProvider;
@@ -23,6 +23,13 @@ use Gnome::Gio::SimpleAction;
 
 use Library::Gui::QA::DBFilters;
 use Library::Gui::QA::DBConfig;
+use Library::Gui::OkMsgDialog;
+
+use Library::DB::Client;
+
+#use BSON::Document;
+
+use QA::Types;
 
 #use Library::App::Menu::Help;
 #use QAManager::App::Page::Category;
@@ -32,13 +39,15 @@ use Library::Gui::QA::DBConfig;
 #Gnome::N::debug(:on);
 
 #-------------------------------------------------------------------------------
-unit class Library::App::MainWindow:auth<github:MARTIMM>:ver<0.2.0>;
+unit class Library::App::MainWindow:auth<github:MARTIMM>:ver<0.2.1>;
 also is Gnome::Gtk3::ApplicationWindow;
 
 has $!application is required;
 has Gnome::Gtk3::Builder $!builder;
 has Str $app-rbpath;
 has Version $!app-version;
+has Str $!library-id;
+has Library::DB::Client $!db;
 
 #enum NotebookPages <SHEETPAGE CATPAGE SETPAGE>;
 
@@ -53,7 +62,7 @@ submethod new ( |c ) {
 }
 
 #-------------------------------------------------------------------------------
-submethod BUILD ( :$!application, Version :$!app-version ) {
+submethod BUILD ( :$!application, Version :$!app-version, Str :$!library-id ) {
 
   $!app-rbpath = $!application.get-resource-base-path;
 
@@ -71,12 +80,12 @@ submethod BUILD ( :$!application, Version :$!app-version ) {
 
   my Gnome::Glib::Error $e = self.set-icon-from-file(
     %?RESOURCES<library-logo.png>.Str
+#    'Old/window-icon.jpg'
   );
-#  my Gnome::Glib::Error $e = self.set-icon-from-file('Old/window-icon.jpg');
   die $e.message if $e.is-valid;
 
   $!grid .= new;
-  self.container-add($!grid);
+  self.add($!grid);
 
   self.show-all;
 }
@@ -100,7 +109,8 @@ method setup-application-style ( ) {
   # read the style definitions into the css provider and style context
   my Gnome::Gtk3::CssProvider $css-provider .= new;
   $css-provider.load-from-resource("$!app-rbpath/library-style");
-note 'scc v: ', $css-provider.is-valid;
+#note 'scc v: ', $css-provider.is-valid;
+
   my Gnome::Gtk3::StyleContext $style-context .= new;
   $style-context.add_provider_for_screen(
     Gnome::Gdk3::Screen.new, $css-provider, GTK_STYLE_PROVIDER_PRIORITY_USER
@@ -114,10 +124,15 @@ method setup-application-menu ( ) {
   my Gnome::Gio::MenuModel $menubar .= new(:build-id<menubar>);
   $!application.set-menubar($menubar);
 
-#  self.link-actions( |<app-quit> );
   self.link-actions(
-    %( :quit<app-quit>, :about-dialog<help-about>,
-       :edit-db-config<db-config>, :edit-filters<db-filters>,
+    %( :quit<app-quit>,
+       :about-dialog<help-about>,
+       :edit-db-config<db-config>,
+       :edit-filters<db-filters>,
+       :connect-db,
+       :disconnect-db,
+#       :connect-db<connect-db>,
+#       :disconnect-db<disconnect-db>,
     )
   );
   #self.link-state-action( 'select-compression', 'uncompressed');
@@ -129,8 +144,18 @@ method link-actions ( Hash $actions ) {
 
   my Gnome::Gio::SimpleAction $simple-action;
   for $actions.keys -> $action {
-    my Str $method = $actions{$action};
-note "Map action $action.fmt('%-20.20s') ~~~> .$method\()";
+    my Str $method;
+
+    if $actions{$action} ~~ Bool {
+      $method = $action;
+    }
+
+    else {
+      $method = $actions{$action};
+    }
+
+#note "Map action $action.fmt('%-20.20s') ~~~> .$method\()";
+
     $simple-action .= new(:name($action));
     $simple-action.set-enabled(True);
     $!application.add-action($simple-action);
@@ -144,7 +169,7 @@ method link-state-action (
   Str:D $action, Str:D :$state!, Str :$method is copy
 ) {
   $method //= $action;
-note "Map action $action.fmt('%-20.20s') with state $state ~~~> .$method\()";
+#note "Map action $action.fmt('%-20.20s') with state $state ~~~> .$method\()";
 
   my Gnome::Gio::SimpleAction $simple-action;
   $simple-action .= new(
@@ -161,7 +186,7 @@ note "Map action $action.fmt('%-20.20s') with state $state ~~~> .$method\()";
 method link-action ( Str:D $action, Str :$method is copy ) {
 
   $method //= $action;
-note "Map action $action.fmt('%-20.20s') ~~~> .$method\()";
+#note "Map action $action.fmt('%-20.20s') ~~~> .$method\()";
 
   my Gnome::Gio::SimpleAction $simple-action;
   $simple-action .= new(:name($action));
@@ -175,7 +200,7 @@ note "Map action $action.fmt('%-20.20s') ~~~> .$method\()";
 #-- [ menu ] -------------------------------------------------------------------
 # Application > Quit
 method app-quit ( N-GObject $n-parameter ) {
-  note "Selected 'Quit' from 'Application' menu";
+#  note "Selected 'Quit' from 'Application' menu";
 
   $!application.quit;
 }
@@ -201,13 +226,36 @@ method db-config ( N-GObject $n-parameter ) {
 #-------------------------------------------------------------------------------
 # Database > Edit Tag
 method db-filters ( N-GObject $n-parameter ) {
-  note "Selected 'Edit Filters' from 'Database' menu";
-  my Library::Gui::QA::DBFilters $df .= new(
-    :sheet-name<tag-skip-filter-config>
-  );
+#  note "Selected 'Edit Filters' from 'Database' menu";
 
-  my Hash $filters = $df.show-dialog;
-  note $filters.gist;
+  if ?$!db {
+    my Library::Gui::QA::DBFilters $df .= new(:$!db);
+    $df.show-dialog;
+  }
+
+  else {
+    self!show-msg(Q:to/EOMSG/);
+      Cannot retrieve data from database,
+      Please select <i>Connect</i> from the
+      <i>Database</i> menu first.
+      EOMSG
+  }
+}
+
+#-------------------------------------------------------------------------------
+# Database > Connect
+method connect-db ( N-GObject $n-parameter ) {
+  unless $!db {
+    $!db .= new;
+    $!db.connect;
+  }
+}
+
+#-------------------------------------------------------------------------------
+# Database > Disconnect
+method disconnect-db ( N-GObject $n-parameter ) {
+  $!db.cleanup;
+  $!db = Nil;
 }
 
 #-------------------------------------------------------------------------------
@@ -217,24 +265,25 @@ method help-about ( N-GObject $n-parameter ) {
   my Gnome::Gtk3::AboutDialog $about .= new(:build-id<aboutdialog>);
   $about.set-transient-for(self);
   $about.set-version($!app-version.Str);
-#  my Gnome::Gdk3::Pixbuf $pix .= new(
-#    :file<%?RESOURCES<library-logo.png>.Str>, :width(100), :height(100)
-#  );
 
   # Getting some ideas to show different UML images of what program does.
   # Using some scratch images now…
   my Gnome::Gdk3::Pixbuf $pix .= new(
-#    :file("Old/I/p{5.rand.Int}.jpg")
-    :file(%?RESOURCES{"library-overview0{4.rand.Int}.png"}.Str)
+#    :file("Old/I/p{9.rand.Int}.jpg"), :width(450), :height(450)
+    :file(%?RESOURCES<library-logo.png>.Str), :width(100), :height(100)
   );
   $about.set-logo($pix);
   $about.run;
   $about.hide;  # cannot destroy, builder keeps same native-object
 }
 
-
-
-
+#-------------------------------------------------------------------------------
+# show message
+method !show-msg($message) {
+  my Library::Gui::OkMsgDialog $msg-diag .= new(:$message);
+  $msg-diag.run;
+  $msg-diag.destroy;
+}
 
 =finish
 
@@ -243,7 +292,7 @@ method help-about ( N-GObject $n-parameter ) {
 
   # make main window widgets
   #my Gnome::Gtk3::Grid $grid .= new;
-  #self.container-add($grid);
+  #self.add($grid);
 
   #my Gnome::Gtk3::Grid $fst-page = self.setup-workarea;
   #self.setup-workarea;

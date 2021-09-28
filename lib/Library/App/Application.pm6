@@ -10,6 +10,8 @@ use Gnome::Gio::ApplicationCommandLine;
 
 use Gnome::Gtk3::Application;
 
+use Library::App::MainWindow;
+
 use QA::Types;
 
 #-------------------------------------------------------------------------------
@@ -32,7 +34,8 @@ submethod new ( |c ) {
   self.bless(
     :GtkApplication, :app-id(library-id),
     :flags(G_APPLICATION_HANDLES_COMMAND_LINE),
-    |c);
+    |c
+  );
 }
 
 #-------------------------------------------------------------------------------
@@ -73,11 +76,7 @@ method app-shutdown ( Gnome::Gtk3::Application :_widget($app) ) {
 }
 
 #-------------------------------------------------------------------------------
-method local-options (
-  N-GObject $n-vd,
-  :_widget($app)
-  --> Int
-) {
+method local-options ( N-GObject $n-vd, :_widget($app) --> Int ) {
   # default continue app
   my Int $exit-code = -1;
 
@@ -93,18 +92,27 @@ method local-options (
 }
 
 #-------------------------------------------------------------------------------
-method remote-options (
-  N-GObject $n-cl,  :_widget($app) --> Int
-) {
+method remote-options ( N-GObject $n-cl,  :_widget($app) --> Int ) {
   my Int $exit-code = 0;
   my Gnome::Gio::ApplicationCommandLine $cl .= new(:native-object($n-cl));
 
-  my Array $args = $cl.get-arguments;
-  my Capture $o = get-options-from( $args[1..*-1], |$Library::options-filter);
+  $Library::app-config<arguments> = $cl.get-arguments;
+#note 'args: ', $Library::app-config<arguments>;
+
+# temporary test option
+  my Capture $o = get-options-from(
+    $Library::app-config<arguments>[1..*-1], |$Library::options-filter
+  );
   my Str $file-to-show = $o.<show> if ($o.<show> // '') and $o.<show>.IO.r;
+
+  $Library::app-config<project> = $o.<project> if ?$o.<project>;
+  $Library::app-config<library-id> = library-id;
+
+note 'cfg: ', $Library::app-config;
 
   self.activate unless $cl.get-is-remote;
 
+# temporary test option
   if ?$file-to-show {
     $cl.print("Buzzy showing text from $file-to-show\n");
     note "Must show $file-to-show now";
@@ -121,8 +129,8 @@ method remote-options (
 # need gui then, build base
 method build-gui ( Gnome::Gtk3::Application :_widget($application) ) {
 
-  (try require ::('Library::App::MainWindow'));
-  ::('Library::App::MainWindow').new(
-    :$application, :app-version($Library::version)
+#  require ::('Library::App::MainWindow');
+  Library::App::MainWindow.new(
+    :$application, :app-version($Library::version), :library-id(library-id)
   );
 }
