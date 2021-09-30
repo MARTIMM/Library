@@ -22,7 +22,7 @@ use BSON::Document;
 use Library::DB::Client;
 
 #-------------------------------------------------------------------------------
-unit class Library::Gui::QA::DBFilters:auth<github:MARTIMM>:ver<0.1.0>;
+unit class Library::DB::Filter:auth<github:MARTIMM>:ver<0.1.0>;
 
 has Str $!sheet-name = 'tag-skip-filter-config';
 has Library::DB::Client $!db is required;
@@ -43,7 +43,9 @@ method show-dialog ( ) {
   self.display-result( $response, $sheet-dialog);
   $sheet-dialog.result-user-data // %();
 
-  self.save-filter-data($sheet-dialog.result-user-data);
+  self.save-filter-data($sheet-dialog.result-user-data)
+    if $response ~~ GTK_RESPONSE_OK;
+
 #note 'sheet results: ', $sheet-dialog.result-user-data.gist;
 }
 
@@ -106,7 +108,7 @@ method save-filter-data ( Hash $user-data ) {
     :upsert
   );
 
-  note $!db.update( [ $sfupd, $tfupd], :user-collection-key<meta-config>);
+  $!db.update( [ $sfupd, $tfupd], :user-collection-key<meta-config>);
 }
 
 #-------------------------------------------------------------------------------
