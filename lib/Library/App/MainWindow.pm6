@@ -16,16 +16,20 @@ use Gnome::Gtk3::Window;
 use Gnome::Gtk3::CssProvider;
 use Gnome::Gtk3::StyleContext;
 use Gnome::Gtk3::StyleProvider;
+#use Gnome::Gtk3::Dialog;
 use Gnome::Gtk3::AboutDialog;
 
 use Gnome::Gio::MenuModel;
 use Gnome::Gio::SimpleAction;
 
-use Library::Gui::QA::DBFilters;
-use Library::Gui::QA::DBConfig;
+use Library::App::TypeDataStore;
+
+#use Library::Gui::QA::DBConfig;
 use Library::Gui::OkMsgDialog;
 
-use Library::DB::Client;
+#use Library::DB::Filter;
+#use Library::DB::Client;
+use Library::DB::Context;
 
 #use BSON::Document;
 
@@ -39,15 +43,17 @@ use QA::Types;
 #Gnome::N::debug(:on);
 
 #-------------------------------------------------------------------------------
-unit class Library::App::MainWindow:auth<github:MARTIMM>:ver<0.2.1>;
+unit class Library::App::MainWindow:auth<github:MARTIMM>:ver<0.3.0>;
 also is Gnome::Gtk3::ApplicationWindow;
 
 has $!application is required;
 has Gnome::Gtk3::Builder $!builder;
 has Str $app-rbpath;
 has Version $!app-version;
-has Str $!library-id;
-has Library::DB::Client $!db;
+#has Str $!library-id;
+
+#has Library::DB::Client $!db;
+has Library::DB::Context $!db-context;
 
 #enum NotebookPages <SHEETPAGE CATPAGE SETPAGE>;
 
@@ -62,7 +68,9 @@ submethod new ( |c ) {
 }
 
 #-------------------------------------------------------------------------------
-submethod BUILD ( :$!application, Version :$!app-version, Str :$!library-id ) {
+submethod BUILD ( :$!application ) {
+
+  $!db-context .= new;
 
   $!app-rbpath = $!application.get-resource-base-path;
 
@@ -80,7 +88,7 @@ submethod BUILD ( :$!application, Version :$!app-version, Str :$!library-id ) {
 
   my Gnome::Glib::Error $e = self.set-icon-from-file(
     %?RESOURCES<library-logo.png>.Str
-#    'Old/window-icon.jpg'
+#    'Old/I/window-icon2.jpg'
   );
   die $e.message if $e.is-valid;
 
@@ -127,10 +135,11 @@ method setup-application-menu ( ) {
   self.link-actions(
     %( :quit<app-quit>,
        :about-dialog<help-about>,
-       :edit-db-config<db-config>,
-       :edit-filters<db-filters>,
-       :connect-db,
-       :disconnect-db,
+#       :edit-db-config<db-config>,
+       :edit-filters($!db-context),
+       :pre-process-docs($!db-context),
+       :connect($!db-context),
+       :disconnect($!db-context),
 #       :connect-db<connect-db>,
 #       :disconnect-db<disconnect-db>,
     )
@@ -142,24 +151,37 @@ method setup-application-menu ( ) {
 # all actions are linked to methods with same name
 method link-actions ( Hash $actions ) {
 
-  my Gnome::Gio::SimpleAction $simple-action;
   for $actions.keys -> $action {
     my Str $method;
+    my $object = self;
+    my Str $name;
+#note $actions{$action}.WHAT;
 
-    if $actions{$action} ~~ Bool {
-      $method = $action;
+    given $actions{$action} {
+      when Bool {
+        $method = $action;
+        $name = self.^name;
+      }
+
+      when Str {
+        $method = $actions{$action};
+        $name = self.^name;
+      }
+
+      default {
+        $method = $action;
+        $object = $actions{$action};
+        $name = $object.^name;
+        next unless $object.^can($method);
+      }
     }
 
-    else {
-      $method = $actions{$action};
-    }
+note "Map action $action.fmt('%-20.20s') ~~~> $name\.$method\()";
 
-#note "Map action $action.fmt('%-20.20s') ~~~> .$method\()";
-
-    $simple-action .= new(:name($action));
+    my Gnome::Gio::SimpleAction $simple-action .= new(:name($action));
     $simple-action.set-enabled(True);
     $!application.add-action($simple-action);
-    $simple-action.register-signal( self, $method, 'activate');
+    $simple-action.register-signal( $object, $method, 'activate');
     $simple-action.clear-object;
   }
 }
@@ -207,13 +229,6 @@ method app-quit ( N-GObject $n-parameter ) {
 
 #`{{
 #-------------------------------------------------------------------------------
-# Database > Edit Skip
-method db-skip ( N-GObject $n-parameter ) {
-  note "Selected 'Edit Skip' from 'Database' menu";
-}
-}}
-
-#-------------------------------------------------------------------------------
 # Database > Configure database
 method db-config ( N-GObject $n-parameter ) {
   note "Selected 'Configure database' from 'Application' menu";
@@ -222,49 +237,16 @@ method db-config ( N-GObject $n-parameter ) {
   my Hash $db-config = $df.show-dialog;
   note $db-config.gist;
 }
-
-#-------------------------------------------------------------------------------
-# Database > Edit Tag
-method db-filters ( N-GObject $n-parameter ) {
-#  note "Selected 'Edit Filters' from 'Database' menu";
-
-  if ?$!db {
-    my Library::Gui::QA::DBFilters $df .= new(:$!db);
-    $df.show-dialog;
-  }
-
-  else {
-    self!show-msg(Q:to/EOMSG/);
-      Cannot retrieve data from database,
-      Please select <i>Connect</i> from the
-      <i>Database</i> menu first.
-      EOMSG
-  }
-}
-
-#-------------------------------------------------------------------------------
-# Database > Connect
-method connect-db ( N-GObject $n-parameter ) {
-  unless $!db {
-    $!db .= new;
-    $!db.connect;
-  }
-}
-
-#-------------------------------------------------------------------------------
-# Database > Disconnect
-method disconnect-db ( N-GObject $n-parameter ) {
-  $!db.cleanup;
-  $!db = Nil;
-}
+}}
 
 #-------------------------------------------------------------------------------
 # Help > About
 method help-about ( N-GObject $n-parameter ) {
-  note "Selected 'About' from 'Help' menu";
+#  CONTROL { when CX::Warn {  note .gist; .resume; } }
+#  note "Selected 'About' from 'Help' menu";
   my Gnome::Gtk3::AboutDialog $about .= new(:build-id<aboutdialog>);
   $about.set-transient-for(self);
-  $about.set-version($!app-version.Str);
+  $about.set-version(Library::App::TypeDataStore.instance.version.Str);
 
   # Getting some ideas to show different UML images of what program does.
   # Using some scratch images now…
@@ -280,7 +262,9 @@ method help-about ( N-GObject $n-parameter ) {
 #-------------------------------------------------------------------------------
 # show message
 method !show-msg($message) {
-  my Library::Gui::OkMsgDialog $msg-diag .= new(:$message);
+  my Library::Gui::OkMsgDialog $msg-diag .= new(
+    :message('Warning'), :secondary-message($message)
+  );
   $msg-diag.run;
   $msg-diag.destroy;
 }

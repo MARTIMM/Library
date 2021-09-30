@@ -5,12 +5,29 @@ use v6.d;
 use lib '../question-answer/lib';
 
 use Library::App::Application;
+use Library::App::TypeDataStore;
+
+use QA::Types;
 
 #-------------------------------------------------------------------------------
-our $Library::version = Version.new(v0.14.3);
-our $Library::options-filter = <version show:s project:s>;
+#our $Library::version = Version.new(v0.14.3);
+#our $Library::options-filter = <version project:s>;
 #our $Library::arguments = [];
-our $Library::app-config = %();
+#our $Library::app-config = %();
+
+my Library::App::TypeDataStore $tds .= instance;
+$tds.set-version(Version.new(v0.14.3));
+$tds.set-cmd-options(<version project:s>);
+$tds.set-library-id('io.github.martimm.library');
+
+#-------------------------------------------------------------------------------
+# let QA look at the proper locations
+given my QA::Types $qa-types {
+  .data-file-type(QAYAML);
+  .cfg-root(Library::App::TypeDataStore.instance.library-id);
+#  .cfg-root(library-id);
+#    .list-dirs.note;
+}
 
 #-------------------------------------------------------------------------------
 given my Int $exit-code = Library::App::Application.new.run // 1 {

@@ -11,8 +11,9 @@ use Gnome::Gio::ApplicationCommandLine;
 use Gnome::Gtk3::Application;
 
 use Library::App::MainWindow;
+use Library::App::TypeDataStore;
 
-use QA::Types;
+#use QA::Types;
 
 #-------------------------------------------------------------------------------
 unit class Library::App::Application:auth<github:MARTIMM>:ver<0.2.0>;
@@ -20,6 +21,7 @@ also is Gnome::Gtk3::Application;
 
 constant library-id = 'io.github.martimm.library';
 
+#`{{
 #-------------------------------------------------------------------------------
 # let QA look at the proper locations
 given my QA::Types $qa-types {
@@ -27,12 +29,14 @@ given my QA::Types $qa-types {
   .cfg-root(library-id);
 #    .list-dirs.note;
 }
+}}
 
 #-------------------------------------------------------------------------------
 submethod new ( |c ) {
   # let the Gnome::Gtk3::Application class process the options
   self.bless(
-    :GtkApplication, :app-id(library-id),
+    :GtkApplication, :app-id(Library::App::TypeDataStore.instance.library-id),
+    #:app-id(library-id),
     :flags(G_APPLICATION_HANDLES_COMMAND_LINE),
     |c
   );
@@ -81,9 +85,12 @@ method local-options ( N-GObject $n-vd, :_widget($app) --> Int ) {
   my Int $exit-code = -1;
 
   CATCH { default { .message.note; $exit-code = 1; return $exit-code; } }
-  my Capture $o = get-options(|$Library::options-filter);
+  my Capture $o = get-options(
+    |Library::App::TypeDataStore.instance.cmd-options
+  );
   if $o<version> {
-    note "Version of Library; $Library::version";
+    my Library::App::TypeDataStore $tds .= instance;
+    note "Version of Library; $tds.version()";
     $exit-code = 0;
   }
 
@@ -96,28 +103,34 @@ method remote-options ( N-GObject $n-cl,  :_widget($app) --> Int ) {
   my Int $exit-code = 0;
   my Gnome::Gio::ApplicationCommandLine $cl .= new(:native-object($n-cl));
 
-  $Library::app-config<arguments> = $cl.get-arguments;
+  my Library::App::TypeDataStore $tds .= instance;
+  $tds.set-arguments($cl.get-arguments);
+#  $Library::app-config<arguments> = $cl.get-arguments;
 #note 'args: ', $Library::app-config<arguments>;
 
 # temporary test option
   my Capture $o = get-options-from(
-    $Library::app-config<arguments>[1..*-1], |$Library::options-filter
+    Library::App::TypeDataStore.instance.arguments[1..*-1],
+    |Library::App::TypeDataStore.instance.cmd-options
   );
-  my Str $file-to-show = $o.<show> if ($o.<show> // '') and $o.<show>.IO.r;
 
-  $Library::app-config<project> = $o.<project> if ?$o.<project>;
-  $Library::app-config<library-id> = library-id;
+  $tds.set-project($o.<project>) if ?$o.<project>;
 
-note 'cfg: ', $Library::app-config;
+#  $Library::app-config<project> = $o.<project> if ?$o.<project>;
+#  $Library::app-config<library-id> = library-id;
+#note 'cfg: ', $Library::app-config;
 
   self.activate unless $cl.get-is-remote;
 
+#`{{
 # temporary test option
+  my Str $file-to-show = $o.<show> if ($o.<show> // '') and $o.<show>.IO.r;
   if ?$file-to-show {
     $cl.print("Buzzy showing text from $file-to-show\n");
     note "Must show $file-to-show now";
     #… show file in window …
   }
+}}
 
   # if not cleared, remote keeps running!
   $cl.clear-object;
@@ -130,7 +143,5 @@ note 'cfg: ', $Library::app-config;
 method build-gui ( Gnome::Gtk3::Application :_widget($application) ) {
 
 #  require ::('Library::App::MainWindow');
-  Library::App::MainWindow.new(
-    :$application, :app-version($Library::version), :library-id(library-id)
-  );
+  Library::App::MainWindow.new(:$application);
 }

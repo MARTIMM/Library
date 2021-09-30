@@ -9,6 +9,8 @@ use MongoDB::Database;
 use MongoDB::Collection;
 use MongoDB::Cursor;
 
+use Library::App::TypeDataStore;
+
 #use QA::Sheet;
 #use QA::Set;
 #use QA::Question;
@@ -77,17 +79,18 @@ method get-user-data ( Hash $config --> Hash ) {
   # Assume user is current user. If not found in config use 'default-user' data
   my Hash $user-data = %();
 
+  my Str $selected-project = Library::App::TypeDataStore.instance.project;
   for @($config<users>) -> Hash $user {
-#note 'projects: ', $user<projects>, ', ', $Library::app-config<project>;
+note 'projects: ', $user<projects>, ', ', $selected-project;
 
     next unless $user<name> eq $*USER;
     $user-data<name> = $user<name>;
     $user-data<password> = $user<password> if ?$user<password>;
-    last unless $Library::app-config<project>;
+    last unless $selected-project;
 
     for @($user<projects>) -> Hash $project {
 #note 'project: ', $project<name>, ', ', $Library::app-config<project>;
-      next unless $project<name> eq $Library::app-config<project>;
+      next unless $project<name> eq $selected-project;
 
       $user-data<database> = $project<database>;
       $user-data<acc-database> = $project<database>;
@@ -209,16 +212,16 @@ method find (
     .<filter> = $query if ?$query;
     .<limit> = $limit if ?$limit;
   }
-#note 'req doc: ', $request.raku;
+note 'req doc: ', $request.raku;
 
   my BSON::Document $doc = $db.run-command($request);
   if $doc<ok> {
-note 'ret doc: ', $doc.raku;
+#note 'ret doc: ', $doc.raku;
     $!cursor .= new( :$!client, :cursor-doc($doc<cursor>));
   }
 
   else {
-    note 'Nothing found …';
+#note 'Nothing found …';
     $!cursor = Nil;
   }
 }
