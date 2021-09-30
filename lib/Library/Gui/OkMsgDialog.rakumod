@@ -23,17 +23,21 @@ submethod new ( Str :$message, |c ) {
     :GtkMessageDialog, :flags(GTK_DIALOG_MODAL), :type(GTK_MESSAGE_WARNING),
     :buttons(GTK_BUTTONS_OK), :markup-message($message),
     |c
-    );
+  );
 }
 
 #-------------------------------------------------------------------------------
 submethod BUILD ( *%options ) {
+note 'opt: ', %options;
+
   self.set-position(GTK_WIN_POS_MOUSE);
   self.set-keep-above(True);
   self.set-default-response(GTK_RESPONSE_NO);
+  self.secondary-markup(%options<secondary-message>)
+    if ?%options<secondary-message>;
 
   my Gnome::Gdk3::Pixbuf $win-icon .= new(
-    :file("Old/I/p{5.rand.Int}.jpg")
+    :file("Old/I/window-icon2.jpg")
 #    :file(%?RESOURCES<library-logo.png>.Str)
   );
   my Gnome::Glib::Error $e = $win-icon.last-error;
