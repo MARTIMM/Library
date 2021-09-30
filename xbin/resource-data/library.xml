@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Run glib-compile-resources resources/g-resources/library.xml -->
+<gresources>
+  <gresource prefix="/io/github/martimm/library">
+    <!--file compressed="true" preprocess="xml-stripblanks">resources/g-resources/library-menu.xml</file-->
+    <file alias="library-style" compressed="true">resources/g-resources/library-style.css</file>
+    <file alias="application-menu" compressed="true" preprocess="xml-stripblanks">resources/g-resources/application-menu.xml</file>
+    <file alias="application-gui" compressed="true" preprocess="xml-stripblanks">resources/g-resources/library-gui.xml</file>
+  </gresource>
+</gresources>

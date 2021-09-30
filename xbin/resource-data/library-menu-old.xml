@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+
+  <object class="GtkMenuBar" id="menubar">
+
+    <child>
+      <object class="GtkMenuItem" id="file">
+        <property name="label" translatable="yes">_File</property>
+        <property name="use_underline">True</property>
+
+        <child type="submenu">
+          <object class="GtkMenu">
+            <!--child>
+              <object class="GtkMenuItem" id='file-list-sheet'>
+                <property name="label">List Sheets</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkMenuItem" id='file-list-cat'>
+                <property name="label">List Categories</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkSeparatorMenuItem"/>
+            </child-->
+
+            <child>
+              <object class="GtkMenuItem" id='file-quit'>
+                <property name="label">Quit</property>
+                <signal name="activate" handler="file-quit"/>
+              </object>
+            </child>
+          </object>
+
+        </child>
+      </object>
+    </child>
+
+    <!--child>
+      <object class="GtkMenuItem" id="sheet">
+        <property name="label" translatable="yes">_Sheet</property>
+        <property name="use_underline">True</property>
+
+        <child type="submenu">
+          <object class="GtkMenu">
+            <child>
+              <object class="GtkMenuItem" id='sheet-new'>
+                <property name="label">New</property>
+                <signal name="activate" handler="sheet-new"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkMenuItem" id='sheet-save'>
+                <property name="label">Save</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkMenuItem" id='sheet-save-as'>
+                <property name="label">Save as</property>
+              </object>
+            </child>
+
+          </object>
+        </child>
+      </object>
+    </child-->
+
+    <!--child>
+      <object class="GtkMenuItem" id="category">
+        <property name="label" translatable="yes">_Category</property>
+        <property name="use_underline">True</property>
+
+        <child type="submenu">
+          <object class="GtkMenu">
+            <child>
+              <object class="GtkMenuItem" id='category-new'>
+                <property name="label">New</property>
+                <signal name="activate" handler="category-new"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkMenuItem" id='category-save'>
+                <property name="label">Save</property>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkMenuItem" id='category-save-as'>
+                <property name="label">Save as</property>
+              </object>
+            </child>
+
+          </object>
+        </child>
+      </object>
+    </child-->
+
+    <!--child>
+      <object class="GtkMenuItem" id="set">
+        <property name="label" translatable="yes">_Set</property>
+        <property name="use_underline">True</property>
+
+        <child type="submenu">
+          <object class="GtkMenu">
+            <child>
+              <object class="GtkMenuItem" id='set-new'>
+                <property name="label">New</property>
+                <signal name="activate" handler="set-new"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkMenuItem" id='set-save'>
+                <property name="label">Save</property>
+                <signal name="activate" handler="category-quit"/>
+              </object>
+            </child>
+
+          </object>
+        </child>
+      </object>
+    </child-->
+
+    <child>
+      <object class="GtkMenuItem" id="help">
+        <property name="label" translatable="yes">_Help</property>
+        <property name="use_underline">True</property>
+
+        <child type="submenu">
+          <object class="GtkMenu">
+            <child>
+              <object class="GtkMenuItem">
+                <property name="label">Purpose</property>
+                <signal name="activate" handler="help-purpose"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkMenuItem">
+                <property name="label">Index</property>
+                <signal name="activate" handler="help-index"/>
+              </object>
+            </child>
+
+            <child>
+              <object class="GtkMenuItem" id='help-about'>
+                <property name="label">_About</property>
+                <property name="use_underline">True</property>
+                <signal name="activate" handler="help-about"/>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+      </object>
+
+    </child>
+  </object>
+</interface>

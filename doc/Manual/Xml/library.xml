@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://docbook.org/ns/docbook" xml:lang="en" version="5.0">
+  <title>Using The Meta Library</title>
+  <info>
+    <author>
+      <personname>
+        <firstname>Marcel</firstname>
+        <surname>Timmerman</surname>
+      </personname>
+      <email>mt1957@gmail.com</email>
+    </author>
+    <address>
+      <city>Haarlem</city>
+      <country>Netherlands</country>
+    </address>
+    <copyright>
+      <year>2015, 2016 ... Inf</year>
+      <holder>Marcel Timmerman</holder>
+    </copyright>
+    <date>2017-05-01</date>
+    <abstract>
+      <para>This document will describe the meta library modules and programs. </para>
+      <para>The latest version of this document is generated on date 2017-05-01</para>
+    </abstract>
+  </info>
+  <sect1>
+    <title>Introduction</title>
+    <para>Long ago I've started to think about how to maintain the large amount of documents on my system which consists of anything textual or other kinds of imagery like photos, films, music and books. Storing on disk you can give it a name and store in some place in the hope that you can find it later. You can then also make links to the same data to provide extra information in the form of a filename. This will soon be a problem when the file is placed in another location. </para>
+  </sect1>
+  <sect1>
+    <title>x</title>
+    <para/>
+  </sect1>
+  <sect1>
+    <title>x</title>
+    <para/>
+  </sect1>
+  <bibliography>
+    <biblioentry>
+      <abbrev>MIMETYPES</abbrev>
+      <title>A list of all mimetypes</title>
+      <abstract>A list of mimetypes can be found on the</abstract>
+      <ulink url="http://www.sitepoint.com/web-foundations/mime-types-complete-list/"/>
+    </biblioentry>
+  </bibliography>
+</article>

@@ -1,0 +1,74 @@
+<!--
+  In dir …/gnome-gtk3/docs/content-docs/tutorial/Application/examples Run;
+  glib-compile-resources GResources/Application
+-->
+<interface>
+  <menu id="menubar">
+
+    <submenu>
+      <attribute name="label">_Application</attribute>
+      <section>
+        <item>
+          <attribute name="label">Configure application …</attribute>
+          <!--attribute name='action'>app-config</attribute-->
+        </item>
+      </section>
+
+      <section>
+        <item>
+          <attribute name="label">Quit</attribute>
+          <attribute name='action'>app.quit</attribute>
+        </item>
+      </section>
+    </submenu>
+
+    <submenu>
+      <attribute name="label">Database</attribute>
+      <section>
+        <item>
+          <attribute name="label">Connect</attribute>
+          <attribute name='action'>app.connect</attribute>
+        </item>
+
+        <item>
+          <attribute name="label">Disconnect</attribute>
+          <attribute name='action'>app.disconnect</attribute>
+        </item>
+      </section>
+
+      <section>
+        <item>
+          <attribute name="label">Edit Filters …</attribute>
+          <attribute name='action'>app.edit-filters</attribute>
+        </item>
+        <item>
+          <attribute name="label">Pre-process Document …</attribute>
+          <attribute name='action'>app.pre-process-docs</attribute>
+        </item>
+      </section>
+      <section>
+        <item>
+          <attribute name="label">Configure database …</attribute>
+          <attribute name='action'>app.edit-db-config</attribute>
+        </item>
+      </section>
+    </submenu>
+
+    <submenu>
+      <attribute name="label">_Help</attribute>
+      <section>
+        <item>
+          <attribute name="label">Index</attribute>
+          <!--attribute name='action'>index</attribute-->
+        </item>
+      </section>
+
+      <section>
+        <item>
+          <attribute name="label">_About …</attribute>
+          <attribute name='action'>app.about-dialog</attribute>
+        </item>
+      </section>
+    </submenu>
+  </menu>
+</interface>
