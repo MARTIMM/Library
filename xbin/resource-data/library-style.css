@@ -11,28 +11,59 @@
 @define-color field-ok-color #00ff44;
 @define-color field-fail-color #dd4400;
 
-/*
-applicationwindow {
-	background-color: #480044;
-	color: blue;
-}
-*/
+@define-color bg010r1 rgba(100%,90%,90%,0.10);
+@define-color bg095r1 rgba(100%,90%,90%,0.95);
+@define-color bg095g1 rgba(100%,90%,90%,0.95);
+@define-color bg095r2 rgba(100%,75%,75%,0.95);
+@define-color bg095r3 rgba(70%,0,0,0.95);
 
-.background {
-/*
-  background-image: url('file:///home/marcel/Languages/Raku/Projects/Library/Old/I/p4.jpg');
-*/
+@define-color cl100r1 rgba(70%,0,0,0.95);
+
+/* Dit werkt!
+window.background {
+  background-image: url('file:///home/marcel/Languages/Raku/Projects/Library/Old/I/window-icon2.jpg');
+  background-size: 450px, 450px;
 }
 
-aboutdialog box {
-  background-color: rgba(100%,100%,100%,0.1);
+menubar {
+  background-color: @bg095g1;
 }
-/*
-.QADialog {
-  background-image: url('file:///home/marcel/Languages/Raku/Projects/Library/Old/I/p4.jpg');
-}
-*/
 
 grid {
-  background-color: rgba(100%,100%,100%,0.1);
+  background-color: @bg095r1;
 }
+*/
+
+
+
+menubar {
+  background-color: @bg095r2;
+}
+
+menu {
+  background-color: @bg095r3;
+}
+
+menuitem {
+  background-color: @bg095r2;
+  color: @cl100r1;
+}
+
+grid {
+  background-color: @bg095r1;
+}
+
+
+
+
+/*
+aboutdialog box {
+  background-color: @bg010r1;
+}
+*/
+
+/*
+.QADialog {
+  background-image: url('file:///home/marcel/Languages/Raku/Projects/Library/Old/I/window-icon2.jpg');
+}
+*/
